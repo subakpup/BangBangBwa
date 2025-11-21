@@ -1,1 +1,38 @@
 /.metadata/
+
+# --- Maven & Java Build ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# --- STS / Eclipse IDE Specific (필수 제외) ---
+.classpath
+.project
+.settings/
+.springBeans
+bin/
+.apt_generated/
+.factorypath
+
+# --- Logs ---
+logs/
+*.log
+
+# --- OS System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Sensitive Data (보안 중요!) ---
+# DB 비밀번호 등이 적힌 설정 파일은 별도로 관리하거나 환경변수 사용을 권장합니다.
+# 만약 application.properties에 비밀번호를 적고 혼자 쓴다면 아래 주석(#)을 해제하세요.
+# src/main/resources/application.properties
+
+# 보통은 운영/로컬 설정을 분리해서 아래와 같이 특정 파일만 무시합니다.
+src/main/resources/application-secret.properties
+src/main/resources/application-local.properties
+src/main/resources/application-prod.properties
+
+# --- Test ---
+test-output/
