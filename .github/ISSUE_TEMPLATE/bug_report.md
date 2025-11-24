@@ -1,7 +1,7 @@
 ---
 name: 🐞 버그 제보 (Bug Report)
 about: 버그가 발생했을 때 기록합니다.
-title: "[FIX] "
+title: "[Fix] "
 labels: bug
 assignees: ''
 ---
