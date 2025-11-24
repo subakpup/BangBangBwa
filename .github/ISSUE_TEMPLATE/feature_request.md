@@ -1,7 +1,7 @@
 ---
 name: ✨ 기능 개발 (Feature Request)
 about: 새로운 기능을 개발할 때 사용합니다.
-title: "[FEAT] "
+title: "[Feat] "
 labels: enhancement
 assignees: ''
 ---
