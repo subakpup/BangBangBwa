@@ -1,5 +1,7 @@
 package com.ssafy.bbb.model.dao;
 
-public interface ProductDao {
+import com.ssafy.bbb.model.dto.ProductDto;
 
+public interface ProductDao {
+	public Long save(ProductDto product);
 }

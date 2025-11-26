@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class ProductDto {
-	private @NonNull Long productId; // pk
+	private Long productId; // pk
 
 	private @NonNull String jibun; // 지번
 	private @NonNull String houseType; // 매물 종류
