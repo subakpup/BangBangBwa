@@ -3,6 +3,8 @@ package com.ssafy.bbb.model.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssafy.bbb.global.exception.CustomException;
+import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 
@@ -31,6 +33,9 @@ public class ProductServiceImpl implements ProductService {
 		// 2. 조회
 		ProductDto modifiedProduct = productDao.findById(productId);
 
+		if (modifiedProduct == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+		}
 		// 3. 반환
 		return modifiedProduct;
 	}
