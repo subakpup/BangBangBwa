@@ -1,6 +1,8 @@
 package com.ssafy.bbb.controller;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,5 +26,12 @@ public class ProductController {
 		Long prouctId = productService.create(createForm);
 
 		return ApiResponse.success(prouctId, "매물 등록이 성공하였습니다.");
+	}
+
+	@PutMapping("/{productId}")
+	public ApiResponse<ProductDto> updateProduct(@PathVariable Long productId, @RequestBody ProductDto modifyForm) {
+		ProductDto product = productService.modify(productId, modifyForm);
+
+		return ApiResponse.success(product, "매물 수정이 완료되었습니다.");
 	}
 }

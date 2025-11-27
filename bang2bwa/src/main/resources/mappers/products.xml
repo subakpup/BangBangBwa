@@ -8,4 +8,33 @@
   		insert into products(jibun, house_type, trade_type, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_cd, umd_nm, agent_id)
   		values(#{jibun}, #{houseType}, #{tradeType}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggCd}, #{umdNm}, #{agentId});
   	</insert>
+  	
+  	<update id="update">
+  		update products
+  		<set> 
+	  		jibun=#{product.jibun},
+	  		house_type=#{product.houseType}, 
+	  		trade_type=#{product.tradeType}, 
+	  		name=#{product.name}, 
+	  		build_year=#{product.buildYear}, 
+	  		exclu_use_ar=#{product.excluUseAr}, 
+	  		apt_dong=#{product.aptDong}, 
+	  		floor=#{product.floor}, 
+	  		land_ar=#{product.landAr}, 
+	  		total_floor_ar=#{product.totalFloorAr}, 
+	  		plottage_ar=#{product.plottageAr}, 
+	  		deal_amount=#{product.dealAmount}, 
+	  		deposit=#{product.deposit}, 
+	  		monthly_rent=#{product.monthlyRent}, 
+	  		sgg_cd=#{product.sggCd}, 
+	  		umd_nm=#{product.umdNm}, 
+	  		agent_id=#{product.agentId},
+  		</set>
+  		where product_id = #{id};
+  	</update>
+  	
+  	<select id="findById">
+  		select * from products
+  		where product_id = #{id};
+  	</select>
   </mapper>

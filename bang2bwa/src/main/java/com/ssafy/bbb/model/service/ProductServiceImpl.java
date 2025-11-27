@@ -22,4 +22,16 @@ public class ProductServiceImpl implements ProductService {
 		productDao.save(product);
 		return product.getProductId();
 	}
+
+	@Override
+	@Transactional
+	public ProductDto modify(Long productId, ProductDto product) {
+		// 1. 수정
+		productDao.update(productId, product);
+		// 2. 조회
+		ProductDto modifiedProduct = productDao.findById(productId);
+
+		// 3. 반환
+		return modifiedProduct;
+	}
 }
