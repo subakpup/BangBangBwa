@@ -37,4 +37,37 @@
   		select * from products
   		where product_id = #{id};
   	</select>
+  	
+  	<select id="findImagesByProductId">
+  		select * from product_images
+  		where product_id = #{productId};
+  	</select>
+  	
+  	<insert id="saveImages">
+  		insert into product_images (product_id, original_name, save_name, save_path)
+  		values
+  		<foreach collection="images" item="image" separator=",">
+  			(#{image.productId}, #{image.originalName}, #{image.saveName}, #{savePath})
+  		</foreach>
+  		;
+  	</insert>
+  	
+  	<delete id="deleteImages">
+  		delete from product_images
+  		where image_id in
+  		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+  			#{id}
+  		</foreach>
+  		;
+  	</delete>
+  	
+  	<select id="findSavePathByIds">
+  		select save_path from product_images
+  		where image_id in
+  		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+  			#{id}
+  		</foreach>
+  		;
+  	</select>
+  	
   </mapper>
