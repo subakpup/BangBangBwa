@@ -2,6 +2,7 @@ package com.ssafy.bbb.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,7 @@ public class FileStore {
 
 	// 파일 전체 경로 반환
 	public String getFullPath(String filename) {
-		return imageDir + filename;
+		return Paths.get(imageDir, filename).toString();
 	}
 
 	// 파일을 실제 디스크에 저장, DB에 저장할 DTO로 변환하여 반환
