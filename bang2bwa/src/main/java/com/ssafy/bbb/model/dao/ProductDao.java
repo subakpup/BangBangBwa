@@ -21,7 +21,7 @@ public interface ProductDao {
 	public void saveImages(List<ProductImageDto> imageDtos);
 
 	// 여러 이미지 삭제
-	public void deleteImages(List<Long> productIds);
+	public void deleteImages(List<Long> imageIds);
 
 	// 삭제할 이미지의 경로를 받아오기(실제 파일 삭제용)
 	public List<String> findSavePathByIds(List<Long> imageIds);
