@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
 
 	private void imageUpload(Long productId, ProductDto product, List<MultipartFile> files) {
 
-		if (files != null && files.isEmpty()) {
+		if (files != null && !files.isEmpty()) {
 			List<ProductImageDto> images = new ArrayList<>();
 
 			// IOException을 catch하여 CustomException(FILE_UPLOAD_ERROR)로 변경
