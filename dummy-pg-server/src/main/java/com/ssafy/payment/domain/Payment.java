@@ -20,29 +20,54 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; // 내부 관리용 ID (PK)
 
-	@Column(nullable = false)
-	private String paymentKey; // PG사에서 발급하는 고유 키 (UUID 등)
+	// PG사에서 발급하는 고유 키 (UUID 등)
+	// 가맹점 서버는 이 key 값을 가지고 주문을 판별함.(외부 노출용 ID)
+	@Column(unique = true, nullable = false)
+	private String paymentKey; // 거래의 식별자
 
 	@Column(nullable = false)
-	private String orderId; // 가맹점(부동산 서버)에서 보낸 주문 번호
+	private String orderId; // 가맹점에서 보낸 주문 번호
 
+	// 가승인 금액과 실제 수수료를 분리해서 저장함.
 	@Column(nullable = false)
-	private Long amount; // 결제 금액
+	private Long originalAmount; // 가승인 금액(보증금 10000원 예상)
+	private Long finalAmount; // 실제 수수료(수수료 1000원 예상)
 
+	// DEPOSIT의 경우에만 (가승인 -> 결제) 동작
 	@Column(nullable = false)
-	private String status; // 결제 상태 (SUCCESS, FAIL, CANCEL)
+	private String type; // 결제의 종류("NORMAL": 일반결제, "DEPOSIT": 예약결제)
+
+	// "READY": 대기, "AUTHORIZED": 가승인
+	// "PAID": 수수료 정산, "CANCLED": 결제 취소
+	@Column(nullable = false)
+	private String status; // 결제 상태 (READY -> AUTHORIZED -> PAID or CANCELED)
 
 	private String failReason; // 실패 시 사유 (잔액부족 등)
 
-	private LocalDateTime createdAt; // 결제 승인 일시
+	private LocalDateTime authorizedAt; // 가승인 일시
+	private LocalDateTime paidAt; // 실제 결제 일시
 
-	@Builder // 객체 생성을 쉽게 하기 위해 빌더 패턴 사용
-	public Payment(String paymentKey, String orderId, Long amount, String status, String failReason) {
+	@Builder
+	public Payment(String paymentKey, String orderId, Long amount, String type, String status) {
 		this.paymentKey = paymentKey;
 		this.orderId = orderId;
-		this.amount = amount;
+		this.originalAmount = amount;
+		this.type = type;
 		this.status = status;
-		this.failReason = failReason;
-		this.createdAt = LocalDateTime.now(); // 생성 시 현재 시간 자동 저장
+		this.authorizedAt = LocalDateTime.now();
+	}
+
+	// === 비지니스 로직 === //
+	// 부분 결제
+	public void paid(Long paidAmount) {
+		this.finalAmount = paidAmount;
+		this.status = "PAID";
+		this.paidAt = LocalDateTime.now();
+	}
+
+	// 결제 취소
+	public void cancel() {
+		this.status = "CANCEL";
+		this.finalAmount = 0L;
 	}
 }
