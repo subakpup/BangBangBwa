@@ -1,12 +1,16 @@
 package com.ssafy.bbb.model.dto;
 
+import java.util.List;
+
 import io.micrometer.common.lang.NonNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString
@@ -35,4 +39,12 @@ public class ProductDto {
 	private String sggCd; // 시군구 코드 (fk)
 	private String umdNm; // 동코드 (fk)
 	private Long agentId; // 공인중개사 (fk)
+
+	private List<ProductImageDto> images; // 매물 사진 리스트
+	private List<Long> deleteImageIds; // (수정시 사용) 삭제할 이미지의 아이디 리스트
+
+	// 이미지를 설정할 setter 메서드
+	public void setImages(List<ProductImageDto> images) {
+		this.images = images;
+	}
 }

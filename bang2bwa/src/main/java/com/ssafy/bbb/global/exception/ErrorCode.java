@@ -18,7 +18,11 @@ public enum ErrorCode {
 	PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 
 	// 3. 매물 관련 에러
-	PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매물입니다.");
+	PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매물입니다."),
+
+	// 4. 파일 관련 에러
+	FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생하였습니다."),
+	FILE_DELETE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 중 오류가 발생하였습니다.");
 
 	// 필요한 에러 추가..
 
