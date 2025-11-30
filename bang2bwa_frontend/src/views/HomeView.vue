@@ -1,12 +1,17 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router'; // 현재 URL 정보
+import { useRoute } from 'vue-router';                    // 현재 URL 정보
 
-import KakaoMap from '@/components/map/KakaoMap.vue';
-import FilterBar from '@/components/home/FilterBar.vue';
+import KakaoMap from '@/components/map/KakaoMap.vue';     // 카카오맵
+import FilterBar from '@/components/home/FilterBar.vue';  // 홈뷰 헤더(필터 바)
+import AiModal from '@/components/modal/AiModal.vue';     // AI 모달
 
-const route = useRoute(); // Spring의 HttpServletRequest
+import { dummyData } from '@/data/dummy';                 // 더미 데이터
+
+const route = useRoute();            // Spring의 HttpServletRequest
 const currentType = ref('전체 매물'); // 현재 보고 있는 매물 타입
+const productList = ref([]);         // 매물 리스트
+const showAiModal = ref(false);      // 모달 상태
 
 const typeMap = {
   'apt': '아파트',
@@ -15,32 +20,56 @@ const typeMap = {
 };
 
 const loadData = (rawType) => {
-  const typeName = typeMap[rawType] || '전체 매물';
+  const typeKey = rawType || 'apt';
+
+  const typeName = typeMap[typeKey] || '전체 매물';
   currentType.value = typeName;
 
-  // TODO: 나중에 여기에 axios로 백엔드에 요청 보낼 때도 rawType('APT')를 보내면 됨
+  productList.value = dummyData[typeKey] || [];
 };
 
-// 필터 바에서 값이 바뀔 때마다 실행되는 함수
+// 필터 바 변경 감지
 const handleFilterChange = (filterData) => {
   console.log('필터 변경 감지:', filterData);
   // 예: { keyword: '강남', type: '전세', floor: '1층', area: '33㎡ 이하' }
-  // TODO: 여기서 백엔드 API를 호출해서 filteredList를 갱신하고, 지도 마커를 다시 찍어야 함
+  // TODO: 나중에 여기서 백엔드 API 호출
 };
 
+// AI 모달 요청
 const handleOpenAi = () => {
-  console.log('AI 추천 모달 열기 요청');
-  // TODO: showAiModal.value = true;
+  showAiModal.value = true;
 };
+
+const handleAiSearchResult = (aiData) => {
+  alert('분석 완료!');
+}
+
+// 가격 포맷팅 메서드
+const formatPrice = (item) => {
+  if (item.tradeType === '매매') {
+    const unit = item.dealAmount >= 10000 ? `${Math.floor(item.dealAmount / 10000)}억` : '';
+    const remain = item.dealAmount % 10000 > 0 ? `${item.dealAmount % 10000}만` : '';
+    return `매매 ${unit}${remain}`;
+  }
+  else if (item.tradeType === '전세') {
+    const unit = item.dealAmount >= 10000 ? `${Math.floor(item.dealAmount / 10000)}억` : '';
+    const remain = item.dealAmount % 10000 > 0 ? `${item.dealAmount % 10000}만` : '';
+    return `전세 ${unit}${remain}`;
+  }
+  else {
+    return `월세 ${item.deposit}/${item.monthlyRent}`;
+  }
+}
 
 // URL의 쿼리 파라미터가 바뀔 때마다 실행
 watch(
-  () => route.query.type, 
+  () => route.query.type,
   (newType) => {
     loadData(newType);
   }
 );
 
+// 처음 접속 시 실행
 onMounted(() => {
   const type = route.query.type;
   loadData(type);
@@ -49,27 +78,46 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col h-full w-full relative">
-    
-    <FilterBar 
-      @filter-change="handleFilterChange" 
-      @open-ai="handleOpenAi"
-    />
 
+    <FilterBar @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
+    
     <div class="flex flex-1 overflow-hidden relative">
-      
+
       <aside class="w-[400px] bg-white border-r p-4 flex-shrink-0 z-10 overflow-y-auto">
         <h2 class="text-xl font-bold mb-4">
           <span class="text-primary">{{ currentType }}</span> 리스트
+          <span class="text-sm text-gray-500 font-normal">({{ productList.length }}개)</span>
         </h2>
-        <div class="p-4 bg-gray-100 rounded text-gray-500 text-center h-32 flex items-center justify-center">
-          매물 리스트 컴포넌트 자리
+
+        <div v-if="productList.length > 0" class="space-y-3">
+          <div v-for="item in productList" :key="item.productId"
+            class="flex gap-3 border p-3 rounded-lg hover:border-primary hover:shadow-md cursor-pointer transition bg-white">
+            <div class="w-24 h-24 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden">
+              <img :src="item.image" class="w-full h-full object-cover" alt="방 사진">
+            </div>
+            <div class="flex flex-col justify-center">
+              <span class="text-xs text-primary font-bold">{{ item.houseType }}</span>
+              <h3 class="font-bold text-lg">{{ formatPrice(item) }}</h3>
+              <p class="text-sm text-gray-600 font-bold">{{ item.name }}</p>
+              <p class="text-sm text-gray-500 truncate">{{ item.jibun }}</p>
+              <p class="text-xs text-gray-400 mt-1">
+                {{ item.floor }}층 | {{ item.excluUseAr }}㎡ | {{ item.desc }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="h-64 flex flex-col items-center justify-center text-gray-400">
+          <p>등록된 매물이 없습니다.</p>
         </div>
       </aside>
 
       <div class="flex-1 bg-gray-100 relative z-0">
-        <KakaoMap />
+        <KakaoMap :items="productList" />
       </div>
 
     </div>
+
+    <AiModal :show="showAiModal" @close="showAiModal = false" @search="handleAiSearchResult" />
   </div>
 </template>
