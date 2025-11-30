@@ -9,6 +9,6 @@ import com.ssafy.payment.domain.Payment;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-	// 결제 검증 시 orderId로 결재 내역 검색 기능 사용
-	Optional<Payment> findByOrderId(String orderId);
+	// 결제 키로 조회
+	Optional<Payment> findByPaymentKey(String paymentKey);
 }
