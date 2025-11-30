@@ -28,9 +28,10 @@ public class PgService {
 		String paymentKey = "dummy_" + UUID.randomUUID().toString().substring(0, 8);
 
 		Payment payment = Payment.builder().paymentKey(paymentKey) // 결제 key
-				.orderId(request.getOrderId()) // 10,000원
-				.amount(request.getAmount()) // DEPOSIT
-				.type("AUTHORIZED") // 상태: 가승인(돈 안 나감)
+				.orderId(request.getOrderId()) // orderId
+				.amount(request.getAmount()) // 10,000원
+				.type(request.getType()) // DEPOSIT
+				.status("AUTHORIZED") // 상태: 가승인(돈 안 나감)
 				.build();
 
 		paymentRepository.save(payment);
