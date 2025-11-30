@@ -1,4 +1,5 @@
 <script setup>
+import KakaoMap from '@/components/map/KakaoMap.vue';
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router'; // 현재 URL 정보
 
@@ -6,9 +7,9 @@ const route = useRoute(); // Spring의 HttpServletRequest
 const currentType = ref(''); // 현재 보고 있는 매물 타입
 
 const typeMap = {
-  'APT': '아파트',
-  'ONEROOM': '원룸',
-  'OFFICETEL': '오피스텔'
+  'apt': '아파트',
+  'oneroom': '원룸',
+  'officetel': '오피스텔'
 };
 
 const loadData = (rawType) => {
@@ -44,7 +45,7 @@ onMounted(() => {
     </aside>
 
     <div class="flex-1 bg-gray-200 flex items-center justify-center">
-      <p class="text-gray-500">여기에 지도가 표시됩니다.</p>
+      <KakaoMap />
     </div>
   </div>
 </template>
