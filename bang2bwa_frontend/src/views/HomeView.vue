@@ -13,12 +13,14 @@ const currentType = ref('전체 매물'); // 현재 보고 있는 매물 타입
 const productList = ref([]);         // 매물 리스트
 const showAiModal = ref(false);      // 모달 상태
 
+// URL 파라미터 매핑
 const typeMap = {
   'apt': '아파트',
   'oneroom': '원룸',
   'officetel': '오피스텔'
 };
 
+// 데이터 로딩
 const loadData = (rawType) => {
   const typeKey = rawType || 'apt';
 
@@ -40,11 +42,12 @@ const handleOpenAi = () => {
   showAiModal.value = true;
 };
 
-const handleAiSearchResult = (aiData) => {
+// AI 분석 결과 처리 함수
+const handleAiSearchResult = () => {
   alert('분석 완료!');
 }
 
-// 가격 포맷팅 메서드
+// 가격 포맷팅 함수
 const formatPrice = (item) => {
   if (item.tradeType === '매매') {
     const unit = item.dealAmount >= 10000 ? `${Math.floor(item.dealAmount / 10000)}억` : '';
@@ -80,7 +83,7 @@ onMounted(() => {
   <div class="flex flex-col h-full w-full relative">
 
     <FilterBar @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
-    
+
     <div class="flex flex-1 overflow-hidden relative">
 
       <aside class="w-[400px] bg-white border-r p-4 flex-shrink-0 z-10 overflow-y-auto">
@@ -117,7 +120,8 @@ onMounted(() => {
       </div>
 
     </div>
-
-    <AiModal :show="showAiModal" @close="showAiModal = false" @search="handleAiSearchResult" />
+    <Teleport to="body">
+      <AiModal :show="showAiModal" @close="showAiModal = false" @search="handleAiSearchResult" />
+    </Teleport>
   </div>
 </template>
