@@ -3,14 +3,65 @@
 @tailwind utilities;
 
 /* 1. 커스텀 스크롤바 */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #CEAC93; border-radius: 3px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #AE8B72; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ceac93;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ae8b72;
+}
 
 /* 2. 카카오맵 인포윈도우 */
 .custom-infowindow {
-    padding: 10px; background: white; border-radius: 8px;
-    border: 1px solid #AE8B72; font-size: 12px;
-    text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ae8b72;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+@layer components {
+  /* 전체 레이아웃 */
+  .layout-container {
+    @apply h-screen flex flex-col overflow-hidden font-sans bg-bg;
+  }
+
+  .main-content {
+    @apply flex-1 flex flex-col overflow-hidden relative;
+  }
+
+  /* 헤더 영역 */
+  .header-bar {
+    @apply bg-white border-b border-accent h-16 flex items-center justify-between px-6 shadow-sm z-20;
+  }
+
+  .logo-link {
+    @apply text-2xl font-bold text-primary flex items-center gap-2;
+  }
+
+  /* 네비게이션 메뉴 */
+  .nav-menu {
+    @apply hidden md:flex items-center gap-6 text-gray-600 font-medium;
+  }
+
+  .nav-item {
+    @apply hover:text-primary transition;
+  }
+
+  /* 버튼 스타일 */
+  .btn-text {
+    @apply text-gray-600 hover:text-primary font-medium;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm;
+  }
 }
