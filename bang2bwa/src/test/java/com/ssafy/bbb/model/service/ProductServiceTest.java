@@ -34,6 +34,8 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.enums.HouseType;
+import com.ssafy.bbb.model.enums.TradeType;
 import com.ssafy.bbb.util.FileStore;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,8 +52,8 @@ class ProductServiceTest {
 
 	// 더미 DTO 생성
 	private ProductDto createDummyDto(Long id) {
-		ProductDto dto = ProductDto.builder().jibun("서울시 강남구").houseType("APART").tradeType("SALE").name("SSAFY Apart")
-				.dealAmount(10000L).build();
+		ProductDto dto = ProductDto.builder().jibun("서울시 강남구").houseType(HouseType.APART).tradeType(TradeType.SALE)
+				.name("SSAFY Apart").dealAmount(10000L).build();
 
 		if (id != null) {
 			ReflectionTestUtils.setField(dto, "productId", id);
