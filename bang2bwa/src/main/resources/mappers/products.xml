@@ -5,8 +5,8 @@
   
   <mapper namespace="com.ssafy.bbb.model.dao.ProductDao">
   	<insert id="save" useGeneratedKeys="true" keyProperty="productId">
-  		insert into products(jibun, house_type, trade_type, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_cd, umd_nm, agent_id)
-  		values(#{jibun}, #{houseType}, #{tradeType}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggCd}, #{umdNm}, #{agentId});
+  		insert into products(jibun, house_type, trade_type, status, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_cd, umd_nm, agent_id)
+  		values(#{jibun}, #{houseType}, #{tradeType}, #{status}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggCd}, #{umdNm}, #{agentId});
   	</insert>
   	
   	<update id="update">
@@ -15,6 +15,7 @@
 	  		jibun=#{product.jibun},
 	  		house_type=#{product.houseType}, 
 	  		trade_type=#{product.tradeType}, 
+	  		status=#{product.status},
 	  		name=#{product.name}, 
 	  		build_year=#{product.buildYear}, 
 	  		exclu_use_ar=#{product.excluUseAr}, 
