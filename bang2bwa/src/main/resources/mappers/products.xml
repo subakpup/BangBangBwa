@@ -73,12 +73,20 @@
   	<select id="search">
   		select *
   		from products
-  		where 
-  		(
-  			name like concat('%', #{keyword}, '%')
-  			or jibun like concat('%', #{keyword}, '%')
-  			or apt_dong like concat('%', #{keyword}, '%')
-  		)
+  		<where>
+  			<if test="keyword != null and keyword != ''">
+  				and 
+  				(
+  					name like concat('%', #{ keyword }, '%')
+  					or jibun like concat('%', #{ keyword }, '%')
+  					or apt_dong like concat('%', #{ keyword }, '%')
+  				)
+  			</if>
+  			
+  			<if test="type != null and type != ''">
+  				and house_type = #{type}
+  			</if>
+  		</where>
   		order by product_id desc;
   	</select>
   	
