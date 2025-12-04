@@ -3,8 +3,21 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="com.ssafy.bbb.model.dao.ReservationDao">
+  	<select id="findById">
+  		select * from reservations
+  		where reservation_id=#{reservationId};
+  	</select>
+  
   	<insert id="reservationUser" useGeneratedKeys="true" keyProperty="reservationId">
   		insert into reservations(agent_id, product_id, user_id, visit_date, message, status, deposit_amount, user_payment_key)
   		values(#{agentId}, #{productId}, #{userId}, #{visitDate}, #{message}, #{status}, #{depositAmount}, #{userPaymentKey});
   	</insert>
+  	
+  	<update id="reservationAccept">
+  		update reservations
+  		set
+  			agent_payment_key=#{agentPaymentKey},
+  			status=#{status}
+  		where reservation_id=#{reservationId};
+  	</update>
   </mapper>
