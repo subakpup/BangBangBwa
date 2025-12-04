@@ -71,7 +71,7 @@
   		;
   	</select>
   	
-  	<select id="selectProductForUpdate">
+  	<select id="selectProductForUpdate" resultMap="selectProductMap">
   		select agent_id, status from products
   		where product_id = #{productId}
   		for update;
@@ -82,5 +82,11 @@
   		set status = #{status}
   		where product_id = #{productId}
   	</update>
+  	
+  	<resultMap type="map" id="selectProductMap">
+  		<id column="product_id" property="productId" />
+  		<result column="agent_id" property="agentId" />
+  		<result column="status" property="status" />
+  	</resultMap>
   	
   </mapper>
