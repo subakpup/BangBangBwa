@@ -1,5 +1,6 @@
 package com.ssafy.bbb.controller;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,11 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservationController {
 	private final ReservationService reservationService;
 
+	// 사용자 예약 요청
 	@PostMapping
 	public ApiResponse<String> createReservation(@RequestBody ReservationRequestDto request,
 			@RequestHeader("user-id") Long userId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
 		reservationService.requestReservation(request, userId);
 
 		return ApiResponse.successWithNoContent("예약이 완료되었습니다.");
+	}
+
+	// 부동산 업자 예약 승인
+	@PostMapping("{reservationId}/accept")
+	public ApiResponse<String> acceptReservation(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long userId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+		reservationService.acceptReservation(reservationId, userId);
+
+		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
 }
