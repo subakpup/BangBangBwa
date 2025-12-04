@@ -70,4 +70,16 @@
   		;
   	</select>
   	
+  	<select id="search">
+  		select *
+  		from products
+  		where 
+  		(
+  			name like concat('%', #{keyword}, '%')
+  			or jibun like concat('%', #{keyword}, '%')
+  			or apt_dong like concat('%', #{keyword}, '%')
+  		)
+  		order by product_id desc;
+  	</select>
+  	
   </mapper>

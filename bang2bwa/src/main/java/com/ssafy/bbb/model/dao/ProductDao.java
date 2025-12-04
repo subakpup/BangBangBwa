@@ -26,4 +26,6 @@ public interface ProductDao {
 	// 삭제할 이미지의 경로를 받아오기(실제 파일 삭제용)
 	public List<String> findSavePathByIds(List<Long> imageIds);
 
+	public List<ProductDto> search(String keyword, String type);
+
 }

@@ -15,14 +15,14 @@ const showAiModal = ref(false);      // 모달 상태
 
 // URL 파라미터 매핑
 const typeMap = {
-  'apt': '아파트',
+  'apart': '아파트',
   'oneroom': '원룸',
   'officetel': '오피스텔'
 };
 
 // 데이터 로딩
 const loadData = (rawType) => {
-  const typeKey = rawType || 'apt';
+  const typeKey = rawType || 'apart';
 
   const typeName = typeMap[typeKey] || '전체 매물';
   currentType.value = typeName;

@@ -113,4 +113,11 @@ public class ProductServiceImpl implements ProductService {
 			productDao.deleteImages(deleteIds);
 		}
 	}
+
+	@Override
+	public List<ProductDto> search(String keyword, String type) {
+		if (keyword == null || keyword.trim().isEmpty())
+			return List.of();
+		return productDao.search(keyword, type);
+	}
 }

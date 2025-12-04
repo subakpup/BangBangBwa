@@ -5,7 +5,7 @@ export const dummyData = {
     { 
       productId: 101, 
       jibun: '서울시 서초구 반포동 20-43', 
-      houseType: '아파트', 
+      houseType: 'apart', 
       tradeType: '매매', 
       name: '반포 자이', 
       buildYear: 2009,
@@ -22,7 +22,7 @@ export const dummyData = {
     { 
       productId: 102, 
       jibun: '서울시 강남구 역삼동 755', 
-      houseType: '아파트', 
+      houseType: 'apart', 
       tradeType: '전세', 
       name: '역삼 래미안', 
       buildYear: 2005,
@@ -41,7 +41,7 @@ export const dummyData = {
     { 
       productId: 201, 
       jibun: '서울시 강남구 역삼동 820-1', 
-      houseType: '원룸', 
+      houseType: 'oneroom', 
       tradeType: '월세', 
       name: '강남 프라임', 
       buildYear: 2021,
@@ -58,7 +58,7 @@ export const dummyData = {
     { 
       productId: 202, 
       jibun: '서울시 관악구 봉천동 100-1', 
-      houseType: '원룸', 
+      houseType: 'oneroom', 
       tradeType: '월세', 
       name: '관악 드림타운', 
       buildYear: 2015,
@@ -77,7 +77,7 @@ export const dummyData = {
     { 
       productId: 301, 
       jibun: '서울시 서초구 서초동 1303-1', 
-      houseType: '오피스텔', 
+      houseType: 'officetel', 
       tradeType: '전세', 
       name: '서초 파라곤', 
       buildYear: 2018,

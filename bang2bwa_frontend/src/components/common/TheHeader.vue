@@ -11,7 +11,7 @@ import { Home } from 'lucide-vue-next'
         </RouterLink>
         
         <nav class="hidden md:flex items-center gap-6 text-gray-600 font-medium">
-            <RouterLink :to="{ path: '/', query: { type: 'apt' }}" class="hover:text-primary transition">아파트</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'apart' }}" class="hover:text-primary transition">아파트</RouterLink>
             <RouterLink :to="{ path: '/', query: { type: 'oneroom' }}" class="hover:text-primary transition">원룸</RouterLink>
             <RouterLink :to="{ path: '/', query: { type: 'officetel' }}" class="hover:text-primary transition">오피스텔</RouterLink>
             

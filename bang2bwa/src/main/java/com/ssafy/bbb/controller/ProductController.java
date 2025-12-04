@@ -2,10 +2,12 @@ package com.ssafy.bbb.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,5 +49,20 @@ public class ProductController {
 		ProductDto product = productService.modify(productId, modifyForm, images);
 
 		return ApiResponse.success(product, "매물 수정이 완료되었습니다.");
+	}
+
+	/**
+	 * 매물 검색 요청 URL: GET /products/search?keyword=검색어
+	 */
+	@GetMapping("/search")
+	public ApiResponse<List<ProductDto>> searchProduct(
+			@RequestParam(value = "keyword", required = false) String keyword,
+			@RequestParam(value = "type", required = false) String type) {
+
+		log.info("매물 검색 요청: {}", keyword);
+
+		List<ProductDto> searchList = productService.search(keyword, type);
+
+		return ApiResponse.success(searchList, "매물 조회가 완료되었습니다.");
 	}
 }

@@ -10,4 +10,6 @@ public interface ProductService {
 	public Long create(ProductDto product, List<MultipartFile> files);
 
 	public ProductDto modify(Long productId, ProductDto product, List<MultipartFile> newFiles);
+
+	public List<ProductDto> search(String keyword, String type);
 }
