@@ -29,4 +29,10 @@
   		</set>
   		where reservation_id = #{reservationId};
   	</update>
+  	
+  	<update id="updateStatus">
+  		update reservations
+  		set status=#{status}
+  		where reservation_id=#{reservationId};
+  	</update>
   </mapper>

@@ -8,4 +8,6 @@ public interface PaymentDao {
 	public void paymentSave(PaymentDto payment);
 
 	public void paymentFee(Map<String, Object> paymentInfo);
+
+	public String findOrderIdByPaymentKey(String paymentKey);
 }

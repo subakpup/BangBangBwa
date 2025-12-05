@@ -10,7 +10,19 @@
   	
   	<update id="paymentFee">
   		update payments
-  		set status=#{status}, amount=#{amount}, approved_at=#{approvedAt}
+  		<set>
+  			status=#{status},
+  			amount=#{amount},
+  			<if test="approvedAt != null">approved_at=#{approvedAt},</if>
+  			<if test="cancelledAt != null">cancelled_at=#{cancelledAt},</if>
+  		</set>
+  		
   		where order_id=#{orderId};
   	</update>
+  	
+  	<select id="findOrderIdByPaymentKey">
+  		select order_id from payments
+  		where payment_key=#{paymentKey};
+  	</select>
+  	
   </mapper>

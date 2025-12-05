@@ -18,4 +18,6 @@ public interface ReservationDao {
 
 	// 예약 장소 나왔음을 확인
 	public void updateConfirmation(@Param("type") String type, @Param("reservationId") Long reservationId);
+
+	public void updateStatus(@Param("reservationId") Long reservationId, @Param("status") ReservationStatus status);
 }
