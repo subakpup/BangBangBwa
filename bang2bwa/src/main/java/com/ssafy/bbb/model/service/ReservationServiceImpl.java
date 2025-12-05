@@ -1,6 +1,7 @@
 package com.ssafy.bbb.model.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgAuthRequestDto;
+import com.ssafy.bbb.model.dto.pg.PgCaptureRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgResponseDto;
 import com.ssafy.bbb.model.enums.PaymentStatus;
 import com.ssafy.bbb.model.enums.PaymentType;
@@ -56,7 +58,7 @@ public class ReservationServiceImpl implements ReservationService {
 		// 3. PG 서버 통신: 가승인 요청
 		String orderId = "ORD_USER_" + UUID.randomUUID().toString();
 		Long amount = 10000L;
-		String paymentKey = connPgServer(orderId, amount);
+		String paymentKey = connPgServerPreAuth(orderId, amount);
 
 		// 4. 예약 정보 저장
 		ReservationDto reservation = ReservationDto.builder() //
@@ -88,6 +90,7 @@ public class ReservationServiceImpl implements ReservationService {
 		productDao.updateProductStatus(request.getProductId(), ReservationStatus.PENDING);
 	}
 
+	// 중개업자 예약 승인
 	@Override
 	@Transactional
 	public void acceptReservation(Long reservationId, Long agentId) {
@@ -109,7 +112,7 @@ public class ReservationServiceImpl implements ReservationService {
 		// 3. PG 서버 통신: 가승인 요청
 		String orderId = "ORD_AGENT_" + UUID.randomUUID().toString();
 		Long amount = 10000L;
-		String paymentKey = connPgServer(orderId, amount);
+		String paymentKey = connPgServerPreAuth(orderId, amount);
 
 		// 4. 예약 테이블 업데이트
 		reservationDao.reservationAccept(reservationId, paymentKey, ReservationStatus.RESERVED);
@@ -131,7 +134,45 @@ public class ReservationServiceImpl implements ReservationService {
 		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.RESERVED);
 	}
 
-	private String connPgServer(String orderId, Long amount) {
+	// 만남 성사
+	@Override
+	@Transactional
+	public void confirmMeeting(Long reservationId, Long userId) {
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		if (reservation == null) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		String userType = "";
+		if (userId == reservation.getUserId()) {
+			userType = "USER";
+		} else if (userId == reservation.getAgentId()) {
+			userType = "AGENT";
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+		// 현재 접근한 유저(예약자 혹은 중개업자)의 confirm 을 'W' -> 'Y' 로 업데이트
+		reservationDao.updateConfirmation(userType, reservationId);
+
+		// 다시 reservation을 조회하여 둘 다 조회했는지 확인.
+		ReservationDto updateReservation = reservationDao.findById(reservationId);
+
+		boolean isUserConfirmed = updateReservation.getUserConfirmed().equals("Y");
+		boolean isAgentConfirmed = updateReservation.getAgentConfirmed().equals("Y");
+
+		if (isUserConfirmed && isAgentConfirmed) {
+			// 둘다 확인하였다면 정산 로직을 실행
+			long fee = 1000L; // 수수료
+
+			connPgServerCapture(updateReservation.getUserPaymentKey(), fee); // 예약자 수수료 결제 승인
+			connPgServerCapture(updateReservation.getAgentPaymentKey(), fee); // 중개업자 수수료 결제 승인
+
+			// 다시 매물을 예약 가능 상태로 변경.
+			productDao.updateProductStatus(updateReservation.getProductId(), ReservationStatus.AVAILABLE);
+		}
+	}
+
+	private String connPgServerPreAuth(String orderId, Long amount) {
 		// 3-1. 통신
 		PgAuthRequestDto pgRequest = PgAuthRequestDto.builder() //
 				.orderId(orderId) // 주문번호
@@ -149,5 +190,28 @@ public class ReservationServiceImpl implements ReservationService {
 		// 3-3. 결제 키 추출
 		Map<String, Object> data = (Map<String, Object>) pgResponse.getData();
 		return (String) data.get("paymentKey");
+	}
+
+	private void connPgServerCapture(String paymentKey, Long fee) {
+		PgCaptureRequestDto userCapture = PgCaptureRequestDto.builder().paymentKey(paymentKey).captureAmount(fee)
+				.build();
+
+		PgResponseDto userResponse = pgClient.requestCapture(userCapture);
+		if (!userResponse.getResultCode().equals("SUCCESS")) {
+			throw new CustomException(ErrorCode.QUIT_PAYMENT);
+		}
+
+		Map<String, Object> data = ((Map<String, Object>) userResponse.getData());
+
+		Map<String, Object> paymentInfo = new HashMap<>();
+		paymentInfo.put("orderId", (String) data.get("orderId"));
+		paymentInfo.put("amount", fee);
+		paymentInfo.put("approvedAt", (String) data.get("paidAt"));
+		paymentInfo.put("status", PaymentStatus.PAID);
+
+		log.info("receipt: {}", data);
+		log.info("paymentInfo: {}", paymentInfo);
+
+		paymentDao.paymentFee(paymentInfo);
 	}
 }

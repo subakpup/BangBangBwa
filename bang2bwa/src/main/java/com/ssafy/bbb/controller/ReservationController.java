@@ -38,4 +38,12 @@ public class ReservationController {
 
 		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
+
+	@PostMapping("{reservationId}/confirm")
+	public ApiResponse<String> confirmReservation(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long userId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+		reservationService.confirmMeeting(reservationId, userId);
+
+		return ApiResponse.successWithNoContent("예약을 확인하였습니다. 상대방의 동의 후 보증금이 반환됩니다.");
+	}
 }

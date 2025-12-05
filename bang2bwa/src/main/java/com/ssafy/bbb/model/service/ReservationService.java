@@ -6,4 +6,6 @@ public interface ReservationService {
 	public void requestReservation(ReservationRequestDto request, Long userId);
 
 	public void acceptReservation(Long reservationId, Long agentId);
+
+	public void confirmMeeting(Long reservationId, Long requestUserId);
 }
