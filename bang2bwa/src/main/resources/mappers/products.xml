@@ -70,24 +70,73 @@
   		;
   	</select>
   	
-  	<select id="search">
+  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto">
   		select *
   		from products
   		<where>
   			<if test="keyword != null and keyword != ''">
-  				and 
-  				(
-  					name like concat('%', #{ keyword }, '%')
-  					or jibun like concat('%', #{ keyword }, '%')
-  					or apt_dong like concat('%', #{ keyword }, '%')
+  				and (
+  					name like concat('%', #{keyword}, '%')
+  					or jibun like concat('%', #{keyword}, '%')
+  					or apt_dong like concat('%', #{keyword}, '%')
   				)
   			</if>
   			
-  			<if test="type != null and type != ''">
-  				and house_type = #{type}
+  			<if test="houseType != null and houseType != ''">
+  				and house_type = #{houseType}
   			</if>
+  			
+  			<if test="tradeType != null and tradeType != ''">
+  				and trade_type = #{tradeType}
+  			</if>
+  			
+  			<if test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체'">
+  				<choose>
+  					<when test="excluUseAr == '33㎡ 이하 (약 10평)'">
+  						and exclu_use_ar &lt;= 33
+  					</when>
+  					
+  					<when test="excluUseAr == '33㎡ ~ 66㎡ (10~20평)'">
+  						AND exclu_use_ar &gt; 33 AND exclu_use_ar &lt;= 66
+  					</when>
+  					
+  					<when test="excluUseAr == '66㎡ ~ 99㎡ (20~30평)'">
+  						AND exclu_use_ar &gt; 66 AND exclu_use_ar &lt;= 99
+  					</when>
+  					
+  					<when test="excluUseAr == '99㎡ 이상 (30평대~)'">
+  						and exclu_use_ar &gt; 99
+  					</when>
+  				</choose>
+  			</if>
+  			
+			<if test="floor != null and floor != '' and floor != '전체'">
+            	<choose>
+                	<when test="floor == '1층'">
+                    	AND (floor = '1층' OR floor = '1') 
+                	</when>
+                
+                	<when test="floor == '2층'">
+                    	AND (floor = '2층' OR floor = '2')
+                	</when>
+                
+                	<when test="floor == '반지하'">
+                    	AND floor LIKE '%지하%'
+                	</when>
+                
+                	<when test="floor == '옥탑'">
+                    	AND floor LIKE '%옥탑%'
+                	</when>
+                
+                	<when test="floor == '3층 이상'">
+                    	AND floor != '1층' AND floor != '1'
+	                    AND floor != '2층' AND floor != '2'
+        	            AND floor NOT LIKE '%지하%'
+            	        AND floor NOT LIKE '%옥탑%'
+                	</when>
+            	</choose>
+        	</if>
   		</where>
-  		order by product_id desc;
   	</select>
   	
   </mapper>

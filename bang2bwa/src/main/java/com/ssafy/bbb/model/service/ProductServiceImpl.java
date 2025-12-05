@@ -16,6 +16,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.util.FileStore;
 
 import lombok.RequiredArgsConstructor;
@@ -115,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductDto> search(String keyword, String type) {
-		return productDao.search(keyword, type);
+	public List<ProductDto> search(ProductSearchDto request) {
+		return productDao.search(request);
 	}
 }
