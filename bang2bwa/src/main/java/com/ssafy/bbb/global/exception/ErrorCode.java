@@ -29,7 +29,8 @@ public enum ErrorCode {
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약정보입니다."),
 	RESERVATION_UNAUTORIZATION(HttpStatus.FORBIDDEN, "자신의 매물만 승인가능합니다."),
 	RESERVATION_NOT_PENDING(HttpStatus.CONFLICT, "예약 대기중인 매물이 아닙니다."),
-	QUIT_PAYMENT(HttpStatus.CONFLICT, "이미 정산된 거래입니다."), PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제가 실패하였습니다.");
+	FAIL_REPORT(HttpStatus.BAD_REQUEST, "노쇼 신고는 예약 일정 이후에만 가능합니다."), QUIT_PAYMENT(HttpStatus.CONFLICT, "이미 정산된 거래입니다."),
+	PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제가 실패하였습니다.");
 
 	// 필요한 에러 추가..
 
