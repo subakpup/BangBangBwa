@@ -8,4 +8,6 @@ public interface ReservationService {
 	public void acceptReservation(Long reservationId, Long agentId);
 
 	public void confirmMeeting(Long reservationId, Long requestUserId);
+
+	public void reportNoShow(Long reservationId, Long reporterId);
 }

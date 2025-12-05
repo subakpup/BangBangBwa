@@ -46,4 +46,12 @@ public class ReservationController {
 
 		return ApiResponse.successWithNoContent("예약을 확인하였습니다. 상대방의 동의 후 보증금이 반환됩니다.");
 	}
+
+	@PostMapping("{reservationId}/noshow")
+	public ApiResponse<String> reportNoShow(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long reporterId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+		reservationService.reportNoShow(reservationId, reporterId);
+
+		return ApiResponse.successWithNoContent("신고가 접수되었습니다.");
+	}
 }

@@ -164,12 +164,66 @@ public class ReservationServiceImpl implements ReservationService {
 			// 둘다 확인하였다면 정산 로직을 실행
 			long fee = 1000L; // 수수료
 
-			connPgServerCapture(updateReservation.getUserPaymentKey(), fee); // 예약자 수수료 결제 승인
-			connPgServerCapture(updateReservation.getAgentPaymentKey(), fee); // 중개업자 수수료 결제 승인
+			connPgServerCapture(updateReservation.getUserPaymentKey(), fee, PaymentStatus.PAID); // 예약자 수수료 결제 승인
+			connPgServerCapture(updateReservation.getAgentPaymentKey(), fee, PaymentStatus.PAID); // 중개업자 수수료 결제 승인
 
+			// 예약 정상 종료
+			reservationDao.updateStatus(reservationId, ReservationStatus.QUIT);
 			// 다시 매물을 예약 가능 상태로 변경.
 			productDao.updateProductStatus(updateReservation.getProductId(), ReservationStatus.AVAILABLE);
 		}
+	}
+
+	@Override
+	@Transactional
+	public void reportNoShow(Long reservationId, Long reporterId) {
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		if (reservation == null) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		// 노쇼 신고는 예약 시간이 지나야만 가능함.
+		if (reservation.getVisitDate().isAfter(LocalDateTime.now())) {
+			throw new CustomException(ErrorCode.FAIL_REPORT);
+		}
+
+		// 피해자
+		String victimType = "";
+		String victimKey = "";
+		// 가해자
+		String offenderType = "";
+		String offenderKey = "";
+
+		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
+			victimType = "USER";
+			victimKey = reservation.getUserPaymentKey();
+			offenderType = "AGNENT";
+			offenderKey = reservation.getAgentPaymentKey();
+		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
+			victimType = "AGNENT";
+			victimKey = reservation.getAgentPaymentKey();
+			offenderType = "USER";
+			offenderKey = reservation.getUserPaymentKey();
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+
+		// 가해자 위약금 몰수
+		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
+
+		// 피해자는 수수료 없이 전액 반환.
+		pgClient.requestCancel(Map.of("paymentKey", victimKey));
+		Map<String, Object> cancleInfo = new HashMap<>();
+		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
+		cancleInfo.put("amount", 0L);
+		cancleInfo.put("approvedAt", LocalDateTime.now());
+		cancleInfo.put("status", PaymentStatus.CANCELED);
+		paymentDao.paymentFee(cancleInfo);
+
+		// 노쇼로 인한 예약 종료
+		reservationDao.updateStatus(reservationId, ReservationStatus.NO_SHOW);
+		// 다시 매물을 예약 가능 상태로 변경.
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
 	}
 
 	private String connPgServerPreAuth(String orderId, Long amount) {
@@ -192,7 +246,7 @@ public class ReservationServiceImpl implements ReservationService {
 		return (String) data.get("paymentKey");
 	}
 
-	private void connPgServerCapture(String paymentKey, Long fee) {
+	private void connPgServerCapture(String paymentKey, Long fee, PaymentStatus status) {
 		PgCaptureRequestDto userCapture = PgCaptureRequestDto.builder().paymentKey(paymentKey).captureAmount(fee)
 				.build();
 
@@ -207,7 +261,7 @@ public class ReservationServiceImpl implements ReservationService {
 		paymentInfo.put("orderId", (String) data.get("orderId"));
 		paymentInfo.put("amount", fee);
 		paymentInfo.put("approvedAt", (String) data.get("paidAt"));
-		paymentInfo.put("status", PaymentStatus.PAID);
+		paymentInfo.put("status", status);
 
 		log.info("receipt: {}", data);
 		log.info("paymentInfo: {}", paymentInfo);
