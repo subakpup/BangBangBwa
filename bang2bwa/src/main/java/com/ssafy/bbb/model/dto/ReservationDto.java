@@ -24,4 +24,7 @@ public class ReservationDto {
 	private String message; // 예약 메세지
 	private ReservationStatus status; // 예약 상태
 	private Long depositAmount; // 예약금
+
+	private String userConfirmed; // 예약자가 예약장소에 왔는지 확인
+	private String agentConfirmed; // 중개인이 예약장소에 왔는지 확인
 }

@@ -20,4 +20,13 @@
   			status=#{status}
   		where reservation_id=#{reservationId};
   	</update>
+  	
+  	<update id="updateConfirmation">
+  		update reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = 'Y', </if>
+  			<if test="type == 'AGENT'">agent_confirmed = 'Y',</if>
+  		</set>
+  		where reservation_id = #{reservationId};
+  	</update>
   </mapper>

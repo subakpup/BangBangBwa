@@ -15,4 +15,7 @@ public interface ReservationDao {
 	// 중개업자가 예약 수락
 	public void reservationAccept(@Param("reservationId") Long reservationId,
 			@Param("agentPaymentKey") String agentPaymentKey, @Param("status") ReservationStatus status);
+
+	// 예약 장소 나왔음을 확인
+	public void updateConfirmation(@Param("type") String type, @Param("reservationId") Long reservationId);
 }
