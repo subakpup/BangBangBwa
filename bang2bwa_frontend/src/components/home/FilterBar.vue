@@ -8,7 +8,8 @@ const emit = defineEmits(['filter-change', 'open-ai']);
 
 // 상태 변수
 const searchQuery = ref('');    // 검색어
-const transaction = ref('전체'); // 월세/전세/매매
+const tradeType = ref('전체'); // 월세/전세/매매
+const houseType = ref('');   // 매물 종류
 const floorOption = ref('전체'); // 층수
 
 // 전용면적
@@ -29,15 +30,16 @@ const currentAreaLabel = computed(() => areaLabels[areaValue.value]);
 
 const toggleAreaDropdown = () => {
     isAreaOpen.value = !isAreaOpen.value;
-}
+};
 
 // 통합 변경
 const emitChange = () => {
     emit('filter-change', {
         keyword: searchQuery.value,
-        type: transaction.value,
-        floor: floorOption.value,
-        area: currentAreaLabel.value,
+        houseType: houseType.value, // 아파트, 오피스텔, 원룸
+        tradeType: tradeType.value, // 매매, 전세, 월세
+        floor: floorOption.value, // 층
+        excluUseAr: currentAreaLabel.value, // 전용 면적
     });
 };
 </script>
@@ -60,7 +62,7 @@ const emitChange = () => {
         <div class="w-px h-6 bg-secondary mx-2"></div>
 
         <!--월세/전세/매매 버튼-->
-        <select v-model="transaction" @change="emitChange"
+        <select v-model="tradeType" @change="emitChange"
             class="px-3 py-2 border border-secondary rounded-md text-sm bg-white hover:border-primary cursor-pointer text-gray-700 outline-none">
             <option value="전체">전체</option>
             <option value="월세">월세</option>
@@ -102,7 +104,7 @@ const emitChange = () => {
             <option value="2층">2층</option>
             <option value="3층 이상">3층 이상</option>
             <option value="옥탑">옥탑</option>
-            <option value="반지하">반지하</option>
+            <option value="지하">지하</option>
         </select>
 
         <!--AI 맞춤 추천 버튼-->

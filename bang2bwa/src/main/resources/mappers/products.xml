@@ -86,11 +86,11 @@
   				and house_type = #{houseType}
   			</if>
   			
-  			<if test="tradeType != null and tradeType != ''">
+  			<if test="tradeType != null and tradeType != '' and tradeType != '전체'">
   				and trade_type = #{tradeType}
   			</if>
   			
-  			<if test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체'">
+  			<if test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체 면적'">
   				<choose>
   					<when test="excluUseAr == '33㎡ 이하 (약 10평)'">
   						and exclu_use_ar &lt;= 33

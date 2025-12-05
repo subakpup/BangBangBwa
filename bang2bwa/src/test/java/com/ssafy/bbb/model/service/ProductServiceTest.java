@@ -34,7 +34,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
-import com.ssafy.bbb.model.enums.HouseType;
+import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.util.FileStore;
 
 @ExtendWith(MockitoExtension.class)
@@ -221,11 +221,13 @@ class ProductServiceTest {
 	class SearchTest {
 
 		@Test
-		@DisplayName("[SUCCESS] 타입과 검색어가 모두 있을 때 정상 조회된다.")
+		@DisplayName("[SUCCESS] 검색 조건(DTO)이 있을 때 정상 조회된다.")
 		void success_with_keyword_and_type() {
 			// given
-			String keyword = "강남";
-			String type = HouseType.APART.toString();
+			ProductSearchDto request = new ProductSearchDto();
+			request.setKeyword("강남");
+			request.setHouseType("아파트"); // 프론트와 맞춘 값
+			request.setTradeType("매매");
 
 			// 검색 결과 더미 데이터
 			ProductDto p1 = createDummyDto(100L);
@@ -233,71 +235,53 @@ class ProductServiceTest {
 			List<ProductDto> list = List.of(p1, p2);
 
 			// Mocking
-			given(productDao.search(keyword, type)).willReturn(list);
+			given(productDao.search(request)).willReturn(list);
 
 			// when
-			List<ProductDto> result = productService.search(keyword, type);
+			List<ProductDto> result = productService.search(request);
 
 			// then
 			assertThat(result).hasSize(2);
 			assertThat(result).contains(p1, p2);
 
 			// Verify
-			then(productDao).should(times(1)).search(keyword, type);
-		}
-
-		@Test
-		@DisplayName("[SUCCESS] 검색어가 없으면 빈 리스트를 반환한다. (Service 내부 정책)")
-		void success_no_keyword_returns_empty() {
-			// given
-			String keyword = ""; // 빈 문자열
-			String type = null;
-
-			// when
-			List<ProductDto> result = productService.search(keyword, type);
-
-			// then
-			assertThat(result).isEmpty();
-
-			// Verify: DAO 호출 없이 바로 리턴했는지 확인
-			then(productDao).should(never()).search(any(), any());
-		}
-
-		@Test
-		@DisplayName("[SUCCESS] 검색어가 Null이면 빈 리스트를 반환한다.")
-		void success_null_keyword_returns_empty() {
-			// given
-			String keyword = null;
-			String type = HouseType.ONEROOM.toString();
-
-			// when
-			List<ProductDto> result = productService.search(keyword, type);
-
-			// then
-			assertThat(result).isEmpty();
-
-			// Verify
-			then(productDao).should(never()).search(any(), any());
+			then(productDao).should(times(1)).search(request);
 		}
 
 		@Test
 		@DisplayName("[SUCCESS] 검색 결과가 없을 경우 빈 리스트를 반환한다.")
-		void success_no_result() {
+		void success_no_keyword_returns_empty() {
 			// given
-			String keyword = "없는아파트";
-			String type = HouseType.APART.toString();
-
-			// Mocking: DAO가 빈 리스트 반환
-			given(productDao.search(keyword, type)).willReturn(Collections.emptyList());
+			ProductSearchDto request = new ProductSearchDto();
+			request.setKeyword("없는아파트");
 
 			// when
-			List<ProductDto> result = productService.search(keyword, type);
+			List<ProductDto> result = productService.search(request);
 
 			// then
 			assertThat(result).isEmpty();
 
 			// Verify
-			then(productDao).should(times(1)).search(keyword, type);
+			then(productDao).should(times(1)).search(request);
+		}
+
+		@Test
+		@DisplayName("[SUCCESS] 필터 조건이 비어있어도(Null/Empty) DAO를 호출한다.")
+		void success_null_keyword_returns_empty() {
+			// MyBatis 동적 쿼리에서 null 처리를 하므로 Service는 그냥 넘겨야 함
+
+			// given
+			ProductSearchDto request = new ProductSearchDto();
+
+			// Mocking
+			given(productDao.search(request)).willReturn(Collections.emptyList());
+
+			// when
+			productService.search(request);
+
+			// then
+			// DAO가 호출되었는지 확인 (Service에서 null 체크 후 리턴해버리는 로직이 없다면 호출되어야 함)
+			then(productDao).should(times(1)).search(request);
 		}
 
 	}

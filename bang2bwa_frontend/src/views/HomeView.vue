@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';                    // 현재 URL 정보
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 import KakaoMap from '@/components/map/KakaoMap.vue';     // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';  // 홈뷰 헤더(필터 바)
@@ -9,20 +10,27 @@ import AiModal from '@/components/modal/AiModal.vue';     // AI 모달
 import { dummyData } from '@/data/dummy';                 // 더미 데이터
 
 const route = useRoute();            // Spring의 HttpServletRequest
-const currentType = ref('전체 매물'); // 현재 보고 있는 매물 타입
+const currentType = ref('전체 매물');  // 현재 보고 있는 매물 타입
 const productList = ref([]);         // 매물 리스트
 const showAiModal = ref(false);      // 모달 상태
 
 // URL 파라미터 매핑
 const typeMap = {
-  'apart': '아파트',
-  'oneroom': '원룸',
-  'officetel': '오피스텔'
+  'APART': '아파트',
+  'ONEROOM': '원룸',
+  'OFFICETEL': '오피스텔'
+};
+
+// 거래 종류 매핑
+const tradeTypeMap = {
+  '매매': 'SALE',
+  '전세': 'LEASE',
+  '월세': 'RENT',
 };
 
 // 데이터 로딩
 const loadData = (rawType) => {
-  const typeKey = rawType || 'apart';
+  const typeKey = rawType || 'APART';
 
   const typeName = typeMap[typeKey] || '전체 매물';
   currentType.value = typeName;
@@ -31,10 +39,38 @@ const loadData = (rawType) => {
 };
 
 // 필터 바 변경 감지
-const handleFilterChange = (filterData) => {
-  console.log('필터 변경 감지:', filterData);
-  // 예: { keyword: '강남', type: '전세', floor: '1층', area: '33㎡ 이하' }
-  // TODO: 나중에 여기서 백엔드 API 호출
+const handleFilterChange = async (filterData) => {
+  try {
+    const houseType = route.query.type || '';
+    const tradeType = tradeTypeMap[filterData.tradeType];
+
+    const response = await axios.post('http://localhost:8080/products/search', {
+      keyword: filterData.keyword,
+      houseType: houseType,
+      tradeType: tradeType,
+      excluUseAr: filterData.excluUseAr,
+      floor: filterData.floor,
+    });
+
+    // 응답처리
+    if (response.data.success === 'SUCCESS') {
+        const searchList = response.data.data;
+        productList.value = searchList;
+        
+        if (filterData.keyword) {
+            currentType.value = `'${filterData.keyword}' 검색 결과`;
+        } else {
+          const typeKey = houseType || 'APART';
+          currentType.value = typeMap[typeKey];
+        }
+    } else {
+        alert(response.data.message); // 실패 메시지 띄우기
+    }
+    
+  } catch (error) {
+    console.error('검색 실패', error);
+    productList.value = [];
+  }
 };
 
 // AI 모달 요청
@@ -69,13 +105,14 @@ watch(
   () => route.query.type,
   (newType) => {
     loadData(newType);
+
+    handleFilterChange({ houseType: newType });
   }
 );
 
 // 처음 접속 시 실행
 onMounted(() => {
-  const type = route.query.type;
-  loadData(type);
+  handleFilterChange({});
 });
 </script>
 
