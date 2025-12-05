@@ -42,6 +42,20 @@ const emitChange = () => {
         excluUseAr: currentAreaLabel.value, // 전용 면적
     });
 };
+
+const resetFilter = () => {
+    searchQuery.value = '';
+    tradeType.value = '전체';
+    houseType.value = '전체';
+    floorOption.value = '전체';
+    areaValue.value = 0; // 슬라이더도 0(전체)으로
+    isAreaOpen.value = false; // 열려있다면 닫기
+}
+
+defineExpose({
+    resetFilter
+});
+
 </script>
 
 <template>
