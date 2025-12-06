@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.dto.ProductSearchDto;
 
 public interface ProductDao {
 	public Long save(ProductDto product);
@@ -25,5 +26,7 @@ public interface ProductDao {
 
 	// 삭제할 이미지의 경로를 받아오기(실제 파일 삭제용)
 	public List<String> findSavePathByIds(List<Long> imageIds);
+
+	public List<ProductDto> search(ProductSearchDto request);
 
 }

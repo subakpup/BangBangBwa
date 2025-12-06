@@ -1,40 +1,65 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';                    // 현재 URL 정보
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 import KakaoMap from '@/components/map/KakaoMap.vue';     // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';  // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';     // AI 모달
 
-import { dummyData } from '@/data/dummy';                 // 더미 데이터
-
 const route = useRoute();            // Spring의 HttpServletRequest
-const currentType = ref('전체 매물'); // 현재 보고 있는 매물 타입
+const currentType = ref('전체 매물');  // 현재 보고 있는 매물 타입
 const productList = ref([]);         // 매물 리스트
 const showAiModal = ref(false);      // 모달 상태
+const filterBar = ref(null);         // 필터바 상태
 
 // URL 파라미터 매핑
 const typeMap = {
-  'apt': '아파트',
-  'oneroom': '원룸',
-  'officetel': '오피스텔'
+  'APART': '아파트',
+  'ONEROOM': '원룸',
+  'OFFICETEL': '오피스텔'
 };
 
-// 데이터 로딩
-const loadData = (rawType) => {
-  const typeKey = rawType || 'apt';
-
-  const typeName = typeMap[typeKey] || '전체 매물';
-  currentType.value = typeName;
-
-  productList.value = dummyData[typeKey] || [];
+// 거래 종류 매핑
+const tradeTypeMap = {
+  '매매': 'SALE',
+  '전세': 'LEASE',
+  '월세': 'RENT',
 };
 
 // 필터 바 변경 감지
-const handleFilterChange = (filterData) => {
-  console.log('필터 변경 감지:', filterData);
-  // 예: { keyword: '강남', type: '전세', floor: '1층', area: '33㎡ 이하' }
-  // TODO: 나중에 여기서 백엔드 API 호출
+const handleFilterChange = async (filterData) => {
+  try {
+    const houseType = route.query.type || '';
+    const tradeType = tradeTypeMap[filterData.tradeType] || '전체';
+
+    const response = await axios.post('http://localhost:8080/products/search', {
+      keyword: filterData.keyword,
+      houseType: houseType,
+      tradeType: tradeType,
+      excluUseAr: filterData.excluUseAr,
+      floor: filterData.floor,
+    });
+
+    // 응답처리
+    if (response.data.success === 'SUCCESS') {
+        const searchList = response.data.data;
+        productList.value = searchList;
+        
+        if (filterData.keyword) {
+            currentType.value = `'${filterData.keyword}' 검색 결과`;
+        } else {
+          const typeKey = houseType || 'APART';
+          currentType.value = typeMap[typeKey];
+        }
+    } else {
+        alert(response.data.message); // 실패 메시지 띄우기
+    }
+    
+  } catch (error) {
+    console.error('검색 실패', error);
+    productList.value = [];
+  }
 };
 
 // AI 모달 요청
@@ -49,40 +74,73 @@ const handleAiSearchResult = () => {
 
 // 가격 포맷팅 함수
 const formatPrice = (item) => {
-  if (item.tradeType === '매매') {
-    const unit = item.dealAmount >= 10000 ? `${Math.floor(item.dealAmount / 10000)}억` : '';
-    const remain = item.dealAmount % 10000 > 0 ? `${item.dealAmount % 10000}만` : '';
-    return `매매 ${unit}${remain}`;
+  // 1. 거래 종류 확인
+  const type = item.tradeType; 
+  let price = 0;
+  let rent = 0;
+
+  // 2. 가격 데이터 추출
+  if (type === '매매' || type === 'SALE') {
+    price = item.dealAmount;
+  } else {
+    price = item.deposit; // 전세, 월세의 보증금
+    rent = item.monthlyRent; // 월세
   }
-  else if (item.tradeType === '전세') {
-    const unit = item.dealAmount >= 10000 ? `${Math.floor(item.dealAmount / 10000)}억` : '';
-    const remain = item.dealAmount % 10000 > 0 ? `${item.dealAmount % 10000}만` : '';
-    return `전세 ${unit}${remain}`;
+
+  // 3. 금액 포맷팅 로직
+  // 예: 2,050,000,000 -> 20억 5000
+  const formatMoney = (amount) => {
+    if (!amount) return '0';
+    
+    // 억 단위 계산
+    const eok = Math.floor(amount / 100000000);
+    // 만 단위 계산
+    const man = Math.floor((amount % 100000000) / 10000);
+
+    let result = '';
+    if (eok > 0) result += `${eok}억`;
+    if (man > 0) result += ` ${man.toLocaleString()}`; // 천 단위 콤마 추가
+    
+    return result.trim(); // "20억 5000"
+  };
+
+  // 4. 최종 문자열 반환
+  const formattedPrice = formatMoney(price);
+
+  if (type === '매매' || type === 'SALE') {
+    return `매매 ${formattedPrice}`;
+  } else if (type === '전세' || type === 'LEASE') {
+    return `전세 ${formattedPrice}`;
+  } else {
+    // 월세는 보통 '만' 단위로 표시 (예: 500,000원 -> 50)
+    // 월세가 0원이 아니면 만원 단위로 변환
+    const formattedRent = rent > 0 ? Math.floor(rent / 10000) : 0;
+    return `월세 ${formattedPrice} / ${formattedRent}`;
   }
-  else {
-    return `월세 ${item.deposit}/${item.monthlyRent}`;
-  }
-}
+};
 
 // URL의 쿼리 파라미터가 바뀔 때마다 실행
 watch(
   () => route.query.type,
   (newType) => {
-    loadData(newType);
+    if (filterBar.value) {
+      filterBar.value.resetFilter();
+    }
+
+    handleFilterChange({ houseType: newType });
   }
 );
 
 // 처음 접속 시 실행
 onMounted(() => {
-  const type = route.query.type;
-  loadData(type);
+  handleFilterChange({});
 });
 </script>
 
 <template>
   <div class="flex flex-col h-full w-full relative">
 
-    <FilterBar @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
+    <FilterBar ref="filterBar" @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
 
     <div class="flex flex-1 overflow-hidden relative">
 
@@ -99,12 +157,12 @@ onMounted(() => {
               <img :src="item.image" class="w-full h-full object-cover" alt="방 사진">
             </div>
             <div class="flex flex-col justify-center">
-              <span class="text-xs text-primary font-bold">{{ item.houseType }}</span>
+              <span class="text-xs text-primary font-bold">{{ typeMap[item.houseType] }}</span>
               <h3 class="font-bold text-lg">{{ formatPrice(item) }}</h3>
               <p class="text-sm text-gray-600 font-bold">{{ item.name }}</p>
               <p class="text-sm text-gray-500 truncate">{{ item.jibun }}</p>
               <p class="text-xs text-gray-400 mt-1">
-                {{ item.floor }}층 | {{ item.excluUseAr }}㎡ | {{ item.desc }}
+                {{ item.floor }} | {{ item.excluUseAr }}㎡ | {{ item.desc }}
               </p>
             </div>
           </div>

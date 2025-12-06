@@ -34,6 +34,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.util.FileStore;
 
 @ExtendWith(MockitoExtension.class)
@@ -213,5 +214,75 @@ class ProductServiceTest {
 			assertThatThrownBy(() -> productService.modify(wrongId, updateReq, files))
 					.isInstanceOf(CustomException.class).extracting("errorCode").isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
 		}
+	}
+
+	@Nested
+	@DisplayName("상품 검색 테스트")
+	class SearchTest {
+
+		@Test
+		@DisplayName("[SUCCESS] 검색 조건(DTO)이 있을 때 정상 조회된다.")
+		void success_with_keyword_and_type() {
+			// given
+			ProductSearchDto request = new ProductSearchDto();
+			request.setKeyword("강남");
+			request.setHouseType("아파트"); // 프론트와 맞춘 값
+			request.setTradeType("매매");
+
+			// 검색 결과 더미 데이터
+			ProductDto p1 = createDummyDto(100L);
+			ProductDto p2 = createDummyDto(200L);
+			List<ProductDto> list = List.of(p1, p2);
+
+			// Mocking
+			given(productDao.search(request)).willReturn(list);
+
+			// when
+			List<ProductDto> result = productService.search(request);
+
+			// then
+			assertThat(result).hasSize(2);
+			assertThat(result).contains(p1, p2);
+
+			// Verify
+			then(productDao).should(times(1)).search(request);
+		}
+
+		@Test
+		@DisplayName("[SUCCESS] 검색 결과가 없을 경우 빈 리스트를 반환한다.")
+		void success_no_keyword_returns_empty() {
+			// given
+			ProductSearchDto request = new ProductSearchDto();
+			request.setKeyword("없는아파트");
+
+			// when
+			List<ProductDto> result = productService.search(request);
+
+			// then
+			assertThat(result).isEmpty();
+
+			// Verify
+			then(productDao).should(times(1)).search(request);
+		}
+
+		@Test
+		@DisplayName("[SUCCESS] 필터 조건이 비어있어도(Null/Empty) DAO를 호출한다.")
+		void success_null_keyword_returns_empty() {
+			// MyBatis 동적 쿼리에서 null 처리를 하므로 Service는 그냥 넘겨야 함
+
+			// given
+			ProductSearchDto request = new ProductSearchDto();
+
+			// Mocking
+			given(productDao.search(request)).willReturn(Collections.emptyList());
+
+			// when
+			productService.search(request);
+
+			// then
+			// DAO가 호출되었는지 확인 (Service에서 null 체크 후 리턴해버리는 로직이 없다면 호출되어야 함)
+			then(productDao).should(times(1)).search(request);
+		}
+
 	}
 }

@@ -16,6 +16,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.util.FileStore;
 
 import lombok.RequiredArgsConstructor;
@@ -112,5 +113,10 @@ public class ProductServiceImpl implements ProductService {
 			// 디비에서 사진의 메타데이터 삭제
 			productDao.deleteImages(deleteIds);
 		}
+	}
+
+	@Override
+	public List<ProductDto> search(ProductSearchDto request) {
+		return productDao.search(request);
 	}
 }

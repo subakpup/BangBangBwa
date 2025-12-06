@@ -26,7 +26,7 @@ public class ProductDto {
 	private Double excluUseAr; // 전용 면적
 
 	private String aptDong; // 동 이름
-	private Integer floor; // 층
+	private String floor; // 층
 
 	private Double landAr; // 대지권 면적
 	private Double totalFloorAr; // 연면적
