@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.bbb.global.response.ApiResponse;
+import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 import com.ssafy.bbb.model.service.ReservationService;
 
@@ -41,16 +42,18 @@ public class ReservationController {
 
 	@PostMapping("{reservationId}/confirm")
 	public ApiResponse<String> confirmReservation(@PathVariable Long reservationId,
-			@RequestHeader("user-id") Long userId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
-		reservationService.confirmMeeting(reservationId, userId);
+			@RequestHeader("user-id") Long userId, // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+			@RequestBody LocationDto curLocation) { 
+		reservationService.confirmMeeting(reservationId, userId, curLocation);
 
 		return ApiResponse.successWithNoContent("예약을 확인하였습니다. 상대방의 동의 후 보증금이 반환됩니다.");
 	}
 
 	@PostMapping("{reservationId}/noshow")
 	public ApiResponse<String> reportNoShow(@PathVariable Long reservationId,
-			@RequestHeader("user-id") Long reporterId) { // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
-		reservationService.reportNoShow(reservationId, reporterId);
+			@RequestHeader("user-id") Long reporterId, // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+			@RequestBody LocationDto curLocation) { 
+		reservationService.reportNoShow(reservationId, reporterId, curLocation);
 
 		return ApiResponse.successWithNoContent("신고가 접수되었습니다.");
 	}

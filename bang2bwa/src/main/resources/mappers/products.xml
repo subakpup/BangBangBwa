@@ -83,6 +83,11 @@
   		where product_id = #{productId}
   	</update>
   	
+  	<select id="findLocationById">
+  		select latitude, longitude from products
+  		where product_id = #{productId};
+  	</select>
+  	
   	<resultMap type="map" id="selectProductMap">
   		<id column="product_id" property="productId" />
   		<result column="agent_id" property="agentId" />

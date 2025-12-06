@@ -14,6 +14,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.PaymentDao;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
+import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -23,6 +24,7 @@ import com.ssafy.bbb.model.dto.pg.PgResponseDto;
 import com.ssafy.bbb.model.enums.PaymentStatus;
 import com.ssafy.bbb.model.enums.PaymentType;
 import com.ssafy.bbb.model.enums.ReservationStatus;
+import com.ssafy.bbb.util.GeometryUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -86,8 +88,14 @@ public class ReservationServiceImpl implements ReservationService {
 				.build();
 		paymentDao.paymentSave(paymentLog);
 
-		// 8. 매물 상태 변경
+		// 6. 매물 상태 변경
 		productDao.updateProductStatus(request.getProductId(), ReservationStatus.PENDING);
+
+		// *************************************************************************************
+		// todo:
+		// 중개업자에게 메일 전송(등록된 매물에 예약 신청이 들어왔습니다.)
+		// 1시간 내에 중개업자가 승인 하지 않을 시 예약 자동 취소
+		// *************************************************************************************
 	}
 
 	// 중개업자 예약 승인
@@ -132,15 +140,28 @@ public class ReservationServiceImpl implements ReservationService {
 
 		// 6. 매물 상태 업데이트
 		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.RESERVED);
+
+		// *************************************************************************************
+		// todo:
+		// 예약자에게 메일 전송(예약 신청이 접수되었습니다.)
+		// *************************************************************************************
 	}
 
 	// 만남 성사
 	@Override
 	@Transactional
-	public void confirmMeeting(Long reservationId, Long userId) {
+	public void confirmMeeting(Long reservationId, Long userId, LocationDto location) {
 		ReservationDto reservation = reservationDao.findById(reservationId);
 		if (reservation == null) {
 			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		LocationDto productLocation = productDao.findLocationById(reservation.getProductId());
+		double distance = GeometryUtils.calculateDistance(location.getLatitude(), location.getLongitude(),
+				productLocation.getLatitude(), productLocation.getLongitude());
+
+		if (distance > 500) {
+			throw new CustomException(ErrorCode.FAR_DISTANCE);
 		}
 
 		String userType = "";
@@ -176,7 +197,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Override
 	@Transactional
-	public void reportNoShow(Long reservationId, Long reporterId) {
+	public void reportNoShow(Long reservationId, Long reporterId, LocationDto location) {
 		ReservationDto reservation = reservationDao.findById(reservationId);
 		if (reservation == null) {
 			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
@@ -187,43 +208,61 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.FAIL_REPORT);
 		}
 
-		// 피해자
-		String victimType = "";
-		String victimKey = "";
-		// 가해자
-		String offenderType = "";
-		String offenderKey = "";
-
-		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
-			victimType = "USER";
-			victimKey = reservation.getUserPaymentKey();
-			offenderType = "AGNENT";
-			offenderKey = reservation.getAgentPaymentKey();
-		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
-			victimType = "AGNENT";
-			victimKey = reservation.getAgentPaymentKey();
-			offenderType = "USER";
-			offenderKey = reservation.getUserPaymentKey();
-		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
-			throw new CustomException(ErrorCode.BAD_REQUEST);
+		LocationDto destination = productDao.findLocationById(reservation.getProductId());
+		if (destination == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
 		}
 
-		// 가해자 위약금 몰수
-		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
+		// 신고자와 매물 간의 거리 계산.
+		double distance = GeometryUtils.calculateDistance(location.getLatitude(), location.getLongitude(),
+				destination.getLatitude(), destination.getLongitude());
 
-		// 피해자는 수수료 없이 전액 반환.
-		pgClient.requestCancel(Map.of("paymentKey", victimKey));
-		Map<String, Object> cancleInfo = new HashMap<>();
-		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
-		cancleInfo.put("amount", 0L);
-		cancleInfo.put("approvedAt", LocalDateTime.now());
-		cancleInfo.put("status", PaymentStatus.CANCELED);
-		paymentDao.paymentFee(cancleInfo);
+		if (distance > 500) { // 예약 매물과의 거리가 500m를 넘어선다면 신고를 기각
+			throw new CustomException(ErrorCode.FAR_DISTANCE);
+		}
 
-		// 노쇼로 인한 예약 종료
-		reservationDao.updateStatus(reservationId, ReservationStatus.NO_SHOW);
-		// 다시 매물을 예약 가능 상태로 변경.
-		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
+		reservationDao.updateStatus(reservationId, ReservationStatus.REPORTED);
+
+		// *************************************************************************************
+		// todo:
+		// 신고 당한 사람에게 메일 전송(이의제기할 수 있는 링크를 같이 제공 => 억울한 신고를 막기 위함)
+		// 10분동안 이의제기 없을 시 노쇼로 판명 => 집행 실시
+		// *************************************************************************************
+	}
+
+	@Override
+	@Transactional
+	public void defendReport(Long reservationId, Long userId, LocationDto location) {
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		if (reservation == null) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		// 신고된 상태가 아니라면 작동 안함.
+		if (reservation.getStatus() != ReservationStatus.REPORTED) {
+			throw new CustomException(ErrorCode.NOT_REPROTED);
+		}
+
+		LocationDto destination = productDao.findLocationById(reservation.getProductId());
+		if (destination == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+		}
+
+		// 현재 매물과의 거리 계산
+		double distance = GeometryUtils.calculateDistance(location.getLatitude(), location.getLongitude(),
+				destination.getLatitude(), destination.getLongitude());
+
+		if (distance > 500) { // 매물과의 거리가 500m 이상이면 이의제기가 실패.
+			throw new CustomException(ErrorCode.FAR_DISTANCE);
+		}
+
+		// 다시 예약상태를 되돌림.
+		reservationDao.updateStatus(reservationId, ReservationStatus.RESERVED);
+
+		// *************************************************************************************
+		// todo:
+		// 신고한 사람에게 메일 전송(상대방이 근처에 있습니다. 잠시만 기다려주세요.)
+		// *************************************************************************************
 	}
 
 	private String connPgServerPreAuth(String orderId, Long amount) {
@@ -267,5 +306,37 @@ public class ReservationServiceImpl implements ReservationService {
 		log.info("paymentInfo: {}", paymentInfo);
 
 		paymentDao.paymentFee(paymentInfo);
+	}
+
+	private void executePunishment(Long reporterId, ReservationDto reservation) {
+		String victimKey = ""; // 피해자
+		String offenderKey = ""; // 가해자
+
+		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
+			victimKey = reservation.getUserPaymentKey();
+			offenderKey = reservation.getAgentPaymentKey();
+		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
+			victimKey = reservation.getAgentPaymentKey();
+			offenderKey = reservation.getUserPaymentKey();
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+
+		// 가해자 위약금 몰수
+		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
+
+		// 피해자는 수수료 없이 전액 반환.
+		pgClient.requestCancel(Map.of("paymentKey", victimKey));
+		Map<String, Object> cancleInfo = new HashMap<>();
+		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
+		cancleInfo.put("amount", 0L);
+		cancleInfo.put("approvedAt", LocalDateTime.now());
+		cancleInfo.put("status", PaymentStatus.CANCELED);
+		paymentDao.paymentFee(cancleInfo);
+
+		// 노쇼로 인한 예약 종료
+		reservationDao.updateStatus(reservation.getReservationId(), ReservationStatus.NO_SHOW);
+		// 다시 매물을 예약 가능 상태로 변경.
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
 	}
 }

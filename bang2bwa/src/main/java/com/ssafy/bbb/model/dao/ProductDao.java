@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
 import com.ssafy.bbb.model.enums.ReservationStatus;
@@ -33,5 +34,8 @@ public interface ProductDao {
 
 	// 매물 상태 변경
 	public Long updateProductStatus(Long productId, ReservationStatus status);
+
+	// 아이디로 매물 위치 정보(위도, 경도) select.
+	public LocationDto findLocationById(Long productId);
 
 }
