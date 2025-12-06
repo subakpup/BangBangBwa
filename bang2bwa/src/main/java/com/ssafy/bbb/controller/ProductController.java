@@ -52,7 +52,7 @@ public class ProductController {
 	}
 
 	/**
-	 * 매물 검색 요청 URL: GET /products/search?keyword=검색어
+	 * 매물 검색 요청 URL: POST /products/search
 	 */
 	@PostMapping("/search")
 	public ApiResponse<List<ProductDto>> searchProduct(@RequestBody ProductSearchDto request) {

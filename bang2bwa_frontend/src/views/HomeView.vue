@@ -31,7 +31,7 @@ const tradeTypeMap = {
 const handleFilterChange = async (filterData) => {
   try {
     const houseType = route.query.type || '';
-    const tradeType = tradeTypeMap[filterData.tradeType];
+    const tradeType = tradeTypeMap[filterData.tradeType] || '전체';
 
     const response = await axios.post('http://localhost:8080/products/search', {
       keyword: filterData.keyword,
@@ -162,7 +162,7 @@ onMounted(() => {
               <p class="text-sm text-gray-600 font-bold">{{ item.name }}</p>
               <p class="text-sm text-gray-500 truncate">{{ item.jibun }}</p>
               <p class="text-xs text-gray-400 mt-1">
-                {{ item.floor }}층 | {{ item.excluUseAr }}㎡ | {{ item.desc }}
+                {{ item.floor }} | {{ item.excluUseAr }}㎡ | {{ item.desc }}
               </p>
             </div>
           </div>
