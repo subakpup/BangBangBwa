@@ -1,6 +1,8 @@
 package com.ssafy.bbb.util;
 
 public class GeometryUtils {
+
+	// Haversine 공식을 이용한 거리 계산.
 	public static double calculateDistance(double latitude1, double longitude1, double latitude2, double longitude2) {
 		double theta = longitude1 - longitude2;
 
