@@ -1,6 +1,7 @@
 package com.ssafy.bbb.model.service;
 
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 
 public interface ReservationService {
@@ -13,4 +14,6 @@ public interface ReservationService {
 	public void reportNoShow(Long reservationId, Long reporterId, LocationDto location);
 
 	public void defendReport(Long reservationId, Long userId, LocationDto location);
+
+	public void executePunishment(Long reporterId, ReservationDto reservation);
 }

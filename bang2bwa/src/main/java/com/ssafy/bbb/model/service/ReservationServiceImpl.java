@@ -14,6 +14,7 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.PaymentDao;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
+import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
@@ -37,7 +38,10 @@ public class ReservationServiceImpl implements ReservationService {
 	private final ProductDao productDao;
 	private final ReservationDao reservationDao;
 	private final PaymentDao paymentDao;
+	private final UserDao userDao;
+
 	private final PgClient pgClient;
+	private final NotificationService notificationService;
 
 	// 예약자 예약 요청
 	@Override
@@ -46,7 +50,6 @@ public class ReservationServiceImpl implements ReservationService {
 		// 1. 매물 조회 및 잠금(동시성 제어)
 		// agent_id, status
 		Map<String, Object> productInfo = productDao.selectProductForUpdate(request.getProductId());
-
 		if (productInfo == null) {
 			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
 		}
@@ -62,9 +65,10 @@ public class ReservationServiceImpl implements ReservationService {
 		Long amount = 10000L;
 		String paymentKey = connPgServerPreAuth(orderId, amount);
 
+		Long agentId = (Long) productInfo.get("agentId");
 		// 4. 예약 정보 저장
 		ReservationDto reservation = ReservationDto.builder() //
-				.agentId((Long) productInfo.get("agentId")) // 중개사 pk
+				.agentId(agentId) // 중개사 pk
 				.productId(request.getProductId()) // 매물 pk
 				.userId(userId) // 예약자 pk
 				.visitDate(request.getVisitDate()) // 예약일
@@ -91,10 +95,21 @@ public class ReservationServiceImpl implements ReservationService {
 		// 6. 매물 상태 변경
 		productDao.updateProductStatus(request.getProductId(), ReservationStatus.PENDING);
 
+		// 7. 중개인에게 알람 발송
+		String agentEmail = userDao.findEmailById(agentId);
+		if (agentEmail != null && !agentEmail.isEmpty()) {
+			StringBuilder message = new StringBuilder();
+			message.append("예약자 ID: ").append(userId).append("\n");
+			message.append("매물 ID: ").append(request.getProductId()).append("\n");
+			message.append("예약 일시: ").append(request.getVisitDate()).append("\n");
+			message.append("예약자의 메세지: \n");
+			message.append(request.getMessage());
+
+			notificationService.sendEmail(agentEmail, "[방방봐] 새로운 예약 요청이 도착했습니다!", message.toString());
+		}
+
 		// *************************************************************************************
-		// todo:
-		// 중개업자에게 메일 전송(등록된 매물에 예약 신청이 들어왔습니다.)
-		// 1시간 내에 중개업자가 승인 하지 않을 시 예약 자동 취소
+		// todo: 1시간 내에 중개업자가 승인 하지 않을 시 예약 자동 취소
 		// *************************************************************************************
 	}
 
@@ -141,10 +156,15 @@ public class ReservationServiceImpl implements ReservationService {
 		// 6. 매물 상태 업데이트
 		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.RESERVED);
 
-		// *************************************************************************************
-		// todo:
-		// 예약자에게 메일 전송(예약 신청이 접수되었습니다.)
-		// *************************************************************************************
+		// 7. 예약자에게 알람 발송
+		String userEmail = userDao.findEmailById(reservation.getUserId());
+		if (userEmail != null && !userEmail.isEmpty()) {
+			StringBuilder message = new StringBuilder();
+			message.append("매물 ID: ").append(reservation.getProductId()).append("\n");
+			message.append("예약 일시: ").append(reservation.getVisitDate()).append("\n");
+
+			notificationService.sendEmail(userEmail, "[방방봐] 예약 요청이 확정 되었습니다!", message.toString());
+		}
 	}
 
 	// 만남 성사
@@ -173,7 +193,7 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.BAD_REQUEST);
 		}
 		// 현재 접근한 유저(예약자 혹은 중개업자)의 confirm 을 'W' -> 'Y' 로 업데이트
-		reservationDao.updateConfirmation(userType, reservationId);
+		reservationDao.updateConfirmation(userType, reservationId, "Y");
 
 		// 다시 reservation을 조회하여 둘 다 조회했는지 확인.
 		ReservationDto updateReservation = reservationDao.findById(reservationId);
@@ -221,12 +241,36 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.FAR_DISTANCE);
 		}
 
+		String userType = "";
+		Long offenderId = 0L;
+		if (reporterId == reservation.getUserId()) {
+			userType = "AGENT";
+			offenderId = reservation.getAgentId();
+		} else if (reporterId == reservation.getAgentId()) {
+			userType = "USER";
+			offenderId = reservation.getUserId();
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+		// 신고당한 유저의 상태를 'W' => 'N'로 업데이트.
+		reservationDao.updateConfirmation(userType, reservationId, "N");
+
 		reservationDao.updateStatus(reservationId, ReservationStatus.REPORTED);
 
-		// *************************************************************************************
-		// todo:
 		// 신고 당한 사람에게 메일 전송(이의제기할 수 있는 링크를 같이 제공 => 억울한 신고를 막기 위함)
-		// 10분동안 이의제기 없을 시 노쇼로 판명 => 집행 실시
+		String offenderEmail = userDao.findEmailById(offenderId);
+		if (offenderEmail != null && !offenderEmail.isEmpty()) {
+			StringBuilder message = new StringBuilder();
+			message.append("신고가 접수되었습니다.\n");
+			// todo: 사이트 링크 제공 할 것(프론트)
+			message.append("이의를 제기하시려면\n").append("[todo: siteLink]");
+			message.append("\n로 접속하세요.");
+
+			notificationService.sendEmail(offenderEmail, "[방방봐]", message.toString());
+		}
+
+		// *************************************************************************************
+		// todo: 10분동안 이의제기 없을 시 노쇼로 판명 => 집행 실시
 		// *************************************************************************************
 	}
 
@@ -256,13 +300,62 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.FAR_DISTANCE);
 		}
 
+		String userType = "";
+		Long reporterId = 0L;
+		if (userId == reservation.getUserId()) {
+			userType = "USER";
+			reporterId = reservation.getAgentId();
+		} else if (userId == reservation.getAgentId()) {
+			userType = "AGENT";
+			reporterId = reservation.getUserId();
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+		// 신고당한 유저의 상태를 'N' => 'W'로 업데이트.
+		reservationDao.updateConfirmation(userType, reservationId, "W");
+
 		// 다시 예약상태를 되돌림.
 		reservationDao.updateStatus(reservationId, ReservationStatus.RESERVED);
 
-		// *************************************************************************************
-		// todo:
-		// 신고한 사람에게 메일 전송(상대방이 근처에 있습니다. 잠시만 기다려주세요.)
-		// *************************************************************************************
+		// 신고한 사람에게 메일 전송
+		String reporterEmail = userDao.findEmailById(reporterId);
+		if (reporterEmail != null && !reporterEmail.isEmpty()) {
+			notificationService.sendEmail(reporterEmail, "[방방봐]", "상대방이 근처에 있습니다. 잠시만 기다려주세요.");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void executePunishment(Long reporterId, ReservationDto reservation) {
+		String victimKey = ""; // 피해자
+		String offenderKey = ""; // 가해자
+
+		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
+			victimKey = reservation.getUserPaymentKey();
+			offenderKey = reservation.getAgentPaymentKey();
+		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
+			victimKey = reservation.getAgentPaymentKey();
+			offenderKey = reservation.getUserPaymentKey();
+		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+			throw new CustomException(ErrorCode.BAD_REQUEST);
+		}
+
+		// 가해자 위약금 몰수
+		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
+
+		// 피해자는 수수료 없이 전액 반환.
+		pgClient.requestCancel(Map.of("paymentKey", victimKey));
+		Map<String, Object> cancleInfo = new HashMap<>();
+		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
+		cancleInfo.put("amount", 0L);
+		cancleInfo.put("approvedAt", LocalDateTime.now());
+		cancleInfo.put("status", PaymentStatus.CANCELED);
+		paymentDao.paymentFee(cancleInfo);
+
+		// 노쇼로 인한 예약 종료
+		reservationDao.updateStatus(reservation.getReservationId(), ReservationStatus.NO_SHOW);
+		// 다시 매물을 예약 가능 상태로 변경.
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
 	}
 
 	private String connPgServerPreAuth(String orderId, Long amount) {
@@ -306,37 +399,5 @@ public class ReservationServiceImpl implements ReservationService {
 		log.info("paymentInfo: {}", paymentInfo);
 
 		paymentDao.paymentFee(paymentInfo);
-	}
-
-	private void executePunishment(Long reporterId, ReservationDto reservation) {
-		String victimKey = ""; // 피해자
-		String offenderKey = ""; // 가해자
-
-		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
-			victimKey = reservation.getUserPaymentKey();
-			offenderKey = reservation.getAgentPaymentKey();
-		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
-			victimKey = reservation.getAgentPaymentKey();
-			offenderKey = reservation.getUserPaymentKey();
-		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
-			throw new CustomException(ErrorCode.BAD_REQUEST);
-		}
-
-		// 가해자 위약금 몰수
-		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
-
-		// 피해자는 수수료 없이 전액 반환.
-		pgClient.requestCancel(Map.of("paymentKey", victimKey));
-		Map<String, Object> cancleInfo = new HashMap<>();
-		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
-		cancleInfo.put("amount", 0L);
-		cancleInfo.put("approvedAt", LocalDateTime.now());
-		cancleInfo.put("status", PaymentStatus.CANCELED);
-		paymentDao.paymentFee(cancleInfo);
-
-		// 노쇼로 인한 예약 종료
-		reservationDao.updateStatus(reservation.getReservationId(), ReservationStatus.NO_SHOW);
-		// 다시 매물을 예약 가능 상태로 변경.
-		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
 	}
 }

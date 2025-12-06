@@ -57,4 +57,13 @@ public class ReservationController {
 
 		return ApiResponse.successWithNoContent("신고가 접수되었습니다.");
 	}
+	
+	@PostMapping("{reservationId}/defend")
+	public ApiResponse<String> defendNoShow(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long userId, // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+			@RequestBody LocationDto curLocation) { 
+		reservationService.defendReport(reservationId, userId, curLocation);
+
+		return ApiResponse.successWithNoContent("매물 근처임이 확인되었습니다.");
+	}
 }

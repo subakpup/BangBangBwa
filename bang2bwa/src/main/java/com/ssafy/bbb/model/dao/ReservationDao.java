@@ -16,8 +16,9 @@ public interface ReservationDao {
 	public void reservationAccept(@Param("reservationId") Long reservationId,
 			@Param("agentPaymentKey") String agentPaymentKey, @Param("status") ReservationStatus status);
 
-	// 예약 장소 나왔음을 확인
-	public void updateConfirmation(@Param("type") String type, @Param("reservationId") Long reservationId);
+	// 유저의 상태를 변경 => Y: 정상적으로 나옴, N: 노쇼 신고가 접수됨.
+	public void updateConfirmation(@Param("type") String type, @Param("reservationId") Long reservationId,
+			@Param("status") String status);
 
 	public void updateStatus(@Param("reservationId") Long reservationId, @Param("status") ReservationStatus status);
 }
