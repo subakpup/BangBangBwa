@@ -1,8 +1,3 @@
-<script setup>
-import { RouterLink } from 'vue-router'
-import { Home } from 'lucide-vue-next'
-</script>
-
 <template>
   <header class="bg-white border-b border-accent h-16 flex items-center justify-between px-6 shadow-sm z-20">
     <div class="flex items-center gap-8">
@@ -26,3 +21,8 @@ import { Home } from 'lucide-vue-next'
     </div>
   </header>
 </template>
+
+<script setup>
+import { RouterLink } from 'vue-router'
+import { Home } from 'lucide-vue-next'
+</script>

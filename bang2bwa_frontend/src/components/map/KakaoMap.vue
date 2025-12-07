@@ -1,3 +1,7 @@
+<template>
+    <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
+</template>
+
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 
@@ -76,7 +80,3 @@ onMounted(() => {
 });
 
 </script>
-
-<template>
-    <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
-</template>
