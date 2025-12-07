@@ -30,7 +30,7 @@
 const props = defineProps(['items']); // productList를 받음
 const emit = defineEmits(['item-click']); // 클릭 시 부모에게 알림
 
-// 2. 가격 포맷팅 함수
+// 가격 포맷팅 함수
 const formatPrice = (item) => {
   const type = item.tradeType; 
   let price = 0;
@@ -65,7 +65,7 @@ const formatPrice = (item) => {
   }
 };
 
-// 매물 타입 한글 변환 맵
+// 매물 타입
 const typeMap = {
   'APART': '아파트',
   'ONEROOM': '원룸',
