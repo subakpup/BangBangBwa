@@ -27,4 +27,7 @@ public class ReservationDto {
 
 	private String userConfirmed; // 예약자가 예약장소에 왔는지 확인
 	private String agentConfirmed; // 중개인이 예약장소에 왔는지 확인
+
+	private LocalDateTime createdAt; // 예약 생성 시간
+	private LocalDateTime reportedAt; // 신고가 접수된 시간
 }

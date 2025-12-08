@@ -39,6 +39,23 @@ public class ReservationController {
 
 		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
+	
+	@PostMapping("{reservationId}/reject")
+	public ApiResponse<String> rejectResevation(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long userId, // 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+			@RequestBody String rejectResone) {
+		reservationService.rejectReservation(reservationId, userId, rejectResone);
+		
+		return ApiResponse.successWithNoContent("예약을 거절하였습니다.");
+	}
+	
+	@PostMapping("{reservationId}/cancel")
+	public ApiResponse<String> cancleResevation(@PathVariable Long reservationId,
+			@RequestHeader("user-id") Long userId) {// 임시로 userId header에서 가져오기 => 로그인 구현 후 변경.
+		reservationService.cancelReservation(reservationId, userId);
+		
+		return ApiResponse.successWithNoContent("예약을 취소하였습니다.");
+	}
 
 	@PostMapping("{reservationId}/confirm")
 	public ApiResponse<String> confirmReservation(@PathVariable Long reservationId,

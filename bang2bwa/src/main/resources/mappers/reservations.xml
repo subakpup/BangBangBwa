@@ -35,4 +35,27 @@
   		set status=#{status}
   		where reservation_id=#{reservationId};
   	</update>
+  	
+  	<update id="report">
+  		update reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = 'N', </if>
+  			<if test="type == 'AGENT'">agent_confirmed = 'N',</if>
+  			status=#{status},
+  			reported_at=#{reportedAt},
+  		</set>
+  		where reservation_id=#{reservationId};
+  	</update>
+  	
+  	<select id="findExpiredPendingReservations">
+  		select * from reservations
+  		where status = 'PENDING'
+  		and	created_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 1 HOUR);
+  	</select>
+  	
+  	<select id="findExpiredReportedReservations">
+  		select * from reservations
+  		where status = 'REPORTED'
+  		and	reported_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 10 MINUTE);
+  	</select>
   </mapper>

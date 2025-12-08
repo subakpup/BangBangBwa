@@ -7,7 +7,11 @@ import com.ssafy.bbb.model.dto.ReservationRequestDto;
 public interface ReservationService {
 	public void requestReservation(ReservationRequestDto request, Long userId);
 
+	public void cancelReservation(Long reservationId, Long userId);
+
 	public void acceptReservation(Long reservationId, Long agentId);
+
+	public void rejectReservation(Long reservationId, Long agentId, String cancelReason);
 
 	public void confirmMeeting(Long reservationId, Long requestUserId, LocationDto location);
 
@@ -15,5 +19,7 @@ public interface ReservationService {
 
 	public void defendReport(Long reservationId, Long userId, LocationDto location);
 
-	public void executePunishment(Long reporterId, ReservationDto reservation);
+	public void processAutoCancel(ReservationDto reservation);
+
+	public void processAutoPunishment(ReservationDto reservation);
 }

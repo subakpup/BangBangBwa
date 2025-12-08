@@ -1,6 +1,8 @@
 package com.ssafy.bbb.model.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -107,10 +109,96 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(agentEmail, "[방방봐] 새로운 예약 요청이 도착했습니다!", message.toString());
 		}
+	}
 
-		// *************************************************************************************
-		// todo: 1시간 내에 중개업자가 승인 하지 않을 시 예약 자동 취소
-		// *************************************************************************************
+	// 예약자 사정으로 인한 예약 취소
+	// 2주 전 => 전액 환불
+	// 1주 전 => 50% 환불
+	// 그 이후 => 30% 환불
+	@Override
+	@Transactional
+	public void cancelReservation(Long reservationId, Long userId) {
+		// 1. 예약 정보 조회
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		if (reservation == null) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		// 2. 상태 검증
+		if (reservation.getUserId() != userId) {
+			throw new CustomException(ErrorCode.RESERVATION_UNAUTORIZATION);
+		}
+		if (reservation.getStatus() != ReservationStatus.RESERVED
+				&& reservation.getStatus() != ReservationStatus.PENDING) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_RESERVED);
+		}
+
+		// 3-1. 중개업자 가승인 요청 해제(수수료 0원)
+		if (reservation.getAgentPaymentKey() != null && !reservation.getAgentPaymentKey().equals("")) {
+			connPgServerCancel(reservation.getAgentPaymentKey());
+		}
+
+		// 3-2. 예약일과의 시간을 계산하여 수수료 지불
+		long diff = ChronoUnit.DAYS.between(LocalDate.now(), reservation.getVisitDate().toLocalDate());
+		if (diff > 14)
+			connPgServerCancel(reservation.getUserPaymentKey());
+		else {
+			long penalty = (diff > 7) ? 5000L : 7000L;
+			connPgServerCapture(reservation.getUserPaymentKey(), penalty, PaymentStatus.PAID);
+		}
+
+		// 4. 예약 상태 업데이트
+		reservationDao.reservationAccept(reservationId, "", ReservationStatus.QUIT);
+
+		// 5. 매물 상태 업데이트
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
+
+		// 6. 예약자에게 알람 발송
+		String userEmail = userDao.findEmailById(reservation.getUserId());
+		String agentEmail = userDao.findEmailById(reservation.getAgentId());
+		if (userEmail != null && !userEmail.isEmpty())
+			notificationService.sendEmail(userEmail, "[방방봐] 예약이 취소되었습니다.", "");
+		if (agentEmail != null && !agentEmail.isEmpty())
+			notificationService.sendEmail(agentEmail, "[방방봐] 사용자의 요청으로 예약이 취소되었습니다.", "");
+	}
+
+	// 중개업자 예약 거절
+	@Override
+	@Transactional
+	public void rejectReservation(Long reservationId, Long agentId, String cancelReason) {
+		// 1. 예약 정보 조회
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		if (reservation == null) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
+		}
+
+		// 2. 상태 검증
+		if (reservation.getAgentId() != agentId) {
+			throw new CustomException(ErrorCode.RESERVATION_UNAUTORIZATION);
+		}
+
+		if (reservation.getStatus() != ReservationStatus.PENDING) {
+			throw new CustomException(ErrorCode.RESERVATION_NOT_PENDING);
+		}
+
+		// 3. 예약자 가승인 요청 해제(수수료 0원)
+		String userKey = reservation.getUserPaymentKey();
+		connPgServerCancel(userKey);
+
+		// 4. 예약 상태 업데이트
+		reservationDao.reservationAccept(reservationId, "", ReservationStatus.QUIT);
+
+		// 5. 매물 상태 업데이트
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
+
+		// 6. 예약자에게 알람 발송
+		String userEmail = userDao.findEmailById(reservation.getUserId());
+		if (userEmail != null && !userEmail.isEmpty()) {
+			StringBuilder message = new StringBuilder();
+			message.append("취소 사유: ").append(cancelReason).append("\n");
+
+			notificationService.sendEmail(userEmail, "[방방봐] 예약 요청이 거절되었습니다.", message.toString());
+		}
 	}
 
 	// 중개업자 예약 승인
@@ -253,9 +341,7 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.BAD_REQUEST);
 		}
 		// 신고당한 유저의 상태를 'W' => 'N'로 업데이트.
-		reservationDao.updateConfirmation(userType, reservationId, "N");
-
-		reservationDao.updateStatus(reservationId, ReservationStatus.REPORTED);
+		reservationDao.report(reservationId, userType, ReservationStatus.REPORTED, LocalDateTime.now());
 
 		// 신고 당한 사람에게 메일 전송(이의제기할 수 있는 링크를 같이 제공 => 억울한 신고를 막기 위함)
 		String offenderEmail = userDao.findEmailById(offenderId);
@@ -268,10 +354,6 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(offenderEmail, "[방방봐]", message.toString());
 		}
-
-		// *************************************************************************************
-		// todo: 10분동안 이의제기 없을 시 노쇼로 판명 => 집행 실시
-		// *************************************************************************************
 	}
 
 	@Override
@@ -326,36 +408,57 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Override
 	@Transactional
-	public void executePunishment(Long reporterId, ReservationDto reservation) {
-		String victimKey = ""; // 피해자
-		String offenderKey = ""; // 가해자
+	public void processAutoCancel(ReservationDto reservation) {
+		String userKey = reservation.getUserPaymentKey();
+		connPgServerCancel(userKey);
 
-		if (reporterId == reservation.getUserId()) { // 중개인이 노쇼한 경우
-			victimKey = reservation.getUserPaymentKey();
-			offenderKey = reservation.getAgentPaymentKey();
-		} else if (reporterId == reservation.getAgentId()) { // 예약자가 노쇼한 경우
-			victimKey = reservation.getAgentPaymentKey();
-			offenderKey = reservation.getUserPaymentKey();
-		} else { // userId, agentId와 둘다 다르다면, 예외를 반환
+		reservationDao.reservationAccept(reservation.getReservationId(), "", ReservationStatus.QUIT);
+		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
+
+		// 6. 예약자에게 알람 발송
+		String userEmail = userDao.findEmailById(reservation.getUserId());
+		if (userEmail != null && !userEmail.isEmpty()) {
+			notificationService.sendEmail(userEmail, "[방방봐] 시간 초과로 예약이 취소되었습니다.", "중개인이 1시간 내에 응답하지 않았습니다.");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void processAutoPunishment(ReservationDto reservation) {
+		Long offenderId = 0L;
+
+		if (reservation.getAgentConfirmed().equals("N")) {
+			offenderId = reservation.getAgentId();
+		} else if (reservation.getUserConfirmed().equals("N")) {
+			offenderId = reservation.getUserId();
+		} else {
 			throw new CustomException(ErrorCode.BAD_REQUEST);
 		}
 
-		// 가해자 위약금 몰수
+		String victimKey = ""; // 피해자
+		String offenderKey = ""; // 가해자
+
+		if (offenderId.equals(reservation.getAgentId())) {
+			offenderKey = reservation.getAgentPaymentKey();
+			victimKey = reservation.getUserPaymentKey();
+		} else {
+			offenderKey = reservation.getUserPaymentKey();
+			victimKey = reservation.getAgentPaymentKey();
+		}
+
+		// 1. 가해자 위약금 몰수 (10,000원)
 		connPgServerCapture(offenderKey, 10000L, PaymentStatus.PAID);
 
-		// 피해자는 수수료 없이 전액 반환.
-		pgClient.requestCancel(Map.of("paymentKey", victimKey));
-		Map<String, Object> cancleInfo = new HashMap<>();
-		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(victimKey));
-		cancleInfo.put("amount", 0L);
-		cancleInfo.put("approvedAt", LocalDateTime.now());
-		cancleInfo.put("status", PaymentStatus.CANCELED);
-		paymentDao.paymentFee(cancleInfo);
+		// 2. 피해자 환불 (0원)
+		connPgServerCancel(victimKey);
 
-		// 노쇼로 인한 예약 종료
+		// 3. 상태 변경 (NO_SHOW)
 		reservationDao.updateStatus(reservation.getReservationId(), ReservationStatus.NO_SHOW);
-		// 다시 매물을 예약 가능 상태로 변경.
 		productDao.updateProductStatus(reservation.getProductId(), ReservationStatus.AVAILABLE);
+
+		// 4. 알림 발송 (가해자에게 통보)
+		String offenderEmail = userDao.findEmailById(offenderId);
+		notificationService.sendEmail(offenderEmail, "[방방봐] 노쇼 처벌이 집행되었습니다.", "이의제기 시간이 경과하여 보증금이 몰수되었습니다.");
 	}
 
 	private String connPgServerPreAuth(String orderId, Long amount) {
@@ -399,5 +502,17 @@ public class ReservationServiceImpl implements ReservationService {
 		log.info("paymentInfo: {}", paymentInfo);
 
 		paymentDao.paymentFee(paymentInfo);
+	}
+
+	private void connPgServerCancel(String paymentKey) {
+		pgClient.requestCancel(Map.of("paymentKey", paymentKey));
+
+		Map<String, Object> cancleInfo = new HashMap<>();
+		cancleInfo.put("orderId", paymentDao.findOrderIdByPaymentKey(paymentKey));
+		cancleInfo.put("amount", 0L);
+		cancleInfo.put("approvedAt", LocalDateTime.now());
+		cancleInfo.put("status", PaymentStatus.CANCELED);
+
+		paymentDao.paymentFee(cancleInfo);
 	}
 }

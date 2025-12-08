@@ -1,5 +1,8 @@
 package com.ssafy.bbb.model.dao;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.ssafy.bbb.model.dto.ReservationDto;
@@ -21,4 +24,11 @@ public interface ReservationDao {
 			@Param("status") String status);
 
 	public void updateStatus(@Param("reservationId") Long reservationId, @Param("status") ReservationStatus status);
+
+	public void report(@Param("reservationId") Long reservationId, @Param("type") String userType,
+			@Param("status") ReservationStatus status, @Param("reportedAt") LocalDateTime reportedAt);
+
+	public List<ReservationDto> findExpiredPendingReservations();
+
+	public List<ReservationDto> findExpiredReportedReservations();
 }
