@@ -29,10 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductServiceImpl implements ProductService {
 	private final ProductDao productDao;
 	private final FileStore fileStore;
+	private final GeocodingService geocodingService;
 
 	@Override
 	@Transactional
 	public Long create(ProductDto product, List<MultipartFile> files) {
+		// 지번 주소를 이용해 좌표 설정
+		setLatLng(product);
+
 		// 매물 정보 DB 저장
 		productDao.save(product);
 		Long productId = product.getProductId();
@@ -45,6 +49,9 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	public ProductDto modify(Long productId, ProductDto product, List<MultipartFile> newfiles) {
+		// 지번 주소를 이용해 좌표 설정
+		setLatLng(product);
+
 		// 매물 정보 수정
 		productDao.update(productId, product);
 
@@ -118,5 +125,20 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public List<ProductDto> search(ProductSearchDto request) {
 		return productDao.search(request);
+	}
+
+	// 지번 주소를 이용해 좌표(위도, 경도) 설정하는 메서드
+	private void setLatLng(ProductDto product) {
+		String address = product.getSggNm() + " " + product.getUmdNm() + " " + product.getJibun();
+
+		System.out.println(address);
+
+		if (address != null && !address.trim().isEmpty()) {
+			double[] coords = geocodingService.getCoordinate(address);
+
+			if (coords[0] != 0.0 && coords[1] != 0.0) {
+				product.setLatLng(coords[0], coords[1]);
+			}
+		}
 	}
 }

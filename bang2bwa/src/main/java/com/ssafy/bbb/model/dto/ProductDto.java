@@ -21,6 +21,8 @@ public class ProductDto {
 	private @NonNull String houseType; // 매물 종류
 	private @NonNull String tradeType; // 거래 종류
 
+//	private @NonNull ReservationStatus status; // 예약 상태
+
 	private String name; // 건물 이름
 	private Integer buildYear; // 건축 년도
 	private Double excluUseAr; // 전용 면적
@@ -36,9 +38,14 @@ public class ProductDto {
 	private Long deposit; // 보증금
 	private Integer monthlyRent; // 월세
 
-	private String sggCd; // 시군구 코드 (fk)
-	private String umdNm; // 동코드 (fk)
+	private String sggNm; // 시군구 이름 (fk)
+	private String umdNm; // 법정동 (fk)
 	private Long agentId; // 공인중개사 (fk)
+
+	private Double latitude; // 위도
+	private Double longitude; // 경도
+
+	private String desc; // 상세 내용
 
 	private List<ProductImageDto> images; // 매물 사진 리스트
 	private List<Long> deleteImageIds; // (수정시 사용) 삭제할 이미지의 아이디 리스트
@@ -46,5 +53,11 @@ public class ProductDto {
 	// 이미지를 설정할 setter 메서드
 	public void setImages(List<ProductImageDto> images) {
 		this.images = images;
+	}
+
+	// 위도, 경도 setter 메서드
+	public void setLatLng(Double latitude, Double longitude) {
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 }
