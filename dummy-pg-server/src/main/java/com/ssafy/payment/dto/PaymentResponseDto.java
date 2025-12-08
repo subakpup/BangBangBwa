@@ -1,5 +1,7 @@
 package com.ssafy.payment.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +17,7 @@ public class PaymentResponseDto {
 	public static class paymentReceipt {
 		private String paymentKey;
 		private String orderId;
-		private String approvedAt; // 승인 시간
+		private LocalDateTime approvedAt; // 승인 시간
 		private String method; // 결제 수단 (CARD, CASH(통장 입금 등))
 	}
 

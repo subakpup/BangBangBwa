@@ -2,6 +2,10 @@ package com.ssafy.bbb.model.dto;
 
 import java.util.List;
 
+import com.ssafy.bbb.model.enums.HouseType;
+import com.ssafy.bbb.model.enums.ReservationStatus;
+import com.ssafy.bbb.model.enums.TradeType;
+
 import io.micrometer.common.lang.NonNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,8 +22,9 @@ public class ProductDto {
 	private Long productId; // pk
 
 	private @NonNull String jibun; // 지번
-	private @NonNull String houseType; // 매물 종류
-	private @NonNull String tradeType; // 거래 종류
+	private @NonNull HouseType houseType; // 매물 종류
+	private @NonNull TradeType tradeType; // 거래 종류
+	private @NonNull ReservationStatus status; // 예약 상태 확인
 
 	private String name; // 건물 이름
 	private Integer buildYear; // 건축 년도

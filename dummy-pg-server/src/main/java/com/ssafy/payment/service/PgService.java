@@ -39,7 +39,7 @@ public class PgService {
 		String paymentKey = "dummy_" + UUID.randomUUID().toString().substring(0, 8);
 
 		Payment payment = Payment.builder().paymentKey(paymentKey) // 결제 key
-				.orderId(request.getOrderId()) // orderId
+				.orderId(request.getOrderId()) // orderId, unique 설정 => 똑같은 주문 번호로 중복 요청이 들어온다면, 거절
 				.amount(request.getAmount()) // 10,000원
 				.type(request.getType()) // DEPOSIT
 				.status("AUTHORIZED") // 상태: 가승인(돈 안 나감)

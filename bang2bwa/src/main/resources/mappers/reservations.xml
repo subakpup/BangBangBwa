@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.ReservationDao">
+  	<select id="findById">
+  		select * from reservations
+  		where reservation_id=#{reservationId};
+  	</select>
+  
+  	<insert id="reservationUser" useGeneratedKeys="true" keyProperty="reservationId">
+  		insert into reservations(agent_id, product_id, user_id, visit_date, message, status, deposit_amount, user_payment_key)
+  		values(#{agentId}, #{productId}, #{userId}, #{visitDate}, #{message}, #{status}, #{depositAmount}, #{userPaymentKey});
+  	</insert>
+  	
+  	<update id="reservationAccept">
+  		update reservations
+  		set
+  			agent_payment_key=#{agentPaymentKey},
+  			status=#{status}
+  		where reservation_id=#{reservationId};
+  	</update>
+  	
+  	<update id="updateConfirmation">
+  		update reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = #{status}, </if>
+  			<if test="type == 'AGENT'">agent_confirmed = #{status},</if>
+  		</set>
+  		where reservation_id = #{reservationId};
+  	</update>
+  	
+  	<update id="updateStatus">
+  		update reservations
+  		set status=#{status}
+  		where reservation_id=#{reservationId};
+  	</update>
+  	
+  	<update id="report">
+  		update reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = 'N', </if>
+  			<if test="type == 'AGENT'">agent_confirmed = 'N',</if>
+  			status=#{status},
+  			reported_at=#{reportedAt},
+  		</set>
+  		where reservation_id=#{reservationId};
+  	</update>
+  	
+  	<select id="findExpiredPendingReservations">
+  		select * from reservations
+  		where status = 'PENDING'
+  		and	created_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 1 HOUR);
+  	</select>
+  	
+  	<select id="findExpiredReportedReservations">
+  		select * from reservations
+  		where status = 'REPORTED'
+  		and	reported_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 10 MINUTE);
+  	</select>
+  </mapper>

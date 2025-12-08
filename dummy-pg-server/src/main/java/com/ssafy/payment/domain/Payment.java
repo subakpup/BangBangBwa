@@ -25,7 +25,7 @@ public class Payment {
 	@Column(unique = true, nullable = false)
 	private String paymentKey; // 거래의 식별자
 
-	@Column(nullable = false)
+	@Column(unique = true, nullable = false)
 	private String orderId; // 가맹점에서 보낸 주문 번호
 
 	// 가승인 금액과 실제 수수료를 분리해서 저장함.
