@@ -22,7 +22,7 @@
   	
   	<select id="findOrderIdByPaymentKey">
   		select order_id from payments
-  		where payment_key=#{paymentKey};
+  		where pg_payment_key=#{paymentKey};
   	</select>
   	
   </mapper>
