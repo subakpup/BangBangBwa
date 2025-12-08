@@ -1,8 +1,3 @@
-<script setup>
-import { RouterLink } from 'vue-router'
-import { Home } from 'lucide-vue-next'
-</script>
-
 <template>
   <header class="bg-white border-b border-accent h-16 flex items-center justify-between px-6 shadow-sm z-20">
     <div class="flex items-center gap-8">
@@ -11,9 +6,9 @@ import { Home } from 'lucide-vue-next'
         </RouterLink>
         
         <nav class="hidden md:flex items-center gap-6 text-gray-600 font-medium">
-            <RouterLink :to="{ path: '/', query: { type: 'apt' }}" class="hover:text-primary transition">아파트</RouterLink>
-            <RouterLink :to="{ path: '/', query: { type: 'oneroom' }}" class="hover:text-primary transition">원룸</RouterLink>
-            <RouterLink :to="{ path: '/', query: { type: 'officetel' }}" class="hover:text-primary transition">오피스텔</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'APART' }}" class="hover:text-primary transition">아파트</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'ONEROOM' }}" class="hover:text-primary transition">원룸</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'OFFICETEL' }}" class="hover:text-primary transition">오피스텔</RouterLink>
             
             <RouterLink to="/notice" class="hover:text-primary transition">공지사항</RouterLink>
             <RouterLink to="/board" class="hover:text-primary transition">게시판</RouterLink>
@@ -26,3 +21,8 @@ import { Home } from 'lucide-vue-next'
     </div>
   </header>
 </template>
+
+<script setup>
+import { RouterLink } from 'vue-router'
+import { Home } from 'lucide-vue-next'
+</script>

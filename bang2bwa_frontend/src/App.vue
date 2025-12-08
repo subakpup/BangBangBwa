@@ -1,8 +1,3 @@
-<script setup>
-import { RouterView } from 'vue-router'
-import TheHeader from '@/components/common/TheHeader.vue'
-</script>
-
 <template>
   <div class="h-screen flex flex-col overflow-hidden font-sans bg-bg">
     
@@ -14,3 +9,8 @@ import TheHeader from '@/components/common/TheHeader.vue'
 
   </div>
 </template>
+
+<script setup>
+import { RouterView } from 'vue-router'
+import TheHeader from '@/components/common/TheHeader.vue'
+</script>
