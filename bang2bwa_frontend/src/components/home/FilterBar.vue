@@ -1,63 +1,3 @@
-<script setup>
-
-import { ref, computed } from 'vue';
-import { Search, Sparkles, ChevronDown } from 'lucide-vue-next';
-
-// HomeView에게 변경된 값을 알리기 위한 이벤트
-const emit = defineEmits(['filter-change', 'open-ai']);
-
-// 상태 변수
-const searchQuery = ref('');    // 검색어
-const tradeType = ref('전체'); // 월세/전세/매매
-const houseType = ref('');   // 매물 종류
-const floorOption = ref('전체'); // 층수
-
-// 전용면적
-const isAreaOpen = ref(false);  // 드롭다운 열림/닫힘 상태
-const areaValue = ref(0);       // 슬라이더 값
-
-// 슬라이더 값에 따른 텍스트 매핑
-const areaLabels = [
-    '전체 면적',
-    '33㎡ 이하 (약 10평)',
-    '33㎡ ~ 66㎡ (10~20평)',
-    '66㎡ ~ 99㎡ (20~30평)',
-    '99㎡ 이상 (30평대~)'
-];
-
-// 선택된 라벨
-const currentAreaLabel = computed(() => areaLabels[areaValue.value]);
-
-const toggleAreaDropdown = () => {
-    isAreaOpen.value = !isAreaOpen.value;
-};
-
-// 통합 변경
-const emitChange = () => {
-    emit('filter-change', {
-        keyword: searchQuery.value,
-        houseType: houseType.value, // 아파트, 오피스텔, 원룸
-        tradeType: tradeType.value, // 매매, 전세, 월세
-        floor: floorOption.value, // 층
-        excluUseAr: currentAreaLabel.value, // 전용 면적
-    });
-};
-
-const resetFilter = () => {
-    searchQuery.value = '';
-    tradeType.value = '전체';
-    houseType.value = '전체';
-    floorOption.value = '전체';
-    areaValue.value = 0; // 슬라이더도 0(전체)으로
-    isAreaOpen.value = false; // 열려있다면 닫기
-}
-
-defineExpose({
-    resetFilter
-});
-
-</script>
-
 <template>
 
     <div class="bg-bg border-b border-accent px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-20">
@@ -129,3 +69,63 @@ defineExpose({
         </button>
     </div>
 </template>
+
+<script setup>
+
+import { ref, computed } from 'vue';
+import { Search, Sparkles, ChevronDown } from 'lucide-vue-next';
+
+// HomeView에게 변경된 값을 알리기 위한 이벤트
+const emit = defineEmits(['filter-change', 'open-ai']);
+
+// 상태 변수
+const searchQuery = ref('');    // 검색어
+const tradeType = ref('전체'); // 월세/전세/매매
+const houseType = ref('');   // 매물 종류
+const floorOption = ref('전체'); // 층수
+
+// 전용면적
+const isAreaOpen = ref(false);  // 드롭다운 열림/닫힘 상태
+const areaValue = ref(0);       // 슬라이더 값
+
+// 슬라이더 값에 따른 텍스트 매핑
+const areaLabels = [
+    '전체 면적',
+    '33㎡ 이하 (약 10평)',
+    '33㎡ ~ 66㎡ (10~20평)',
+    '66㎡ ~ 99㎡ (20~30평)',
+    '99㎡ 이상 (30평대~)'
+];
+
+// 선택된 라벨
+const currentAreaLabel = computed(() => areaLabels[areaValue.value]);
+
+const toggleAreaDropdown = () => {
+    isAreaOpen.value = !isAreaOpen.value;
+};
+
+// 통합 변경
+const emitChange = () => {
+    emit('filter-change', {
+        keyword: searchQuery.value,
+        houseType: houseType.value, // 아파트, 오피스텔, 원룸
+        tradeType: tradeType.value, // 매매, 전세, 월세
+        floor: floorOption.value, // 층
+        excluUseAr: currentAreaLabel.value, // 전용 면적
+    });
+};
+
+const resetFilter = () => {
+    searchQuery.value = '';
+    tradeType.value = '전체';
+    houseType.value = '전체';
+    floorOption.value = '전체';
+    areaValue.value = 0; // 슬라이더도 0(전체)으로
+    isAreaOpen.value = false; // 열려있다면 닫기
+}
+
+defineExpose({
+    resetFilter
+});
+
+</script>
