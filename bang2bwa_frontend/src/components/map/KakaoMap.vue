@@ -11,6 +11,7 @@ const emit = defineEmits(['marker-click']); // 마커 클릭 이벤트
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
 const markers = ref([]); // 마커 배열
+const infraMarkers = ref([]); // 인프라 마커들 담을 배열
 
 // 지도 초기 설정
 const initMap = () => {
@@ -92,8 +93,69 @@ const moveToCenter = (lat, lng) => {
     mapInstance.value.panTo(moveLatLng); // 지도 이동(panTo: 이동 애니메이션)
 };
 
+// 인프라 검색 함수
+const searchInfrastructure = (categoryCode, lat, lng) => {
+    // 기존 인프라 마커 초기화
+    clearInfraMarkers();
+
+    if (!window.kakao || !window.kakao.maps.services) {
+        console.error("services 라이브러리가 로드되지 않았습니다.");
+        return;
+    }
+
+    // 장소 검색 객체 생성
+    const ps = new window.kakao.maps.services.Places(mapInstance.value);
+
+    // 검색 옵션 (반경 500m, 중심 좌표 설정)
+    const options = {
+        location: new window.kakao.maps.LatLng(lat, lng),
+        radius: 500,
+        sort: window.kakao.maps.services.SortBy.DISTANCE // 거리순 정렬
+    }
+
+    // 카테고리로 검색 실행
+    ps.categorySearch(categoryCode, (data, status, _pagination) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+            displayInfraMarkers(data);
+        } else {
+            alert("주변에 해당 시설이 없습니다.");
+        }
+    }, options);
+};
+
+// 인프라 마커 표시 함수
+const displayInfraMarkers = (places) => {
+    places.forEach(place => {
+        const markerPosition = new window.kakao.maps.LatLng(place.y, place.x);
+
+        const marker = new window.kakao.maps.Marker({
+            position: markerPosition,
+            map: mapInstance.value,
+            title: place.plcae_name // 마우스 올리면 이름
+            // image: // 인프라 전용 이미지
+        });
+
+        const infowindow = new window.kakao.maps.InfoWindow({
+            content: `<div style="padding:5px;font-size:12px;">${place.place_name}</div>`
+        });
+
+        window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(mapInstance.value, marker));
+        window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
+
+        infraMarkers.value.push(marker);
+    })
+}
+
+// 인프라 마커 지우는 함수
+const clearInfraMarkers = () => {
+    infraMarkers.value.forEach(marker => marker.setMap(null));
+    infraMarkers.value = [];
+}
+
 defineExpose({
-    moveToCenter
+    moveToCenter,
+    searchInfrastructure,
+    clearInfraMarkers
 });
 
 watch(() => props.items, (newItems) => {

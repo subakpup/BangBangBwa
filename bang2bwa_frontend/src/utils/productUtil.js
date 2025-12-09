@@ -52,3 +52,13 @@ export const formatPrice = (item) => {
     return `월세 ${formattedPrice} / ${formattedRent}`;
   }
 };
+
+export const infraCategories = [
+  { code: "MT1", name: "대형마트" },
+  { code: "CS2", name: "편의점" },
+  { code: "SC4", name: "학교" },
+  { code: "SW8", name: "지하철" },
+  { code: "BK9", name: "은행" },
+  { code: "CE7", name: "카페" },
+  { code: "OL7", name: "주유소" },
+];
