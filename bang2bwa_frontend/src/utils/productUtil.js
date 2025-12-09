@@ -1,3 +1,5 @@
+import { TrainFront, Bus, Store, School, ShoppingCart, Hospital, Pill, Shirt, Siren, Trees } from 'lucide-vue-next';
+
 // 매물 종류 매핑
 export const typeMap = {
   APART: "아파트",
@@ -54,14 +56,14 @@ export const formatPrice = (item) => {
 };
 
 export const infraCategories = [
-    { name: '지하철', code: 'SW8', type: 'category', icon: '🚇' },
-    { name: '버스', keyword: '버스정류장', type: 'keyword', icon: '🚌' },
-    { name: '편의점', code: 'CS2', type: 'category', icon: '🏪' },
-    { name: '학교', code: 'SC4', type: 'category', icon: '🏫' },
-    { name: '대형마트', code: 'MT1', type: 'category', icon: '🛒' },
-    { name: '병원', code: 'HP8', type: 'category', icon: '🏥' },
-    { name: '약국', code: 'PM9', type: 'category', icon: '💊' },
-    { name: '세탁소', keyword: '세탁소', type: 'keyword', icon: '👕' },
-    { name: '치안센터', code: 'PO3', type: 'category', icon: '👮' }, // PO3는 공공기관
-    { name: '공원', keyword: '공원', type: 'keyword', icon: '🌳' },
+    { name: '지하철', code: 'SW8', type: 'category', icon: TrainFront },
+    { name: '버스', keyword: '버스정류장', type: 'keyword', icon: Bus },
+    { name: '편의점', code: 'CS2', type: 'category', icon: Store },
+    { name: '학교', code: 'SC4', type: 'category', icon: School },
+    { name: '대형마트', code: 'MT1', type: 'category', icon: ShoppingCart },
+    { name: '병원', code: 'HP8', type: 'category', icon: Hospital },
+    { name: '약국', code: 'PM9', type: 'category', icon: Pill },
+    { name: '세탁소', keyword: '세탁소', type: 'keyword', icon: Shirt },
+    { name: '치안센터', code: 'PO3', type: 'category', icon: Siren },
+    { name: '공원', keyword: '공원', type: 'keyword', icon: Trees },
 ];
