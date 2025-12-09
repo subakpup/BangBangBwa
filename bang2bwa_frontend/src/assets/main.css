@@ -57,6 +57,22 @@
   justify-content: center;
 }
 
+/* 인프라 툴팁 스타일 (매물 마커와 대비) */
+.infra-tooltip {
+  background-color: white; 
+  color: #ae8b72;
+  padding: 6px 12px;
+  border-radius: 20px; /* 둥근 캡슐형 */
+  border: 2px solid #ae8b72;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @layer components {
   /* 전체 레이아웃 */
   .layout-container {

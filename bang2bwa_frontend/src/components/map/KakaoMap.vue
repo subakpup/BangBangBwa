@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, toRaw } from 'vue';
 import { formatPrice } from '@/utils/productUtil';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
@@ -104,7 +104,8 @@ const searchInfrastructure = (categoryCode, lat, lng) => {
     }
 
     // 장소 검색 객체 생성
-    const ps = new window.kakao.maps.services.Places(mapInstance.value);
+    const rawMap = toRaw(mapInstance.value);
+    const ps = new window.kakao.maps.services.Places(rawMap);
 
     // 검색 옵션 (반경 500m, 중심 좌표 설정)
     const options = {
@@ -125,25 +126,30 @@ const searchInfrastructure = (categoryCode, lat, lng) => {
 
 // 인프라 마커 표시 함수
 const displayInfraMarkers = (places) => {
+    const rawMap = toRaw(mapInstance.value);
+
+    const infowindow = new window.kakao.maps.InfoWindow({ zIndex: 1 });
+
     places.forEach(place => {
-        const markerPosition = new window.kakao.maps.LatLng(place.y, place.x);
+        const position = new window.kakao.maps.LatLng(place.y, place.x);
 
         const marker = new window.kakao.maps.Marker({
-            position: markerPosition,
-            map: mapInstance.value,
-            title: place.plcae_name // 마우스 올리면 이름
-            // image: // 인프라 전용 이미지
+            map: rawMap,
+            position: position,
+            title: place.place_name
         });
 
-        const infowindow = new window.kakao.maps.InfoWindow({
-            content: `<div style="padding:5px;font-size:12px;">${place.place_name}</div>`
+        window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+            infowindow.setContent(`<div class="infra-tooltip">${place.place_name}</div>`);
+            infowindow.open(rawMap, marker);
         });
 
-        window.kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(mapInstance.value, marker));
-        window.kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
+        window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+            infowindow.close();
+        });
 
         infraMarkers.value.push(marker);
-    })
+    });
 }
 
 // 인프라 마커 지우는 함수
