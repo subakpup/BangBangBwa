@@ -1,75 +1,3 @@
-<script setup>
-import { ref, reactive } from 'vue';
-import { Bot, X, Search, Sparkles, Loader2, TrainFront, Bus, Store, School, ShoppingCart, Stethoscope, Pill, Shirt, Siren, Trees } from 'lucide-vue-next'
-
-const props = defineProps(['show']);
-const emit = defineEmits(['close', 'search']); // 이벤트를 보낼 변수
-
-const isAnalyzing = ref(false); // 분석 중 로딩 상태
-
-// 입력 폼 데이터
-const form = reactive({
-    type: '월세',
-    location: '',
-    deposit: { min: 0, max: 5000 },
-    monthly: { min: 0, max: 100},
-    budget: { min: 0, max: 50000},
-    options: [], // 선택된 옵션들
-})
-
-// 옵션 목록
-const optionsList = [
-  { id: 'subway', label: '지하철', icon: TrainFront },
-  { id: 'bus', label: '버스', icon: Bus },
-  { id: 'convenience', label: '편의점', icon: Store },
-  { id: 'school', label: '학교', icon: School },
-  { id: 'mart', label: '대형마트', icon: ShoppingCart },
-  { id: 'hospital', label: '병원', icon: Stethoscope },
-  { id: 'pharmacy', label: '약국', icon: Pill },
-  { id: 'laundry', label: '세탁소', icon: Shirt },
-  { id: 'police', label: '치안센터', icon: Siren },
-  { id: 'park', label: '공원', icon: Trees },
-];
-
-// 옵션 클릭 시 배열에 넣는 함수
-const toggleOption = (id) => {
-    if (form.options.includes(id)) {
-        form.options = form.options.filter(opt => opt !== id);
-    } else {
-        form.options.push(id);
-    }
-};
-
-// 금액 변환 함수
-const formatMoney = (value) => {
-  if (!value || value === 0) return '0원';
-  if (value >= 10000) {
-    const uk = Math.floor(value / 10000);
-    const man = value % 10000;
-    return `${uk}억 ${man > 0 ? man + '천' : ''}`;
-  }
-  return `${value}만`;
-};
-
-// '분석 시작' 버튼 클릭 핸들러
-const handleSearch = () => {
-  if (isAnalyzing.value) return;
-  
-  if (!form.location) {
-    alert('희망 지역을 입력해주세요!');
-    return;
-  }
-
-  isAnalyzing.value = true;
-  
-  setTimeout(() => {
-    isAnalyzing.value = false;
-    emit('search', { ...form });  // 입력 데이터 부모에게 전달
-    emit('close'); // 모달 닫기
-  }, 1500);
-};
-</script>
-
 <template>
   <div v-if="show" class="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
@@ -209,6 +137,68 @@ const handleSearch = () => {
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, reactive } from 'vue';
+import { Bot, X, Search, Sparkles, Loader2, TrainFront, Bus, Store, School, ShoppingCart, Stethoscope, Pill, Shirt, Siren, Trees } from 'lucide-vue-next'
+import { formatMoney } from '@/utils/productUtil';
+
+const props = defineProps(['show']);
+const emit = defineEmits(['close', 'search']); // 이벤트를 보낼 변수
+
+const isAnalyzing = ref(false); // 분석 중 로딩 상태
+
+// 입력 폼 데이터
+const form = reactive({
+    type: '월세',
+    location: '',
+    deposit: { min: 0, max: 5000 },
+    monthly: { min: 0, max: 100},
+    budget: { min: 0, max: 50000},
+    options: [], // 선택된 옵션들
+})
+
+// 옵션 목록
+const optionsList = [
+  { id: 'subway', label: '지하철', icon: TrainFront },
+  { id: 'bus', label: '버스', icon: Bus },
+  { id: 'convenience', label: '편의점', icon: Store },
+  { id: 'school', label: '학교', icon: School },
+  { id: 'mart', label: '대형마트', icon: ShoppingCart },
+  { id: 'hospital', label: '병원', icon: Stethoscope },
+  { id: 'pharmacy', label: '약국', icon: Pill },
+  { id: 'laundry', label: '세탁소', icon: Shirt },
+  { id: 'police', label: '치안센터', icon: Siren },
+  { id: 'park', label: '공원', icon: Trees },
+];
+
+// 옵션 클릭 시 배열에 넣는 함수
+const toggleOption = (id) => {
+    if (form.options.includes(id)) {
+        form.options = form.options.filter(opt => opt !== id);
+    } else {
+        form.options.push(id);
+    }
+};
+
+// '분석 시작' 버튼 클릭 핸들러
+const handleSearch = () => {
+  if (isAnalyzing.value) return;
+  
+  if (!form.location) {
+    alert('희망 지역을 입력해주세요!');
+    return;
+  }
+
+  isAnalyzing.value = true;
+  
+  setTimeout(() => {
+    isAnalyzing.value = false;
+    emit('search', { ...form });  // 입력 데이터 부모에게 전달
+    emit('close'); // 모달 닫기
+  }, 1500);
+};
+</script>
 
 <style scoped>
 </style>

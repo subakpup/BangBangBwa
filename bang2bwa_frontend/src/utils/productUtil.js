@@ -13,7 +13,7 @@ export const tradeTypeMap = {
 };
 
 // 억, 만 단위 포맷팅 함수
-const formatMoney = (amount) => {
+export const formatMoney = (amount) => {
   if (!amount) return "0";
 
   const eok = Math.floor(amount / 100000000);

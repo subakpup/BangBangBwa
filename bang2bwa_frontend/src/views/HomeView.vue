@@ -32,7 +32,7 @@
       </aside>
 
       <div class="flex-1 bg-gray-100 relative z-0">
-        <KakaoMap :items="productList" />
+        <KakaoMap ref="kakaoMapRef" :items="productList" @marker-click="handleItemClick"/>
       </div>
 
     </div>
@@ -60,6 +60,7 @@ const productList = ref([]);      // 매물 리스트
 const showAiModal = ref(false);   // 모달 상태
 const filterBar = ref(null);      // 필터바 상태
 const selectProperty = ref(null); // 선택된 매물
+const kakaoMapRef = ref(null)     // 카카오 맵
 
 // 필터 바 변경 감지
 const handleFilterChange = async (filterData) => {
@@ -109,7 +110,10 @@ const handleAiSearchResult = () => {
 // 매물 클릭 함수
 const handleItemClick = (item) => {
   selectProperty.value = item;
-  // KakaoMapRef.value?.moveTo(item); // 지도 중심 이동
+
+  if (kakaoMapRef.value) {
+    kakaoMapRef.value.moveToCenter(item.latitude, item.longitude);
+  }
 };
 
 // 상세 페이지 뒤로 가기

@@ -7,10 +7,12 @@ import { onMounted, ref, watch } from 'vue';
 import { formatPrice } from '@/utils/productUtil';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
+const emit = defineEmits(['marker-click']); // 마커 클릭 이벤트
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
 const markers = ref([]); // 마커 배열
 
+// 지도 초기 설정
 const initMap = () => {
     const container = mapContainer.value;
     const options = {
@@ -26,6 +28,7 @@ const initMap = () => {
     }
 };
 
+// 마커 설정
 const updateMarkers = (newItems) => {
     // 기존 마커 초기화
     if (markers.value.length > 0) {
@@ -48,16 +51,20 @@ const updateMarkers = (newItems) => {
         const content = document.createElement('div');
         content.className = `custom-overlay`;
 
+        // 마커
         content.innerHTML = `
             <div class="overlay-content">
                 <span class="price">${price}</span>
             </div>
         `;
 
+        // 마커 클릭 이벤트
         content.addEventListener('click', () => {
-            console.log('마커 클릭 이벤트 발생');
+            moveToCenter(item.latitude, item.longitude);
+            emit('marker-click', item);
         });
 
+        // 지도 오버레이
         const customOverlay = new window.kakao.maps.CustomOverlay({
             position: position,
             content: content,
@@ -74,6 +81,20 @@ const updateMarkers = (newItems) => {
         mapInstance.value.setBounds(bounds);
     }
 };
+
+// 매물 선택 시 지도 이동 함수
+const moveToCenter = (lat, lng) => {
+    if (!mapInstance.value || !lat || !lng) return;
+
+    const moveLatLng = new window.kakao.maps.LatLng(lat, lng); // 이동할 좌표
+
+    mapInstance.value.setLevel(4); // 지도 확대 레벨
+    mapInstance.value.panTo(moveLatLng); // 지도 이동(panTo: 이동 애니메이션)
+};
+
+defineExpose({
+    moveToCenter
+});
 
 watch(() => props.items, (newItems) => {
     if (mapInstance.value) {

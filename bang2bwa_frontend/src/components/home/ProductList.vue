@@ -27,48 +27,8 @@
 </template>
 
 <script setup>
+import { formatPrice, typeMap } from '@/utils/productUtil';
+
 const props = defineProps(['items']); // productList를 받음
 const emit = defineEmits(['item-click']); // 클릭 시 부모에게 알림
-
-// 가격 포맷팅 함수
-const formatPrice = (item) => {
-  const type = item.tradeType; 
-  let price = 0;
-  let rent = 0;
-
-  if (type === '매매' || type === 'SALE') {
-    price = item.dealAmount;
-  } else {
-    price = item.deposit; 
-    rent = item.monthlyRent;
-  }
-
-  const formatMoney = (amount) => {
-    if (!amount) return '0';
-    const eok = Math.floor(amount / 100000000);
-    const man = Math.floor((amount % 100000000) / 10000);
-    let result = '';
-    if (eok > 0) result += `${eok}억`;
-    if (man > 0) result += ` ${man.toLocaleString()}`;
-    return result.trim();
-  };
-
-  const formattedPrice = formatMoney(price);
-
-  if (type === '매매' || type === 'SALE') {
-    return `매매 ${formattedPrice}`;
-  } else if (type === '전세' || type === 'LEASE') {
-    return `전세 ${formattedPrice}`;
-  } else {
-    const formattedRent = rent > 0 ? Math.floor(rent / 10000) : 0;
-    return `월세 ${formattedPrice} / ${formattedRent}`;
-  }
-};
-
-// 매물 타입
-const typeMap = {
-  'APART': '아파트',
-  'ONEROOM': '원룸',
-  'OFFICETEL': '오피스텔'
-};
 </script>
