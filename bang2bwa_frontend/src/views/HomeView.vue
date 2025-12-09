@@ -47,6 +47,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+import { tradeTypeMap, typeMap } from '@/utils/productUtil';
 import KakaoMap from '@/components/map/KakaoMap.vue';             // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';          // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';             // AI 모달
@@ -59,20 +60,6 @@ const productList = ref([]);      // 매물 리스트
 const showAiModal = ref(false);   // 모달 상태
 const filterBar = ref(null);      // 필터바 상태
 const selectProperty = ref(null); // 선택된 매물
-
-// URL 파라미터 매핑
-const typeMap = {
-  'APART': '아파트',
-  'ONEROOM': '원룸',
-  'OFFICETEL': '오피스텔'
-};
-
-// 거래 종류 매핑
-const tradeTypeMap = {
-  '매매': 'SALE',
-  '전세': 'LEASE',
-  '월세': 'RENT',
-};
 
 // 필터 바 변경 감지
 const handleFilterChange = async (filterData) => {

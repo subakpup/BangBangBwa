@@ -149,11 +149,16 @@ public class ProductServiceImpl implements ProductService {
 		List<MapResponseDto> markers = new ArrayList<>();
 
 		for (ProductDto product : products) {
-			markers.add(MapResponseDto.builder().productId(product.getProductId()).houseType(product.getHouseType())
-					.tradeType(product.getTradeType()).dealAmount(product.getDealAmount()).deposit(product.getDeposit())
-					.monthlyRent(product.getMonthlyRent()).latitude(product.getLatitude())
-					.longitude(product.getLongitude()).build());
-
+			markers.add(MapResponseDto.builder()
+					.productId(product.getProductId())
+					.houseType(product.getHouseType())
+					.tradeType(product.getTradeType())
+					.dealAmount(product.getDealAmount())
+					.deposit(product.getDeposit())
+					.monthlyRent(product.getMonthlyRent())
+					.latitude(product.getLatitude())
+					.longitude(product.getLongitude())
+					.build());
 		}
 		return markers;
 	}

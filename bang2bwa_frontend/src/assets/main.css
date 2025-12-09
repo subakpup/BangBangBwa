@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 1. 커스텀 스크롤바 */
-.custom-scrollbar::-webkit-scrollbar {
+/* 커스텀 스크롤바 */
+.custom-scrollbar::-webkit-scrollbar { 
   width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -17,7 +17,7 @@
   background: #ae8b72;
 }
 
-/* 2. 카카오맵 인포윈도우 */
+/* 카카오맵 인포윈도우 */
 .custom-infowindow {
   padding: 10px;
   background: white;
@@ -26,6 +26,35 @@
   font-size: 12px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 카카오맵 커스텀 오버레이 (가격표 마커) */
+.custom-overlay {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* 마우스 올렸을 때 효과 */
+.custom-overlay:hover {
+  transform: scale(1.1); /* 1.1배 확대 */
+  z-index: 1000; /* 맨 위로 */
+}
+
+/* 말풍선 본체 */
+.overlay-content {
+  background-color: #ae8b72; 
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px; /* 둥근 캡슐형 */
+  border: 2px solid white;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @layer components {

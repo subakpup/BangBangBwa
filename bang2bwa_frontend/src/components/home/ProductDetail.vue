@@ -155,45 +155,11 @@
 </template>
 
 <script setup>
-import { ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, Share2, UserCircle2, Info } from 'lucide-vue-next';
+import { ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info } from 'lucide-vue-next';
+import { formatPrice, typeMap } from '@/utils/productUtil';
 
 const props = defineProps(['item']);
 const emit = defineEmits(['close']);
-
-// 가격 포맷팅 함수
-const formatPrice = (item) => {
-    const type = item.tradeType;
-    let price = 0;
-    let rent = 0;
-
-    if (type === '매매' || type === 'SALE') {
-        price = item.dealAmount;
-    } else {
-        price = item.deposit;
-        rent = item.monthlyRent;
-    }
-
-    const formatMoney = (amount) => {
-        if (!amount) return '0';
-        const eok = Math.floor(amount / 100000000);
-        const man = Math.floor((amount % 100000000) / 10000);
-        let result = '';
-        if (eok > 0) result += `${eok}억`;
-        if (man > 0) result += ` ${man.toLocaleString()}`;
-        return result.trim();
-    };
-
-    const formattedPrice = formatMoney(price);
-
-    if (type === '매매' || type === 'SALE') {
-        return `매매 ${formattedPrice}`;
-    } else if (type === '전세' || type === 'LEASE') {
-        return `전세 ${formattedPrice}`;
-    } else {
-        const formattedRent = rent > 0 ? Math.floor(rent / 10000) : 0;
-        return `월세 ${formattedPrice} / ${formattedRent}`;
-    }
-};
 
 // 평수 계산
 const formatPyeong = (m2) => {
@@ -207,13 +173,6 @@ const formatFloor = (item) => {
     if (item.aptDong) text = `${item.aptDong} / ${text}`;
     return text;
 }
-
-// 매물 타입
-const typeMap = {
-    'APART': '아파트',
-    'ONEROOM': '원룸',
-    'OFFICETEL': '오피스텔'
-};
 </script>
 
 <style lang="scss" scoped></style>

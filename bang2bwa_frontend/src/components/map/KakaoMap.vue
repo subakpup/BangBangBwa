@@ -4,6 +4,7 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+import { formatPrice } from '@/utils/productUtil';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
 const mapContainer = ref(null); // 지도를 담을 div
@@ -42,10 +43,16 @@ const updateMarkers = (newItems) => {
         if (!item.latitude || !item.longitude) return; // 좌표 없는 데이터는 패스
 
         const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
+        const price = formatPrice(item); // 마커 내용(가격)
 
         const content = document.createElement('div');
-        content.className = `price-label`;
-        content.innerHTML = `<span class="price-text">${item.name}</span><span class="arrow"></span>`
+        content.className = `custom-overlay`;
+
+        content.innerHTML = `
+            <div class="overlay-content">
+                <span class="price">${price}</span>
+            </div>
+        `;
 
         content.addEventListener('click', () => {
             console.log('마커 클릭 이벤트 발생');
@@ -54,7 +61,7 @@ const updateMarkers = (newItems) => {
         const customOverlay = new window.kakao.maps.CustomOverlay({
             position: position,
             content: content,
-            yAnchor: 1
+            yAnchor: 1.5
         });
 
         customOverlay.setMap(mapInstance.value);
