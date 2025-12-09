@@ -32,11 +32,16 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						// 로그인 없이도 들어갈 수 있는 곳들 (검색, 상세 조회)
 						.requestMatchers("/products/search", "/products/**").permitAll()
+						// Swagger 관련 설정도 모두에게 허용
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+						// 개발중에 잠시 열어둠.
+						.requestMatchers("/reservations/**").permitAll()
 						// 나머지는 다 로그인 해야 함
 						.anyRequest().authenticated())
 
 				// 5. 기본 로그인 폼 끄기 (팝업 뜨는 거 방지)
-				.formLogin(login -> login.disable()).httpBasic(basic -> basic.disable());
+				.formLogin(login -> login.disable())
+				.httpBasic(basic -> basic.disable());
 
 		return http.build();
 	}
