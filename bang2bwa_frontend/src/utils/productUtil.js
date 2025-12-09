@@ -54,11 +54,14 @@ export const formatPrice = (item) => {
 };
 
 export const infraCategories = [
-  { code: "MT1", name: "대형마트" },
-  { code: "CS2", name: "편의점" },
-  { code: "SC4", name: "학교" },
-  { code: "SW8", name: "지하철" },
-  { code: "BK9", name: "은행" },
-  { code: "CE7", name: "카페" },
-  { code: "OL7", name: "주유소" },
+    { name: '지하철', code: 'SW8', type: 'category', icon: '🚇' },
+    { name: '버스', keyword: '버스정류장', type: 'keyword', icon: '🚌' },
+    { name: '편의점', code: 'CS2', type: 'category', icon: '🏪' },
+    { name: '학교', code: 'SC4', type: 'category', icon: '🏫' },
+    { name: '대형마트', code: 'MT1', type: 'category', icon: '🛒' },
+    { name: '병원', code: 'HP8', type: 'category', icon: '🏥' },
+    { name: '약국', code: 'PM9', type: 'category', icon: '💊' },
+    { name: '세탁소', keyword: '세탁소', type: 'keyword', icon: '👕' },
+    { name: '치안센터', code: 'PO3', type: 'category', icon: '👮' }, // PO3는 공공기관
+    { name: '공원', keyword: '공원', type: 'keyword', icon: '🌳' },
 ];

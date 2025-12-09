@@ -1,19 +1,48 @@
 <template>
-    <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
+    <div class="relative w-full h-full">
+        <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
+
+        <div v-if="selectedItem" 
+             class="absolute top-4 right-4 z-20 w-32 flex flex-col gap-2 max-h-[95%]">
+            
+            <div class="bg-white/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 flex flex-col overflow-y-auto custom-scrollbar">
+                <div class="text-xs font-bold text-gray-500 mb-2 text-center border-b border-gray-100 pb-2">
+                    주변 편의시설
+                </div>
+                
+                <div class="flex flex-col gap-1">
+                    <button v-for="cat in infraCategories" :key="cat.name"
+                            @click="searchInfrastructure(cat)"
+                            class="flex items-center gap-3 p-2 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-all duration-200 group text-left">
+                        <span class="text-lg group-hover:scale-110 transition-transform">{{ cat.icon }}</span>
+                        <span class="text-xs text-gray-700 font-medium group-hover:text-blue-600">{{ cat.name }}</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button @click="resetSelection" 
+                    class="bg-white/90 text-red-500 text-xs font-bold py-2 px-3 rounded-lg shadow border border-red-100 hover:bg-red-50 transition">
+                선택 해제 ✕
+            </button>
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch, toRaw } from 'vue';
-import { formatPrice } from '@/utils/productUtil';
+import { onMounted, ref, watch, toRaw, computed } from 'vue';
+import { formatPrice, infraCategories } from '@/utils/productUtil';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
 const emit = defineEmits(['marker-click']); // 마커 클릭 이벤트
+
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
 const markers = ref([]); // 마커 배열
 const infraMarkers = ref([]); // 인프라 마커들 담을 배열
+const selectedItem = ref(null); // 현재 선택된 매물 객체
+const currentCircle = ref(null); // 현재 그려진 반경 원
 
-// 지도 초기 설정
+// 지도 초기화
 const initMap = () => {
     const container = mapContainer.value;
     const options = {
@@ -37,11 +66,15 @@ const updateMarkers = (newItems) => {
         markers.value = [];
     }
 
+    // 새 리스트 로드 시 선택 상태 초기화
+    resetSelection();
+
     // 데이터가 없으면 리턴
     if (!newItems || newItems.length === 0) return;
 
     // 지도 범위 재설정
     const bounds = new window.kakao.maps.LatLngBounds();
+    const rawMap = toRaw(mapInstance.value);
 
     newItems.forEach(item => {
         if (!item.latitude || !item.longitude) return; // 좌표 없는 데이터는 패스
@@ -61,7 +94,6 @@ const updateMarkers = (newItems) => {
 
         // 마커 클릭 이벤트
         content.addEventListener('click', () => {
-            moveToCenter(item.latitude, item.longitude);
             emit('marker-click', item);
         });
 
@@ -72,33 +104,23 @@ const updateMarkers = (newItems) => {
             yAnchor: 1.5
         });
 
-        customOverlay.setMap(mapInstance.value);
+        customOverlay.setMap(rawMap);
         markers.value.push(customOverlay);
         bounds.extend(position);
     });
 
     // 모든 마커가 보이도록 지도 범위 조절
-    if (mapInstance.value && markers.value.length > 0) {
-        mapInstance.value.setBounds(bounds);
+    if (rawMap && markers.value.length > 0) {
+        rawMap.setBounds(bounds);
     }
 };
 
-// 매물 선택 시 지도 이동 함수
-const moveToCenter = (lat, lng) => {
-    if (!mapInstance.value || !lat || !lng) return;
-
-    const moveLatLng = new window.kakao.maps.LatLng(lat, lng); // 이동할 좌표
-
-    mapInstance.value.setLevel(4); // 지도 확대 레벨
-    mapInstance.value.panTo(moveLatLng); // 지도 이동(panTo: 이동 애니메이션)
-};
-
 // 인프라 검색 함수
-const searchInfrastructure = (categoryCode, lat, lng) => {
+const searchInfrastructure = (category) => {
     // 기존 인프라 마커 초기화
     clearInfraMarkers();
 
-    if (!window.kakao || !window.kakao.maps.services) {
+    if (!window.kakao || !window.kakao.maps.services || !selectedItem.value) {
         console.error("services 라이브러리가 로드되지 않았습니다.");
         return;
     }
@@ -107,6 +129,9 @@ const searchInfrastructure = (categoryCode, lat, lng) => {
     const rawMap = toRaw(mapInstance.value);
     const ps = new window.kakao.maps.services.Places(rawMap);
 
+    const lat = selectedItem.value.latitude;
+    const lng = selectedItem.value.longitude;
+
     // 검색 옵션 (반경 500m, 중심 좌표 설정)
     const options = {
         location: new window.kakao.maps.LatLng(lat, lng),
@@ -114,14 +139,20 @@ const searchInfrastructure = (categoryCode, lat, lng) => {
         sort: window.kakao.maps.services.SortBy.DISTANCE // 거리순 정렬
     }
 
-    // 카테고리로 검색 실행
-    ps.categorySearch(categoryCode, (data, status, _pagination) => {
+    const callback = (data, status) => {
         if (status === window.kakao.maps.services.Status.OK) {
             displayInfraMarkers(data);
         } else {
-            alert("주변에 해당 시설이 없습니다.");
+            alert(`${category.name} 검색 결과가 없습니다.`);
         }
-    }, options);
+    };
+
+    // 카카오 코드가 있는 것과 없는 것 구분
+    if (category.type === 'category') {
+        ps.categorySearch(category.code, callback, options);
+    } else {
+        ps.keywordSearch(category.keyword, callback, options);
+    }
 };
 
 // 인프라 마커 표시 함수
@@ -161,8 +192,62 @@ const clearInfraMarkers = () => {
     infraMarkers.value = [];
 }
 
+// 매물 선택 시 실행할 이벤트: 지도 이동 + 반경(원) + 인프라 버튼 활성화
+const selectItem = (item) => {
+    if (!mapInstance.value || !item) return;
+
+    selectedItem.value = item; // 버튼 표시 트리거
+    const rawMap = toRaw(mapInstance.value);
+    const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
+
+    // 1. 지도 중심 이동
+    mapInstance.value.setLevel(4);
+    mapInstance.value.panTo(position);
+
+    // 2. 기존 원 제거
+    if (currentCircle.value) {
+        currentCircle.value.setMap(null);
+    }
+
+    // 3. 새로운 반경 500m 원 생성 및 표시
+    const circle = new window.kakao.maps.Circle({
+        center: position, // 원 중심 좌표
+        radius: 500, // 원 반지름
+        strokeWeight: 2, // 선 두께
+        strokeColor: '#75B8FA', // 선 색깔
+        strokeOpacity: 0.8,
+        strokeStyle: 'solid',
+        fillColor: '#CFE7FF', // 채우기 색깔
+        fillOpacity: 0.4
+    });
+
+    circle.setMap(rawMap);
+    currentCircle.value = circle;
+
+    // 4. 이전에 검색된 인프라 마커 초기화
+    clearInfraMarkers();
+}
+
+// 선택 초기화: 뒤로가기 누를 때 원과 버튼을 지우는 함수
+const resetSelection = () => {
+    selectedItem.value = null; // 버튼 숨김
+
+    // 원 지우기
+    if (currentCircle.value) {
+        currentCircle.value.setMap(null);
+        currentCircle.value = null;
+    }
+
+    clearInfraMarkers();
+}
+
+const selectedItemName = computed(() => {
+    return selectedItem.value ? formatPrice(selectedItem.value) : '';
+});
+
 defineExpose({
-    moveToCenter,
+    selectItem,
+    resetSelection,
     searchInfrastructure,
     clearInfraMarkers
 });

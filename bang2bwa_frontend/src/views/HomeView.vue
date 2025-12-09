@@ -31,17 +31,6 @@
         </div>
       </aside>
 
-      <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
-        <button 
-          v-for="cat in infraCategories"
-          :key="cat.code"
-          @click="handleInfraClick(cat.code)"
-          class="bg-white p-2 rounded shadow text-xs font-bold hover:bg-gray-100">
-          {{ cat.name }}
-        </button>
-        <button @click="handleClearInfra" class="bg-red-500 text-white p-2 rounded shadow text-xs">초기화</button>
-      </div>
-
       <div class="flex-1 bg-gray-100 relative z-0">
         <KakaoMap 
           ref="kakaoMapRef" 
@@ -64,7 +53,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
-import { tradeTypeMap, typeMap, infraCategories } from '@/utils/productUtil';
+import { tradeTypeMap, typeMap } from '@/utils/productUtil';
 import KakaoMap from '@/components/map/KakaoMap.vue';             // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';          // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';             // AI 모달
@@ -129,35 +118,17 @@ const handleItemClick = (item) => {
   selectProperty.value = item;
 
   if (kakaoMapRef.value) {
-    kakaoMapRef.value.moveToCenter(item.latitude, item.longitude);
+    kakaoMapRef.value.selectItem(item);
   }
 };
 
 // 상세 페이지 뒤로 가기
 const closeDetail = () => {
   selectProperty.value = null;
-};
 
-// 인프라 버튼 클릭 시 실행
-const handleInfraClick = (code) => {
-  // 1. 현재 선택된 매물이 있는지 확인
-  if (!selectProperty.value) {
-    alert("먼저 매물을 선택해주세요!");
-    return;
-  }
-
-  // 2. 지도 컴포넌트의 검색 함수 호출
   if (kakaoMapRef.value) {
-    kakaoMapRef.value.searchInfrastructure(
-      code,
-      selectProperty.value.latitude,
-      selectProperty.value.longitude
-    );
+    kakaoMapRef.value.resetSelection();
   }
-};
-
-const handleClearInfra = () => {
-  if (kakaoMapRef.value) kakaoMapRef.value.clearInfraMarkers();
 };
 
 // URL의 쿼리 파라미터가 바뀔 때마다 실행
