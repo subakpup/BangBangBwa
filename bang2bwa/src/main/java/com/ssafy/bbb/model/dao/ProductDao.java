@@ -29,4 +29,7 @@ public interface ProductDao {
 
 	public List<ProductDto> search(ProductSearchDto request);
 
+	// 전체 마커 조회
+	public List<ProductDto> findAllMarkers();
+
 }

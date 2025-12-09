@@ -141,4 +141,10 @@
   		</where>
   	</select>
   	
+  	<select id="findAllMarkers">
+  		select product_id, house_type, trade_type, deal_amount, deposit, monthly_rent, latitude, longitude
+  		from products
+  		where latitude is not null and longitude is not null
+  	</select>
+  	
   </mapper>

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
+import com.ssafy.bbb.model.dto.MapResponseDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
@@ -141,4 +142,20 @@ public class ProductServiceImpl implements ProductService {
 			}
 		}
 	}
+
+	@Override
+	public List<MapResponseDto> findAllMarkers() {
+		List<ProductDto> products = productDao.findAllMarkers();
+		List<MapResponseDto> markers = new ArrayList<>();
+
+		for (ProductDto product : products) {
+			markers.add(MapResponseDto.builder().productId(product.getProductId()).houseType(product.getHouseType())
+					.tradeType(product.getTradeType()).dealAmount(product.getDealAmount()).deposit(product.getDeposit())
+					.monthlyRent(product.getMonthlyRent()).latitude(product.getLatitude())
+					.longitude(product.getLongitude()).build());
+
+		}
+		return markers;
+	}
+
 }

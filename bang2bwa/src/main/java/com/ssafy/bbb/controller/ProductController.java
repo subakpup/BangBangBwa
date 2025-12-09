@@ -2,6 +2,7 @@ package com.ssafy.bbb.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.bbb.global.response.ApiResponse;
+import com.ssafy.bbb.model.dto.MapResponseDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.model.service.ProductService;
@@ -56,11 +58,18 @@ public class ProductController {
 	 */
 	@PostMapping("/search")
 	public ApiResponse<List<ProductDto>> searchProduct(@RequestBody ProductSearchDto request) {
-
-		log.info("매물 검색 요청: {}", request);
-
 		List<ProductDto> searchList = productService.search(request);
 
 		return ApiResponse.success(searchList, "매물 조회가 완료되었습니다.");
+	}
+
+	/**
+	 * 마커 요청
+	 */
+	@GetMapping("/map")
+	public ApiResponse<List<MapResponseDto>> getMapMarkers() {
+		List<MapResponseDto> markerList = productService.findAllMarkers();
+
+		return ApiResponse.success(markerList, "마커 조회가 완료되었습니다.");
 	}
 }

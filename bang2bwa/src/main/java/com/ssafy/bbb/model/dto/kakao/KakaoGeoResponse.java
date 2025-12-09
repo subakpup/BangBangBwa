@@ -10,7 +10,6 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoGeoResponse {
-
 	private List<Document> documents;
 
 	@Data

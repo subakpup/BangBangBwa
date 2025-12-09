@@ -39,18 +39,27 @@ const updateMarkers = (newItems) => {
     const bounds = new window.kakao.maps.LatLngBounds();
 
     newItems.forEach(item => {
-        if (!item.lat || !item.lng) return;
+        if (!item.latitude || !item.longitude) return; // 좌표 없는 데이터는 패스
 
-        const position = new window.kakao.maps.LatLng(item.lat, item.lng);
+        const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
 
-        const marker = new window.kakao.maps.Marker({
-            position: position,
-            map: mapInstance.value,
-            title: item.name, // 마우스 올리면 이름
+        const content = document.createElement('div');
+        content.className = `price-label`;
+        content.innerHTML = `<span class="price-text">${item.name}</span><span class="arrow"></span>`
+
+        content.addEventListener('click', () => {
+            console.log('마커 클릭 이벤트 발생');
         });
 
-        markers.value.push(marker); // 배열에 저장
-        bounds.extend(position); // 지도 범위에 포함
+        const customOverlay = new window.kakao.maps.CustomOverlay({
+            position: position,
+            content: content,
+            yAnchor: 1
+        });
+
+        customOverlay.setMap(mapInstance.value);
+        markers.value.push(customOverlay);
+        bounds.extend(position);
     });
 
     // 모든 마커가 보이도록 지도 범위 조절
