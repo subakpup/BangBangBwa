@@ -128,7 +128,10 @@ const searchInfrastructure = (categoryCode, lat, lng) => {
 const displayInfraMarkers = (places) => {
     const rawMap = toRaw(mapInstance.value);
 
-    const infowindow = new window.kakao.maps.InfoWindow({ zIndex: 1 });
+    const tooltipOverlay = new window.kakao.maps.CustomOverlay({ 
+        zIndex: 1,
+        yAnchor: 2.2
+    });
 
     places.forEach(place => {
         const position = new window.kakao.maps.LatLng(place.y, place.x);
@@ -136,16 +139,16 @@ const displayInfraMarkers = (places) => {
         const marker = new window.kakao.maps.Marker({
             map: rawMap,
             position: position,
-            title: place.place_name
         });
 
         window.kakao.maps.event.addListener(marker, 'mouseover', () => {
-            infowindow.setContent(`<div class="infra-tooltip">${place.place_name}</div>`);
-            infowindow.open(rawMap, marker);
+            tooltipOverlay.setContent(`<div class="infra-tooltip">${place.place_name}</div>`);
+            tooltipOverlay.setPosition(position);
+            tooltipOverlay.setMap(rawMap);
         });
 
         window.kakao.maps.event.addListener(marker, 'mouseout', () => {
-            infowindow.close();
+            tooltipOverlay.setMap(null);
         });
 
         infraMarkers.value.push(marker);
