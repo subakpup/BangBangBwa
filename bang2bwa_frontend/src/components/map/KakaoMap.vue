@@ -13,15 +13,15 @@
                 <div class="flex flex-col gap-1">
                     <button v-for="cat in infraCategories" :key="cat.name"
                             @click="searchInfrastructure(cat)"
-                            class="flex items-center gap-3 p-2 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-all duration-200 group text-left">
+                            class="flex items-center gap-3 p-2 hover:bg-[#ae8b72]/10 rounded-md transition-all duration-200 group text-left">
                         
                         <component 
                             :is="cat.icon" 
-                            class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:scale-110 transition-transform" 
+                            class="w-5 h-5 text-gray-400 group-hover:text-[#ae8b72] group-hover:scale-110 transition-transform" 
                             stroke-width="2"
                         />
                         
-                        <span class="text-xs text-gray-700 font-medium group-hover:text-blue-600">{{ cat.name }}</span>
+                        <span class="text-xs text-gray-700 font-medium group-hover:text-[#ae8b72]">{{ cat.name }}</span>
                     </button>
                 </div>
             </div>
@@ -166,6 +166,8 @@ const searchInfrastructure = (category) => {
 const displayInfraMarkers = (places) => {
     const rawMap = toRaw(mapInstance.value);
 
+    const markerImage1 = createMarkerImage('#ae8b72');
+
     const tooltipOverlay = new window.kakao.maps.CustomOverlay({ 
         zIndex: 1,
         yAnchor: 2.2
@@ -177,6 +179,7 @@ const displayInfraMarkers = (places) => {
         const marker = new window.kakao.maps.Marker({
             map: rawMap,
             position: position,
+            image: markerImage1
         });
 
         window.kakao.maps.event.addListener(marker, 'mouseover', () => {
@@ -221,11 +224,11 @@ const selectItem = (item) => {
         center: position, // 원 중심 좌표
         radius: 500, // 원 반지름
         strokeWeight: 2, // 선 두께
-        strokeColor: '#75B8FA', // 선 색깔
+        strokeColor: '#ae8b72', // 선 색깔
         strokeOpacity: 0.8,
         strokeStyle: 'solid',
-        fillColor: '#CFE7FF', // 채우기 색깔
-        fillOpacity: 0.4
+        fillColor: '#ae8b72', // 채우기 색깔
+        fillOpacity: 0.2
     });
 
     circle.setMap(rawMap);
@@ -248,9 +251,26 @@ const resetSelection = () => {
     clearInfraMarkers();
 }
 
-const selectedItemName = computed(() => {
-    return selectedItem.value ? formatPrice(selectedItem.value) : '';
-});
+// 마커 생성 함수
+const createMarkerImage = (color) => {
+    // 마커
+    const svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="35" viewBox="0 0 24 35">
+            <path fill="${color}" d="M12 0C5.373 0 0 5.373 0 12c0 9.5 12 23 12 23s12-13.5 12-23c0-6.627-5.373-12-12-12z"/>
+            <circle fill="white" cx="12" cy="12" r="4"/>
+        </svg>
+    `;
+
+    // svg 문자열을 Data URL로 변환(이미지처럼 쓰기 위함)
+    const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+
+    // 카카오맵 마커 이미지 객체 생성
+    return new window.kakao.maps.MarkerImage(
+        svgUrl,
+        new window.kakao.maps.Size(24, 35), // 마커 크기
+        { offset: new window.kakao.maps.Point(12, 35) } // 마커 기준점
+    );
+};
 
 defineExpose({
     selectItem,
