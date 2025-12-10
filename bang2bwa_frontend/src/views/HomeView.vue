@@ -32,12 +32,18 @@
       </aside>
 
       <div class="flex-1 bg-gray-100 relative z-0">
-        <KakaoMap :items="productList" />
+        <KakaoMap 
+          ref="kakaoMapRef" 
+          :items="productList" 
+          @marker-click="handleItemClick"/>
       </div>
 
     </div>
     <Teleport to="body">
-      <AiModal :show="showAiModal" @close="showAiModal = false" @search="handleAiSearchResult" />
+      <AiModal
+        :show="showAiModal" 
+        @close="showAiModal = false" 
+        @search="handleAiSearchResult" />
     </Teleport>
   </div>
 </template>
@@ -47,6 +53,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+import { tradeTypeMap, typeMap } from '@/utils/productUtil';
 import KakaoMap from '@/components/map/KakaoMap.vue';             // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';          // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';             // AI 모달
@@ -59,20 +66,7 @@ const productList = ref([]);      // 매물 리스트
 const showAiModal = ref(false);   // 모달 상태
 const filterBar = ref(null);      // 필터바 상태
 const selectProperty = ref(null); // 선택된 매물
-
-// URL 파라미터 매핑
-const typeMap = {
-  'APART': '아파트',
-  'ONEROOM': '원룸',
-  'OFFICETEL': '오피스텔'
-};
-
-// 거래 종류 매핑
-const tradeTypeMap = {
-  '매매': 'SALE',
-  '전세': 'LEASE',
-  '월세': 'RENT',
-};
+const kakaoMapRef = ref(null)     // 카카오 맵
 
 // 필터 바 변경 감지
 const handleFilterChange = async (filterData) => {
@@ -122,12 +116,19 @@ const handleAiSearchResult = () => {
 // 매물 클릭 함수
 const handleItemClick = (item) => {
   selectProperty.value = item;
-  // KakaoMapRef.value?.moveTo(item); // 지도 중심 이동
+
+  if (kakaoMapRef.value) {
+    kakaoMapRef.value.selectItem(item);
+  }
 };
 
 // 상세 페이지 뒤로 가기
 const closeDetail = () => {
   selectProperty.value = null;
+
+  if (kakaoMapRef.value) {
+    kakaoMapRef.value.resetSelection();
+  }
 };
 
 // URL의 쿼리 파라미터가 바뀔 때마다 실행
