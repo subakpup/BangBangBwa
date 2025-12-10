@@ -4,6 +4,25 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="com.ssafy.bbb.model.dao.UserDao">
   	<select id="findEmailById">
-  		select email from users where user_id=#{userId};
+  		SELECT email FROM users WHERE user_id=#{userId};
   	</select>
+  	
+  	<insert id="save" useGeneratedKeys="true" keyProperty="userId">
+  		INSERT INTO users(email, password, phone, name, birth, role)
+  		VALUES (#{email}, #{password}, #{phone}, #{name}, #{birth}, #{role});
+  	</insert>
+  	
+  	<insert id="saveAgent">
+  		INSERT INTO agents(agent_id, ceo_name, realtor_agency, business_number)
+  		VALUES (#{agentId}, #{ceoName}, #{realtorAgency}, #{businessNumber});
+  	</insert>
+  	
+  	<select id="findByEmail">
+  		SELECT * FROM users WHERE email = #{email};
+  	</select>
+  	
+  	<select id="existsByEmail">
+  		SELECT COUNT(*) FROM users WHERE email = #{email};
+  	</select>
+  	
   </mapper>
