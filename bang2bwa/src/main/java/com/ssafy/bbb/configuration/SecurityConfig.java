@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -36,6 +38,7 @@ public class SecurityConfig {
 			// 요청 권한 설정 (여기가 핵심!)
 			.authorizeHttpRequests(auth -> auth 
 					.requestMatchers("/products/search", "/products/**").permitAll() // 로그인 없이도 들어갈 수 있는 곳들 (검색, 상세 조회)
+					.requestMatchers("/users/signup", "users/check-email", "users/login", "users/refresh").permitAll() // 회원가입, 이메일 중복체크, 로그인, 토큰 재발급은 모두에게 허용
 					.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Swagger 관련 설정도 모두에게 허용
 					.requestMatchers("/reservations/**").permitAll() // 개발중에 잠시 열어둠.
 					.anyRequest().authenticated()) // 나머지는 다 로그인 해야 함
@@ -70,5 +73,10 @@ public class SecurityConfig {
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+		return authenticationConfiguration.getAuthenticationManager();
 	}
 }
