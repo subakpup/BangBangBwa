@@ -5,17 +5,17 @@
   <mapper namespace="com.ssafy.bbb.model.dao.RefreshTokenDao">
   	
   	<insert id="saveToken">
-  		INSERT INTO refresh_tokens(user_id, refresh_token)
-  		VALUES (#{userId}, #{refreshToken})
+  		INSERT INTO refresh_tokens(user_email, refresh_token)
+  		VALUES (#{userEmail}, #{refreshToken})
   		ON DUPLICATE KEY UPDATE refresh_token = #{refreshToken};
   	</insert>
   	
   	<select id="getToken">
   		SELECT refresh_token FROM refresh_tokens
-  		WHERE user_id = #{userId};
+  		WHERE user_email = #{userEmail};
   	</select>
   	
   	<delete id="deleteToken">
-  		DELETE FROM refresh_tokens WHERE user_id = #{userId};
+  		DELETE FROM refresh_tokens WHERE user_email = #{userEmail};
   	</delete>
   </mapper>
