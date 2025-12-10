@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
@@ -13,10 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.TokenInfo;
 
 import io.jsonwebtoken.Claims;
@@ -45,6 +45,9 @@ public class JwtTokenProvider {
 	
 	// 토큰 생성 메서드
 	public TokenInfo createToken(Authentication authentication) {
+		// Principal을 CustomUserDetails로 캐스팅
+		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+		
 		// 권한 가져오기 (ROLE_USER, ROLE_AGENT)
 		String authorities = authentication.getAuthorities().stream()
 											.map(GrantedAuthority::getAuthority)
@@ -56,6 +59,7 @@ public class JwtTokenProvider {
 		Date accessTokenExpiresIn = new Date(now + accessExpiration);
 		String accessToken = Jwts.builder()
 									.subject(authentication.getName())
+									.claim("userId", userDetails.getUserId())
 									.claim("auth", authorities)
 									.expiration(accessTokenExpiresIn)
 									.signWith(key)
@@ -87,7 +91,10 @@ public class JwtTokenProvider {
 																	.map(SimpleGrantedAuthority::new)
 																	.collect(Collectors.toList());
 		
-		UserDetails principal = new User(claims.getSubject(), "", authorities);
+		Long userId = claims.get("userId", Long.class);
+		String email = claims.getSubject();
+		
+		CustomUserDetails principal = new CustomUserDetails(userId, email, (List<GrantedAuthority>) authorities);
 		
 		return new UsernamePasswordAuthenticationToken(principal, "", authorities);
 	}
