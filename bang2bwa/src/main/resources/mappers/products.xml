@@ -5,8 +5,8 @@
   
   <mapper namespace="com.ssafy.bbb.model.dao.ProductDao">
   	<insert id="save" useGeneratedKeys="true" keyProperty="productId">
-  		insert into products(jibun, house_type, trade_type, status, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_cd, umd_nm, agent_id, latitude, longitude)
-  		values(#{jibun}, #{houseType}, #{tradeType}, #{status}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggCd}, #{umdNm}, #{agentId}, #{latitude}, #{longitude});
+  		insert into products(jibun, house_type, trade_type, status, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_nm, umd_nm, agent_id, latitude, longitude)
+  		values(#{jibun}, #{houseType}, #{tradeType}, #{status}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggNm}, #{umdNm}, #{agentId}, #{latitude}, #{longitude});
   	</insert>
   	
   	<update id="update">
