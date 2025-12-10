@@ -132,8 +132,6 @@ public class ProductServiceImpl implements ProductService {
 	private void setLatLng(ProductDto product) {
 		String address = product.getSggNm() + " " + product.getUmdNm() + " " + product.getJibun();
 
-		System.out.println(address);
-
 		if (address != null && !address.trim().isEmpty()) {
 			double[] coords = geocodingService.getCoordinate(address);
 
