@@ -17,8 +17,11 @@ import com.ssafy.bbb.model.dao.RefreshTokenDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
+import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.SignupRequestDto;
 import com.ssafy.bbb.model.dto.user.UserDto;
+import com.ssafy.bbb.model.dto.user.UserInfoDto;
+import com.ssafy.bbb.model.dto.user.UserUpdateDto;
 import com.ssafy.bbb.model.enums.Role;
 
 import lombok.RequiredArgsConstructor;
@@ -54,6 +57,12 @@ public class UserServiceImpl implements UserService {
 		} catch(AuthenticationException e) {
 			throw new CustomException(ErrorCode.USER_NOT_FOUND);
 		}
+	}
+	
+	@Override
+	@Transactional
+	public void logout(String email) {
+		refreshTokenDao.deleteToken(email);
 	}
 	
 	@Override
@@ -111,5 +120,42 @@ public class UserServiceImpl implements UserService {
 		if(userDao.existsByEmail(email) > 0) {
 			throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
 		}
+	}
+	
+	@Override
+	public UserInfoDto getUserInfo(Long userId) {
+		return userDao.findUserInfoById(userId)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+	}
+	
+	@Override
+	@Transactional
+	public void updateUserInfo(Long userId, UserUpdateDto request) {
+		Role role = userDao.findRoleById(userId);
+		
+		userDao.updateUser(userId, request);
+		if(role == Role.ROLE_AGENT) {
+			userDao.updateAgent(userId, request);
+		}
+	}
+	
+	@Override
+	@Transactional
+	public void updatePassword(Long userId, PasswordUpdateDto request) {
+		String curPassword = userDao.findPasswordById(userId);
+		
+		if(!passwordEncoder.matches(request.getCurrentPassword(), curPassword)) {
+			throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+		}
+		
+		userDao.updatePassword(userId, passwordEncoder.encode(request.getNewPassword()));
+	}
+	
+	@Override
+	@Transactional
+	public void withdraw(Long userId, String email) {
+		refreshTokenDao.deleteToken(email);
+		
+		userDao.deleteUser(userId);
 	}
 }
