@@ -19,6 +19,7 @@ public enum ErrorCode {
 	LOGIN_FAIL(HttpStatus.UNAUTHORIZED, "이메일/비밀번호가 일치하지 않습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료 되었습니다. 다시 로그인 해주세요."),
+	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다. 다시 시도해주세요."),
 
 	// 3. 매물 관련 에러
 	PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매물입니다."),
