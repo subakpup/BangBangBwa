@@ -12,8 +12,14 @@ import io.swagger.v3.oas.annotations.info.Info;
 public class SwaggerConfig {
 
 	@Bean
-	GroupedOpenApi openAPI() {
+	GroupedOpenApi reservationOpenAPI() {
 		String[] paths = { "/reservations/**" };
 		return GroupedOpenApi.builder().group("부동산 예약 관련 API").pathsToMatch(paths).build();
+	}
+	
+	@Bean
+	GroupedOpenApi userOpenAPI() {
+		String[] paths = { "/users/**" };
+		return GroupedOpenApi.builder().group("회원 기능 관련 API").pathsToMatch(paths).build();
 	}
 }
