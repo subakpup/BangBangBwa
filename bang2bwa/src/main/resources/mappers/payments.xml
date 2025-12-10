@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.PaymentDao">
+  	<insert id="paymentSave">
+  		insert into payments(pg_payment_key, order_id, amount, payment_type, status, approved_at, reservation_id, user_id)
+  		values(#{pgPaymentKey}, #{orderId}, #{amount}, #{paymentType}, #{status}, #{approvedAt}, #{reservationId}, #{userId});
+  	</insert>
+  	
+  	<update id="paymentFee">
+  		update payments
+  		<set>
+  			status=#{status},
+  			amount=#{amount},
+  			<if test="approvedAt != null">approved_at=#{approvedAt},</if>
+  			<if test="cancelledAt != null">cancelled_at=#{cancelledAt},</if>
+  		</set>
+  		
+  		where order_id=#{orderId};
+  	</update>
+  	
+  	<select id="findOrderIdByPaymentKey">
+  		select order_id from payments
+  		where pg_payment_key=#{paymentKey};
+  	</select>
+  	
+  </mapper>

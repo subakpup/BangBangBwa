@@ -34,6 +34,8 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.enums.HouseType;
+import com.ssafy.bbb.model.enums.TradeType;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.model.enums.HouseType;
 import com.ssafy.bbb.model.enums.TradeType;

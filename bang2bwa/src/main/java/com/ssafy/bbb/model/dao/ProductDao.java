@@ -1,11 +1,14 @@
 package com.ssafy.bbb.model.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
+import com.ssafy.bbb.model.enums.ReservationStatus;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 
 public interface ProductDao {
@@ -27,6 +30,14 @@ public interface ProductDao {
 	// 삭제할 이미지의 경로를 받아오기(실제 파일 삭제용)
 	public List<String> findSavePathByIds(List<Long> imageIds);
 
+	// 매물 예약을 위한 select for update 문 (for update를 통해 동시성 제어)
+	public Map<String, Object> selectProductForUpdate(Long productId);
+
+	// 매물 상태 변경
+	public Long updateProductStatus(Long productId, ReservationStatus status);
+
+	// 아이디로 매물 위치 정보(위도, 경도) select.
+	public LocationDto findLocationById(Long productId);
 	public List<ProductDto> search(ProductSearchDto request);
 
 	// 전체 마커 조회
