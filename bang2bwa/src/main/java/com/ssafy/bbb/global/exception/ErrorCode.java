@@ -16,10 +16,13 @@ public enum ErrorCode {
 	// 2. 유저, 토큰 관련 에러
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
 	DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
+	INVALID_EMAIL(HttpStatus.CONFLICT, "인증을 하지 않았거나, 인증시간이 끝난 이메일입니다. 다시 인증해주세요."),
 	LOGIN_FAIL(HttpStatus.UNAUTHORIZED, "이메일/비밀번호가 일치하지 않습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료 되었습니다. 다시 로그인 해주세요."),
 	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다. 다시 시도해주세요."),
+	INVALID_CODE(HttpStatus.CONFLICT, "유효하지 않은 코드입니다."),
+	EXPIRED_CODE(HttpStatus.CONFLICT, "코드가 만료되었습니다. 다시 인증해주세요."),
 
 	// 3. 매물 관련 에러
 	PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매물입니다."),

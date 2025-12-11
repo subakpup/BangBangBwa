@@ -68,4 +68,10 @@ public interface UserControllerDocs {
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제합니다.")
     public ApiResponse<String> withdraw(CustomUserDetails user);
+    
+    @Operation(summary = "이메일 인증 코드 발송", description = "이메일로 6자리 인증 코드를 전송합니다.")
+    public ApiResponse<String> sendEmailVerification(String email);
+    
+    @Operation(summary = "이메일 인증 코드 확인", description = "전송된 코드를 검증합니다.")
+    public ApiResponse<String> verifyEmail(String email, String code);
 }
