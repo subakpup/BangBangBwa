@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.HouseDao">
+  	
+  	<select id="selectHouseInfo">
+  		SELECT *
+  		FROM house_infos
+  		WHERE umd_nm = #{umdNm}
+  		  AND jibun = #{jibun}
+  		  AND build_name = #{buildName}
+  		LIMIT 1
+  	</select>
+  	
+  	<insert id="insertHouseInfo" useGeneratedKeys="true" keyProperty="houseInfoId">
+  		INSERT INTO house_infos (
+  			house_type, sgg_nm, umd_nm, jibun, build_year, build_name,
+  			plottage_ar, total_floor_ar, land_ar
+  		) VALUES (
+  			#{houseType}, #{sggNm}, #{umdNm}, #{jibun}, #{buildYear}, #{buildName},
+  			#{plottageAr}, #{totalFloorAr}, #{landAr}
+  		)
+  	</insert>
+  	
+  	<insert id="insertHouseDeal">
+  		INSERT INTO house_deals (
+  			house_info_id, deal_amount, deal_date, floor, exclu_use_ar
+  		) VALUES (
+  			#{houseInfoId}, #{dealAmount}, #{dealDate}, #{floor}, #{excluUseAr}
+  		)
+  	</insert>
+  </mapper>
