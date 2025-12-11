@@ -1,0 +1,17 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8080';
+
+/**
+ * 매물 검색 API
+ * @param {Object} params - 검색 조건들이 담긴 객체
+ * @returns - 결과 데이터
+ */
+export const searchProducts = async (params) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/products/search`, params);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

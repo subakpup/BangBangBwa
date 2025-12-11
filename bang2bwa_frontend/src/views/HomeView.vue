@@ -51,9 +51,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 
-import { tradeTypeMap, typeMap } from '@/utils/productUtil';
+import { searchProducts } from '@/api/productApi';                // 매물 검색 API
+import { tradeTypeMap, typeMap } from '@/utils/productUtil';      // 타입 매퍼
 import KakaoMap from '@/components/map/KakaoMap.vue';             // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';          // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';             // AI 모달
@@ -74,18 +74,19 @@ const handleFilterChange = async (filterData) => {
     const houseType = route.query.type || '';
     const tradeType = tradeTypeMap[filterData.tradeType] || '전체';
 
-    const response = await axios.post('http://localhost:8080/products/search', {
+    const request = {
       keyword: filterData.keyword,
       houseType: houseType,
       tradeType: tradeType,
       excluUseAr: filterData.excluUseAr,
       floor: filterData.floor,
-    });
+    };
+
+    const response = await searchProducts(request);
 
     // 응답처리
-    if (response.data.success === 'SUCCESS') {
-        const searchList = response.data.data;
-        productList.value = searchList;
+    if (response.success === 'SUCCESS') {
+        productList.value = response.data;
         
         if (filterData.keyword) {
             currentType.value = `'${filterData.keyword}' 검색 결과`;
