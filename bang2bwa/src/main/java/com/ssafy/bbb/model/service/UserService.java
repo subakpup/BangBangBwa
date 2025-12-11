@@ -20,9 +20,6 @@ public interface UserService {
 	// 회원 가입
 	public Long signup(SignupRequestDto request);
 	
-	// 이메일 중복 체크
-	public void checkEmailDuplicate(String email);
-	
 	// 내 정보 조회
 	public UserInfoDto getUserInfo(Long userId);
 	

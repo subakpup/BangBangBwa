@@ -19,6 +19,7 @@ import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.SignupRequestDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
+import com.ssafy.bbb.model.service.EmailVerificationService;
 import com.ssafy.bbb.model.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserController implements UserControllerDocs {
 	private final UserService userService;
+	private final EmailVerificationService emailVerificationService;
 
 	@Override
 	@PostMapping("/signup")
@@ -38,14 +40,6 @@ public class UserController implements UserControllerDocs {
 		Long userId = userService.signup(request);
 		
 		return ApiResponse.success(userId, "회원가입이 완료되었습니다.");
-	}
-	
-	@Override
-	@GetMapping("/check-email")
-	public ApiResponse<String> checkEmail(@RequestParam String email) {
-		userService.checkEmailDuplicate(email);
-		
-		return ApiResponse.successWithNoContent("사용 가능한 이메일입니다.");
 	}
 	
 	@Override
@@ -102,5 +96,29 @@ public class UserController implements UserControllerDocs {
 		userService.withdraw(user.getUserId(), user.getUsername());
 		
 		return ApiResponse.successWithNoContent("회원 탈퇴가 완료되었습니다.");
+	}
+	
+	@Override
+	@GetMapping("/email-verification/duplicate")
+	public ApiResponse<String> checkEmail(@RequestParam String email) {
+		emailVerificationService.checkEmailDuplicate(email);
+		
+		return ApiResponse.successWithNoContent("사용 가능한 이메일입니다.");
+	}
+	
+	@Override
+	@PostMapping("/email-verification/request")
+	public ApiResponse<String> sendEmailVerification(@RequestParam String email) {
+		emailVerificationService.sendCode(email);
+		
+		return ApiResponse.successWithNoContent("인증 코드가 발송되었습니다.");
+	}
+	
+	@Override
+	@PostMapping("/email-verification/verify")
+	public ApiResponse<String> verifyEmail(@RequestParam String email, @RequestParam String code) {
+		emailVerificationService.verifyCode(email, code);
+		
+		return ApiResponse.successWithNoContent("이메일 인증이 완료되었습니다. 1시간 이내로 회원가입을 마무리해 주세요.");
 	}
 }
