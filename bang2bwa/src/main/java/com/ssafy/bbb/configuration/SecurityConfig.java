@@ -36,6 +36,8 @@ public class SecurityConfig {
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 						// 개발중에 잠시 열어둠.
 						.requestMatchers("/reservations/**").permitAll()
+						// 개발 중에 잠시 열어 둠.
+						.requestMatchers("/house/**").permitAll()
 						// 나머지는 다 로그인 해야 함
 						.anyRequest().authenticated())
 
