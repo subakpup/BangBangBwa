@@ -43,6 +43,10 @@ public enum ErrorCode {
 	QUIT_PAYMENT(HttpStatus.CONFLICT, "이미 정산된 거래입니다."),
 	PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제가 실패하였습니다.");
 
+	// 6. 공공데이터 API 관련 에러
+	OPEN_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공공데이터 API 연동 중 오류가 발생했습니다."),
+	DATA_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 중 오류가 발생했습니다.");
+	
 	// 필요한 에러 추가..
 
 	private final HttpStatus status;
