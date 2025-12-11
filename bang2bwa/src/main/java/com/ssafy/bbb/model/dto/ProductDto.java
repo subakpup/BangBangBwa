@@ -6,11 +6,11 @@ import com.ssafy.bbb.model.enums.HouseType;
 import com.ssafy.bbb.model.enums.ReservationStatus;
 import com.ssafy.bbb.model.enums.TradeType;
 
-import io.micrometer.common.lang.NonNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 
 @Getter
