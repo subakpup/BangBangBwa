@@ -34,9 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final PasswordEncoder passwordEncoder;
+	
+	private final EmailVerificationService emailVerificationService;
 	private final RefreshTokenDao refreshTokenDao;
 	private final UserDao userDao;
-	private final PasswordEncoder passwordEncoder;
+	
 	
 	@Override
 	@Transactional
@@ -90,7 +93,12 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public Long signup(SignupRequestDto request) {
 		// email 중복 더블체크
-		checkEmailDuplicate(request.getEmail());
+		emailVerificationService.checkEmailDuplicate(request.getEmail());
+		
+		// 인증받은 email 인지 체크
+		if(!emailVerificationService.isVerified(request.getEmail())) {
+			throw new CustomException(ErrorCode.INVALID_EMAIL);
+		}
 		
 		String encodedPassword = passwordEncoder.encode(request.getPassword());
 		
@@ -113,13 +121,6 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		return userDto.getUserId();
-	}
-	
-	@Override
-	public void checkEmailDuplicate(String email) {
-		if(userDao.existsByEmail(email) > 0) {
-			throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
-		}
 	}
 	
 	@Override
