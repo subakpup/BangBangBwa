@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -51,6 +53,7 @@ class UserServiceTest {
     @Mock private RefreshTokenDao refreshTokenDao;
     @Mock private UserDao userDao;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private EmailVerificationService emailVerificationService;
 
     // 공통 테스트 데이터 상수
     private final String EMAIL = "test@ssafy.com";
@@ -133,8 +136,9 @@ class UserServiceTest {
             request.setPassword(PASSWORD);
             request.setRole(Role.ROLE_USER);
 
-            given(userDao.existsByEmail(EMAIL)).willReturn(0);
+            willDoNothing().given(emailVerificationService).checkEmailDuplicate(EMAIL);
             given(passwordEncoder.encode(PASSWORD)).willReturn("encodedPw");
+            given(emailVerificationService.isVerified(EMAIL)).willReturn(true);
 
             // when
             userService.signup(request);
@@ -156,8 +160,9 @@ class UserServiceTest {
             request.setRealtorAgency("Agency");
             request.setBusinessNumber("123-45");
 
-            given(userDao.existsByEmail(EMAIL)).willReturn(0);
+            willDoNothing().given(emailVerificationService).checkEmailDuplicate(EMAIL);
             given(passwordEncoder.encode(PASSWORD)).willReturn("encodedPw");
+            given(emailVerificationService.isVerified(EMAIL)).willReturn(true);
 
             // when
             userService.signup(request);
@@ -173,7 +178,9 @@ class UserServiceTest {
             // given
             SignupRequestDto request = new SignupRequestDto();
             request.setEmail(EMAIL);
-            given(userDao.existsByEmail(EMAIL)).willReturn(1);
+            
+            willThrow(new CustomException(ErrorCode.DUPLICATE_EMAIL))
+            .given(emailVerificationService).checkEmailDuplicate(EMAIL);
 
             // when & then
             assertThatThrownBy(() -> userService.signup(request))
