@@ -4,6 +4,69 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="com.ssafy.bbb.model.dao.UserDao">
   	<select id="findEmailById">
-  		select email from users where user_id=#{userId};
+  		SELECT email FROM users WHERE user_id=#{userId}
   	</select>
+  	
+  	<insert id="save" useGeneratedKeys="true" keyProperty="userId">
+  		INSERT INTO users(email, password, phone, name, birth, role)
+  		VALUES (#{email}, #{password}, #{phone}, #{name}, #{birth}, #{role})
+  	</insert>
+  	
+  	<insert id="saveAgent">
+  		INSERT INTO agents(agent_id, ceo_name, realtor_agency, business_number)
+  		VALUES (#{agentId}, #{ceoName}, #{realtorAgency}, #{businessNumber})
+  	</insert>
+  	
+  	<select id="findByEmail">
+  		SELECT * FROM users WHERE email = #{email}
+  	</select>
+  	
+  	<select id="existsByEmail">
+  		SELECT COUNT(*) FROM users WHERE email = #{email}
+  	</select>
+  	
+  	<select id="findUserInfoById">
+  		SELECT u.user_id, u.email, u.name, u.phone, u.birth, u.role, a.ceo_name, a.realtor_agency, a.business_number
+  		FROM users u LEFT JOIN agents a ON u.user_id = a.agent_id
+  		WHERE u.user_id = #{userId}
+  	</select>
+  	
+  	<select id="findRoleById">
+  		SELECT role FROM users WHERE user_id=#{userId}
+  	</select>
+  	
+  	<update id="updateUser">
+  		UPDATE users
+  		<set>
+  			<if test="name != null and name != ''">name=#{name},</if>
+  			<if test="phone != null and phone != ''">phone=#{phone},</if>
+  			<if test="birth != null and birth != ''">birth=#{birth},</if>
+  		</set>
+  		WHERE user_id = #{userId}
+  	</update>
+  	
+  	<update id="updateAgent">
+  		UPDATE agents
+  		<set>
+  			<if test="ceoName != null and ceoName != ''">ceo_name=#{ceoName},</if>
+  			<if test="realtorAgency != null and realtorAgency != ''">realtor_agency=#{realtorAgency},</if>
+  			<if test="businessNumber != null and businessNumber != ''">business_number=#{businessNumber},</if>
+  		</set>
+  		WHERE agent_id = #{agentId}
+  	</update>
+  	
+  	<select id="findPasswordById">
+  		SELECT password FROM users WHERE user_id = #{userId}
+  	</select>
+  	
+  	<update id="updatePassword">
+  		UPDATE users
+  		SET password=#{encodedPassword}
+  		WHERE user_id = #{userId}
+  	</update>
+  	
+  	<delete id="deleteUser">
+  		DELETE FROM users WHERE user_id = #{userId}
+  	</delete>
+  	
   </mapper>
