@@ -5,12 +5,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.bbb.global.constant.SggData;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.HouseDao;
@@ -104,15 +106,16 @@ public class HouseServiceImpl implements HouseService {
 				for (JsonNode item : items) {
 					HouseInfoDto infoDto = new HouseInfoDto(); // 파싱한 데이터를 DTO에 매핑
 
-					// house_type, sgg_nm, umd_nm, jibun, build_year, build_name, plottage_ar, total_floor_ar, land_ar
 					infoDto.setHouseType(type);
-					infoDto.setBuildName(item.path(typeNm).asText());
+					infoDto.setSggNm(SggData.sggMap.get(lawdCd));
 					infoDto.setUmdNm(item.path("umdNm").asText());
 					infoDto.setJibun(item.path("jibun").asText());
+					infoDto.setBuildName(item.path(typeNm).asText());
 					infoDto.setBuildYear(item.path("buildYear").asInt(0));
-
-					Integer buildYear = item.path("buildYear").asInt(0);
-					infoDto.setBuildYear(buildYear);
+					
+//					infoDto.setPlottageAr(0.0);
+//			        infoDto.setTotalFloorAr(0.0);
+//			        infoDto.setLandAr(0.0);
 
 					// 거래 정보
 					HouseDealDto dealDto = new HouseDealDto();
@@ -146,6 +149,23 @@ public class HouseServiceImpl implements HouseService {
             throw e; 
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.DATA_PARSING_ERROR);
+		}
+	}
+
+	@Override
+	public void fetchSggData(String dealYmd) {
+		Set<String> sggCodes = SggData.sggMap.keySet();
+		
+		for (String lawdCd : sggCodes) {
+			try {
+				fetchAndSaveHouseData(lawdCd, dealYmd);
+				Thread.sleep(800); // 0.8초 딜레이
+				
+			} catch (CustomException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new CustomException(ErrorCode.DATA_PARSING_ERROR);
+			}
 		}
 	}
 }

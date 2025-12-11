@@ -8,5 +8,8 @@ public interface HouseService {
 	void registHouseDeal(HouseInfoDto infoDto, HouseDealDto dealDto);
 	
 	// API 호출 및 데이터 저장
-	public void fetchAndSaveHouseData(String lawdCd, String dealYmd);
+	void fetchAndSaveHouseData(String lawdCd, String dealYmd);
+	
+	// 원하는 지역구 수집
+	void fetchSggData(String dealYmd); 
 }

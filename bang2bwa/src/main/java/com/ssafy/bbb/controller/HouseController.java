@@ -18,9 +18,9 @@ public class HouseController {
 	private final HouseService houseService;
 	
 	@GetMapping("/load")
-	public ApiResponse<?> loadData(@RequestParam("code") String lawdCd, @RequestParam("date") String dealYmd) {
-		houseService.fetchAndSaveHouseData(lawdCd, dealYmd);
+	public ApiResponse<?> loadData(@RequestParam("date") String dealYmd) {
+		houseService.fetchSggData(dealYmd);
 		
-		return ApiResponse.successWithNoContent("데이터 로딩에 성공했습니다.");
+		return ApiResponse.successWithNoContent("데이터 수집에 성공했습니다.");
 	}
 }
