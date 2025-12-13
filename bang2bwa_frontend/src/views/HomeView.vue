@@ -10,7 +10,7 @@
           
           <div class="sidebar-header">
             <h2 class="sidebar-title">
-              <span>{{ currentType }}</span> 리스트
+              <span>{{ currentType }}</span>
               <span class="sidebar-count">({{ productList.length }}개)</span>
             </h2>
           </div>

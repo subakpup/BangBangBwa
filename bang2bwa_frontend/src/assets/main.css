@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* =========================================
-   1. 전역 스타일 & 변수 (Scrollbar & Root)
+   1. 전역 스타일 & 변수
    ========================================= */
 @layer base {
   /* 커스텀 스크롤바 (Webkit) */
@@ -32,11 +32,9 @@
 .infra-tooltip { @apply bubble-base bg-white text-[#ae8b72] border-2 border-[#ae8b72]; }
 
 /* =========================================
-   3. 컴포넌트 레이어 (핵심 리팩토링)
+   3. 컴포넌트 레이어
    ========================================= */
 @layer components {
-
-  /* --- [공통 UI 프리셋] : 반복되는 스타일 모음 --- */
   
   /* 기본 버튼 스타일 */
   .btn-base {
@@ -53,19 +51,19 @@
     @apply bg-white border border-gray-200 rounded-lg shadow-sm;
   }
 
-  /* --- [레이아웃 통합] --- */
+  /* --- 레이아웃 --- */
   .app-layout, .layout-container {
     @apply h-screen flex flex-col overflow-hidden font-sans bg-[#FFFBE8];
   }
   .app-main, .main-content {
-    @apply flex-1 flex flex-col overflow-hidden relative;
+    @apply flex-1 flex flex-col overflow-y-auto custom-scrollbar relative;
   }
   .mg-top { @apply mt-4; }
   .mg-top-lg { @apply mt-8; }
 
   
   /* --- [페이지: 회원가입 (Signup)] --- */
-  .signup-wrapper { @apply flex justify-center min-h-screen bg-[#FFFBE8] p-5; }
+  .signup-wrapper { @apply flex flex-col items-center min-h-full flex-1 bg-[#FFFBE8] px-5 py-10; }
   .signup-container { @apply w-full max-w-[460px] py-5; }
   .signup-title { @apply text-center text-[#AE8B72] mb-8 font-bold text-2xl; }
 
@@ -111,7 +109,7 @@
   .sidebar-header { @apply p-4 border-b border-gray-100 flex-shrink-0 mb-2; }
   .sidebar-title { @apply text-xl font-bold text-[#AE8B72]; }
   .sidebar-count { @apply text-sm text-gray-500 font-normal ml-1; }
-  .list-wrapper { @apply flex-1 overflow-hidden; }
+  .list-wrapper { @apply flex-1 overflow-y-auto custom-scrollbar relative; }
 
 
   /* --- [컴포넌트: 헤더 (TheHeader)] --- */
