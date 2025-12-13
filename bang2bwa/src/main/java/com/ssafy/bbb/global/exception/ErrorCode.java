@@ -41,7 +41,7 @@ public enum ErrorCode {
 	NOT_REPROTED(HttpStatus.BAD_REQUEST, "신고된 상태가 아닙니다!"),
 	FAR_DISTANCE(HttpStatus.BAD_REQUEST, "예약 매물과의 거리가 너무 멉니다."),
 	QUIT_PAYMENT(HttpStatus.CONFLICT, "이미 정산된 거래입니다."),
-	PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제가 실패하였습니다.");
+	PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "결제가 실패하였습니다."),
 
 	// 6. 공공데이터 API 관련 에러
 	OPEN_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공공데이터 API 연동 중 오류가 발생했습니다."),

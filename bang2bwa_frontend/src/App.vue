@@ -1,9 +1,9 @@
 <template>
-  <div class="h-screen flex flex-col overflow-hidden font-sans bg-bg">
+  <div class="app-layout">
     
     <TheHeader />
 
-    <main class="flex-1 flex flex-col overflow-hidden relative">
+    <main class="app-main">
       <RouterView />
     </main>
 

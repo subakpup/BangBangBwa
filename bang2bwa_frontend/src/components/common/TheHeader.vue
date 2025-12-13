@@ -1,23 +1,23 @@
 <template>
-  <header class="bg-white border-b border-accent h-16 flex items-center justify-between px-6 shadow-sm z-20">
+  <header class="header-container">
     <div class="flex items-center gap-8">
-        <RouterLink to="/" class="text-2xl font-bold text-primary flex items-center gap-2">
+        <RouterLink to="/" class="header-logo">
             <Home class="w-8 h-8" /> 방방봐
         </RouterLink>
         
-        <nav class="hidden md:flex items-center gap-6 text-gray-600 font-medium">
-            <RouterLink :to="{ path: '/', query: { type: 'APART' }}" class="hover:text-primary transition">아파트</RouterLink>
-            <RouterLink :to="{ path: '/', query: { type: 'ONEROOM' }}" class="hover:text-primary transition">원룸</RouterLink>
-            <RouterLink :to="{ path: '/', query: { type: 'OFFICETEL' }}" class="hover:text-primary transition">오피스텔</RouterLink>
+        <nav class="header-nav">
+            <RouterLink :to="{ path: '/', query: { type: 'APART' }}" class="nav-link">아파트</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'ONEROOM' }}" class="nav-link">원룸</RouterLink>
+            <RouterLink :to="{ path: '/', query: { type: 'OFFICETEL' }}" class="nav-link">오피스텔</RouterLink>
             
-            <RouterLink to="/notice" class="hover:text-primary transition">공지사항</RouterLink>
-            <RouterLink to="/board" class="hover:text-primary transition">게시판</RouterLink>
+            <RouterLink to="/notice" class="nav-link">공지사항</RouterLink>
+            <RouterLink to="/board" class="nav-link">게시판</RouterLink>
         </nav>
     </div>
 
-    <div class="flex items-center gap-4">
-        <button class="text-gray-600 hover:text-primary font-medium">로그인</button>
-        <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm">회원가입</button>
+    <div class="header-auth">
+        <button class="btn-login">로그인</button>
+        <RouterLink to="/signup" class="btn-signup">회원가입</RouterLink>
     </div>
   </header>
 </template>

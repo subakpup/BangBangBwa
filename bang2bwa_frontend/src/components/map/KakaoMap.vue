@@ -2,10 +2,9 @@
     <div class="relative w-full h-full">
         <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
 
-        <div v-if="selectedItem" 
-            class="absolute top-4 right-4 z-20 w-36 flex flex-col gap-2 max-h-[90%]">
+        <div v-if="selectedItem" class="map-overlay">
             
-            <div class="bg-white/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 flex flex-col overflow-y-auto custom-scrollbar">
+            <div class="infra-box">
                 <div class="text-xs font-bold text-gray-500 mb-2 text-center border-b border-gray-100 pb-2">
                     주변 편의시설
                 </div>
@@ -13,21 +12,15 @@
                 <div class="flex flex-col gap-1">
                     <button v-for="cat in infraCategories" :key="cat.name"
                             @click="searchInfrastructure(cat)"
-                            class="flex items-center gap-3 p-2 hover:bg-[#ae8b72]/10 rounded-md transition-all duration-200 group text-left">
+                            class="infra-btn">
                         
-                        <component 
-                            :is="cat.icon" 
-                            class="w-5 h-5 text-gray-400 group-hover:text-[#ae8b72] group-hover:scale-110 transition-transform" 
-                            stroke-width="2"
-                        />
-                        
-                        <span class="text-xs text-gray-700 font-medium group-hover:text-[#ae8b72]">{{ cat.name }}</span>
+                        <component :is="cat.icon" class="infra-icon" stroke-width="2" />
+                        <span class="text-xs text-gray-700 font-medium group-hover:text-[#AE8B72]">{{ cat.name }}</span>
                     </button>
                 </div>
             </div>
             
-            <button @click="resetSelection" 
-                    class="bg-white/90 text-red-500 text-xs font-bold py-2 px-3 rounded-lg shadow border border-red-100 hover:bg-red-50 transition flex items-center justify-center gap-1">
+            <button @click="resetSelection" class="btn-reset">
                 <X class="w-4 h-4" /> 선택 해제
             </button>
         </div>

@@ -1,46 +1,34 @@
 <template>
-
-    <div class="bg-bg border-b border-accent px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-20">
-
-        <!--검색 바-->
-        <div class="relative">
-            <input v-model="searchQuery" @keyup.enter="emitChange" type="text" placeholder="지역, 지하철, 학교 검색"
-                class="pl-4 pr-10 py-2 border border-secondary rounded-md text-sm focus:outline-none focus:border-primary w-64 bg-white placeholder-gray-400">
-            <button @click="emitChange"
-                class="absolute right-2 top-1.5 p-1 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-full transition"
-                title="검색">
+    <div class="filter-bar">
+        <div class="search-wrapper">
+            <input v-model="searchQuery" @keyup.enter="emitChange" type="text" placeholder="지역, 지하철, 학교 검색" class="search-input">
+            <button @click="emitChange" class="search-btn" title="검색">
                 <Search class="w-4 h-4" />
             </button>
         </div>
 
-        <div class="w-px h-6 bg-secondary mx-2"></div>
+        <div class="filter-divider"></div>
 
-        <!--월세/전세/매매 버튼-->
-        <select v-model="tradeType" @change="emitChange"
-            class="px-3 py-2 border border-secondary rounded-md text-sm bg-white hover:border-primary cursor-pointer text-gray-700 outline-none">
+        <select v-model="tradeType" @change="emitChange" class="filter-select">
             <option value="전체">전체</option>
             <option value="월세">월세</option>
             <option value="전세">전세</option>
             <option value="매매">매매</option>
         </select>
 
-        <!--전용 면적-->
         <div class="relative">
-            <button @click="toggleAreaDropdown"
-                class="px-3 py-2 border border-secondary rounded-md text-sm bg-white hover:border-primary cursor-pointer text-gray-700 outline-none flex items-center justify-between min-w-[190px]">
+            <button @click="toggleAreaDropdown" class="dropdown-btn">
                 <span>{{ currentAreaLabel }}</span>
                 <ChevronDown class="w-4 h-4 text-gray-400 ml-2" :class="{ 'rotate-180': isAreaOpen }" />
             </button>
 
-            <div v-if="isAreaOpen"
-                class="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 animate-fade-in-up">
+            <div v-if="isAreaOpen" class="dropdown-box">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs font-bold text-gray-600">면적 범위 선택</span>
-                    <span class="text-xs text-primary font-bold">{{ currentAreaLabel }}</span>
+                    <span class="text-xs text-[#AE8B72] font-bold">{{ currentAreaLabel }}</span>
                 </div>
 
-                <input type="range" v-model="areaValue" @change="emitChange" min="0" max="4" step="1"
-                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                <input type="range" v-model="areaValue" @change="emitChange" min="0" max="4" step="1" class="range-slider">
 
                 <div class="flex justify-between text-[10px] text-gray-400 mt-1">
                     <span>최소</span>
@@ -50,9 +38,7 @@
             <div v-if="isAreaOpen" @click="isAreaOpen = false" class="fixed inset-0 z-40 cursor-default"></div>
         </div>
 
-        <!--층수 선택-->
-        <select v-model="floorOption" @change="emitChange"
-            class="px-3 py-2 border border-secondary rounded-md text-sm bg-white hover:border-primary cursor-pointer text-gray-700 outline-none">
+        <select v-model="floorOption" @change="emitChange" class="filter-select">
             <option value="전체">전체</option>
             <option value="1층">1층</option>
             <option value="2층">2층</option>
@@ -61,11 +47,8 @@
             <option value="지하">지하</option>
         </select>
 
-        <!--AI 맞춤 추천 버튼-->
-        <button @click="$emit('open-ai')"
-            class="ml-auto flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition">
-            <Sparkles class="w-4 h-4" />
-            AI 맞춤 추천
+        <button @click="$emit('open-ai')" class="btn-ai">
+            <Sparkles class="w-4 h-4" /> AI 맞춤 추천
         </button>
     </div>
 </template>
