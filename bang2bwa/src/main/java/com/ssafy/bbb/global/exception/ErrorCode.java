@@ -27,6 +27,7 @@ public enum ErrorCode {
 	// 3. 매물 관련 에러
 	PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매물입니다."),
 	PRODUCT_NOT_AVAILABLE(HttpStatus.CONFLICT, "이미 예약 진행 중이거나 거래 완료된 매물입니다."),
+	ALERDAY_BOOKMARK(HttpStatus.CONFLICT, "이미 찜한 매물/동네 입니다."),
 
 	// 4. 파일 관련 에러
 	FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생하였습니다."),
