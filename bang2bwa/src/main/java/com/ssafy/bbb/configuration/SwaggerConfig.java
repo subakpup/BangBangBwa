@@ -22,4 +22,10 @@ public class SwaggerConfig {
 		String[] paths = { "/users/**" };
 		return GroupedOpenApi.builder().group("회원 기능 관련 API").pathsToMatch(paths).build();
 	}
+	
+	@Bean
+	GroupedOpenApi starOpenAPI() {
+		String[] paths = { "/stars/**" };
+		return GroupedOpenApi.builder().group("찜 기능 관련 API").pathsToMatch(paths).build();
+	}
 }
