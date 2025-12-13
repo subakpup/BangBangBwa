@@ -16,7 +16,7 @@
                         <input type="password" v-model="form.passwordConfirm" class="form-input" placeholder="비밀번호 확인" required />
                     </div>
                 </div>
-                <div class="error-msg" v-if="form.passwordConfirm && !isPasswordMatch">
+                <div class="error-msg" v-if="form.password && form.passwordConfirm && !isPasswordMatch">
                     <span>비밀번호가 일치하지 않습니다.</span>
                 </div>
 
