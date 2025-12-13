@@ -1,21 +1,21 @@
 <template>
-  <div class="flex flex-col h-full w-full relative">
+  <div class="home-container">
 
     <FilterBar ref="filterBar" @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
 
-    <div class="flex flex-1 overflow-hidden relative">
+    <div class="content-wrapper">
 
-      <aside class="w-[400px] bg-white border-r p-4 flex-shrink-0 z-10 overflow-y-auto">
+      <aside class="sidebar custom-scrollbar">
         <div v-if="!selectProperty" class="flex flex-col h-full w-full">
           
-          <div class="p-4 border-b border-gray-100 flex-shrink-0">
-            <h2 class="text-xl font-bold">
-              <span class="text-primary">{{ currentType }}</span> 리스트
-              <span class="text-sm text-gray-500 font-normal">({{ productList.length }}개)</span>
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">
+              <span>{{ currentType }}</span> 리스트
+              <span class="sidebar-count">({{ productList.length }}개)</span>
             </h2>
           </div>
 
-          <div class="flex-1 overflow-hidden">
+          <div class="list-wrapper">
             <ProductList 
               :items="productList" 
               @item-click="handleItemClick" 
@@ -31,19 +31,22 @@
         </div>
       </aside>
 
-      <div class="flex-1 bg-gray-100 relative z-0">
+      <div class="map-container">
         <KakaoMap 
           ref="kakaoMapRef" 
           :items="productList" 
-          @marker-click="handleItemClick"/>
+          @marker-click="handleItemClick"
+        />
       </div>
 
     </div>
+
     <Teleport to="body">
       <AiModal
         :show="showAiModal" 
         @close="showAiModal = false" 
-        @search="handleAiSearchResult" />
+        @search="handleAiSearchResult" 
+      />
     </Teleport>
   </div>
 </template>

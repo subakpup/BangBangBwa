@@ -63,7 +63,7 @@
                 </div>
                 
                 <div class="mg-top-lg">
-                    <button type="submit" class="btn-primary w-full py-4 text-lg font-bold">가입하기</button>
+                    <button type="submit" class="btn-submit">가입하기</button>
                 </div>
             </form>
         </div>

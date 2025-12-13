@@ -2,111 +2,206 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 커스텀 스크롤바 */
-.custom-scrollbar::-webkit-scrollbar { 
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #ceac93;
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ae8b72;
+/* =========================================
+   1. 전역 스타일 & 변수 (Scrollbar & Root)
+   ========================================= */
+@layer base {
+  /* 커스텀 스크롤바 (Webkit) */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #ceac93; border-radius: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ae8b72; }
 }
 
-/* 카카오맵 인포윈도우 */
+/* =========================================
+   2. 유틸리티 (Map, Overlay)
+   ========================================= */
 .custom-infowindow {
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #ae8b72;
-  font-size: 12px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  @apply p-2.5 bg-white rounded-lg border border-[#ae8b72] text-xs text-center shadow-md;
 }
 
-/* 카카오맵 커스텀 오버레이 (가격표 마커) */
 .custom-overlay {
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  @apply relative cursor-pointer transition-all duration-200 ease-in-out hover:scale-110 hover:z-[1000];
 }
 
-/* 마우스 올렸을 때 효과 */
-.custom-overlay:hover {
-  transform: scale(1.1); /* 1.1배 확대 */
-  z-index: 1000; /* 맨 위로 */
+/* 말풍선 공통 */
+.bubble-base {
+  @apply px-3 py-1.5 rounded-[20px] shadow-md font-bold text-[13px] whitespace-nowrap flex items-center justify-center;
 }
+.overlay-content { @apply bubble-base bg-[#ae8b72] text-white border-2 border-white; }
+.infra-tooltip { @apply bubble-base bg-white text-[#ae8b72] border-2 border-[#ae8b72]; }
 
-/* 말풍선 본체 */
-.overlay-content {
-  background-color: #ae8b72; 
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px; /* 둥근 캡슐형 */
-  border: 2px solid white;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  font-weight: bold;
-  font-size: 13px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 인프라 툴팁 스타일 (매물 마커와 대비) */
-.infra-tooltip {
-  background-color: white; 
-  color: #ae8b72;
-  padding: 6px 12px;
-  border-radius: 20px; /* 둥근 캡슐형 */
-  border: 2px solid #ae8b72;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  font-weight: bold;
-  font-size: 13px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* =========================================
+   3. 컴포넌트 레이어 (핵심 리팩토링)
+   ========================================= */
 @layer components {
-  /* 전체 레이아웃 */
-  .layout-container {
-    @apply h-screen flex flex-col overflow-hidden font-sans bg-bg;
+
+  /* --- [공통 UI 프리셋] : 반복되는 스타일 모음 --- */
+  
+  /* 기본 버튼 스타일 */
+  .btn-base {
+    @apply bg-[#AE8B72] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm cursor-pointer;
+  }
+  
+  /* 기본 입력창/선택창 스타일 */
+  .input-base {
+    @apply border border-[#CEAC93] rounded-md text-sm bg-white outline-none focus:border-[#AE8B72] placeholder-gray-400 transition-colors;
   }
 
-  .main-content {
+  /* 카드/박스 공통 스타일 */
+  .card-base {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
+  }
+
+  /* --- [레이아웃 통합] --- */
+  .app-layout, .layout-container {
+    @apply h-screen flex flex-col overflow-hidden font-sans bg-[#FFFBE8];
+  }
+  .app-main, .main-content {
     @apply flex-1 flex flex-col overflow-hidden relative;
   }
+  .mg-top { @apply mt-4; }
+  .mg-top-lg { @apply mt-8; }
 
-  /* 헤더 영역 */
-  .header-bar {
-    @apply bg-white border-b border-accent h-16 flex items-center justify-between px-6 shadow-sm z-20;
+  
+  /* --- [페이지: 회원가입 (Signup)] --- */
+  .signup-wrapper { @apply flex justify-center min-h-screen bg-[#FFFBE8] p-5; }
+  .signup-container { @apply w-full max-w-[460px] py-5; }
+  .signup-title { @apply text-center text-[#AE8B72] mb-8 font-bold text-2xl; }
+
+  .input-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm; }
+  .input-row { @apply relative flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+
+  .btn-submit { @apply w-full py-4 text-lg font-bold text-white bg-[#AE8B72] rounded-lg shadow-md transition-all duration-200; }
+  .btn-submit:hover { @apply bg-[#8c6b54] shadow-lg transform -translate-y-0.5; }
+
+  .btn-submit:active { @apply transform translate-y-0 shadow-sm; }
+  
+  .form-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent py-2 placeholder-[#E3C9A5]; }
+  /* 자동완성 배경 제거 */
+  .form-input:-webkit-autofill,
+  .form-input:-webkit-autofill:hover, 
+  .form-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #AE8B72;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  /* 날짜 아이콘 커스텀 */
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5) sepia(1) saturate(1) hue-rotate(340deg);
+    @apply cursor-pointer;
   }
 
-  .logo-link {
-    @apply text-2xl font-bold text-primary flex items-center gap-2;
+  /* 역할 선택 라디오 */
+  .role-group { @apply flex border border-[#CEAC93] rounded-lg overflow-hidden mt-4; }
+  .role-label { @apply flex-1 text-center cursor-pointer relative; }
+  .role-text { @apply block py-3.5 text-[15px] text-[#CEAC93] bg-white transition-all border-r border-[#CEAC93]; }
+  .role-label:last-child .role-text { @apply border-r-0; }
+  .role-input:checked + .role-text { @apply bg-[#E3C9A5] text-[#AE8B72] font-bold; }
+  .error-msg { @apply p-2 text-[13px] text-red-500; }
+
+
+  /* --- [페이지: 홈 (HomeView)] --- */
+  .home-container { @apply flex flex-col h-full w-full relative; }
+  .content-wrapper { @apply flex flex-1 overflow-hidden relative; }
+  .map-container { @apply flex-1 bg-gray-100 relative z-0; }
+  
+  /* 사이드바 */
+  .sidebar { @apply w-[400px] bg-white border-r border-[#CEAC93] p-4 flex-shrink-0 z-10 overflow-y-auto; }
+  .sidebar-header { @apply p-4 border-b border-gray-100 flex-shrink-0 mb-2; }
+  .sidebar-title { @apply text-xl font-bold text-[#AE8B72]; }
+  .sidebar-count { @apply text-sm text-gray-500 font-normal ml-1; }
+  .list-wrapper { @apply flex-1 overflow-hidden; }
+
+
+  /* --- [컴포넌트: 헤더 (TheHeader)] --- */
+  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-20; }
+  .header-logo { @apply text-2xl font-bold text-[#AE8B72] flex items-center gap-2; }
+  .header-nav { @apply hidden md:flex items-center gap-6 text-gray-600 font-medium; }
+  .nav-link { @apply hover:text-[#AE8B72] transition; }
+  .header-auth { @apply flex items-center gap-4; }
+  .btn-login { @apply text-gray-600 hover:text-[#AE8B72] font-medium; }
+  .btn-signup { @apply btn-base; } /* 공통 버튼 사용 */
+
+
+  /* --- [컴포넌트: 필터바 (FilterBar)] --- */
+  .filter-bar { @apply bg-[#FFFBE8] border-b border-[#CEAC93] px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-20; }
+  .search-wrapper { @apply relative; }
+  .search-input { @apply input-base pl-4 pr-10 py-2 w-64; } /* 공통 인풋 + 개별 사이즈 */
+  .search-btn { @apply absolute right-2 top-1.5 p-1 text-gray-400 hover:text-[#AE8B72] hover:bg-gray-100 rounded-full transition; }
+  .filter-divider { @apply w-px h-6 bg-[#CEAC93] mx-2; }
+  .filter-select { @apply input-base px-3 py-2 hover:border-[#AE8B72] cursor-pointer text-gray-700; }
+  .dropdown-btn { @apply input-base px-3 py-2 hover:border-[#AE8B72] cursor-pointer text-gray-700 flex items-center justify-between min-w-[190px]; }
+  .dropdown-box { @apply absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 animate-fade-in-up; }
+  .range-slider { @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#AE8B72]; }
+  .btn-ai { @apply ml-auto flex items-center gap-2 bg-gradient-to-r from-[#AE8B72] to-[#CEAC93] text-white px-4 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition; }
+
+
+  /* --- [컴포넌트: 리스트 (ProductList)] --- */
+  .list-container { @apply overflow-y-auto custom-scrollbar p-4 h-full; }
+  .product-card { @apply flex gap-3 card-base p-3 hover:border-[#AE8B72] hover:shadow-md cursor-pointer transition; }
+  .card-img-box { @apply w-24 h-24 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden; }
+  .card-img { @apply w-full h-full object-cover group-hover:scale-105 transition duration-500; }
+  .card-info { @apply flex flex-col justify-center flex-1 min-w-0; }
+  .card-type { @apply text-xs text-[#AE8B72] font-bold; }
+  .card-price { @apply font-bold text-lg truncate text-gray-900; }
+  .card-title { @apply text-sm text-gray-600 font-bold truncate; }
+  .empty-state { @apply h-64 flex flex-col items-center justify-center text-gray-400; }
+
+
+  /* --- [컴포넌트: 상세 (ProductDetail)] --- */
+  .detail-container { @apply h-full flex flex-col bg-white; }
+  .detail-header { @apply p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10 sticky top-0; }
+  .btn-back { @apply hover:bg-gray-100 p-2 rounded-full transition text-gray-700; }
+  .detail-body { @apply flex-1 overflow-y-auto custom-scrollbar; }
+  
+  .hero-img-area { @apply h-72 w-full bg-gray-200 relative; }
+  .img-badge { @apply absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm; }
+  .detail-content { @apply p-6 space-y-8; }
+  
+  .info-grid { @apply grid grid-cols-2 gap-y-6 gap-x-4; }
+  .info-item { @apply flex items-start gap-3; }
+  .icon-box { @apply p-2 bg-gray-100 rounded-lg text-gray-600; }
+  .info-label { @apply text-xs text-gray-500; }
+  .info-value { @apply font-bold text-gray-800 whitespace-nowrap; }
+
+  .detail-table { @apply bg-gray-50 rounded-lg border border-gray-100 overflow-hidden text-sm; }
+  .table-row { @apply grid grid-cols-2 border-b border-gray-200 last:border-0; }
+  .table-head { @apply p-3 text-gray-500 bg-gray-100 border-r border-gray-200; }
+  .table-data { @apply p-3 text-gray-800; }
+
+  .agent-card { @apply card-base border-[#CEAC93] p-4 flex items-center gap-4; }
+  .agent-avatar { @apply w-12 h-12 bg-[#CEAC93]/20 rounded-full flex items-center justify-center text-[#AE8B72]; }
+
+  .detail-footer { @apply p-4 border-t border-gray-200 bg-white flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20; }
+  .btn-like { @apply flex-1 border border-[#AE8B72]/20 bg-[#CEAC93]/10 py-3 rounded-xl font-bold text-[#AE8B72] hover:bg-[#CEAC93]/20 transition flex items-center justify-center gap-2; }
+  .btn-contact { @apply flex-[2] btn-base py-3 flex items-center justify-center gap-2 hover:bg-[#8c6b54]; } /* 공통 버튼 + 확장 */
+
+
+  /* --- [컴포넌트: 지도 오버레이 (KakaoMap)] --- */
+  .map-overlay { @apply absolute top-4 right-4 z-20 w-36 flex flex-col gap-2 max-h-[90%]; }
+  .infra-box { @apply bg-white/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 flex flex-col overflow-y-auto custom-scrollbar; }
+  .infra-btn { @apply flex items-center gap-3 p-2 hover:bg-[#AE8B72]/10 rounded-md transition-all duration-200 text-left; }
+  .infra-icon { @apply w-5 h-5 text-gray-400 group-hover:text-[#AE8B72] group-hover:scale-110 transition-transform; }
+  .btn-reset { @apply bg-white/90 text-red-500 text-xs font-bold py-2 px-3 rounded-lg shadow border border-red-100 hover:bg-red-50 transition flex items-center justify-center gap-1; }
+}
+
+/* =========================================
+   4. 커스텀 애니메이션
+   ========================================= */
+@layer utilities {
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
   }
 
-  /* 네비게이션 메뉴 */
-  .nav-menu {
-    @apply hidden md:flex items-center gap-6 text-gray-600 font-medium;
-  }
-
-  .nav-item {
-    @apply hover:text-primary transition;
-  }
-
-  /* 버튼 스타일 */
-  .btn-text {
-    @apply text-gray-600 hover:text-primary font-medium;
-  }
-
-  .btn-primary {
-    @apply bg-primary text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm;
+  .animate-fade-in-up {
+    animation: fadeInUp 0.2s ease-out forwards;
   }
 }
