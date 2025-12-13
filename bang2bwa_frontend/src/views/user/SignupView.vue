@@ -16,7 +16,7 @@
                         <input type="password" v-model="form.passwordConfirm" class="form-input" placeholder="비밀번호 확인" required />
                     </div>
                 </div>
-                <div class="error-msg" v-if="form.password && !isPasswordMatch">
+                <div class="error-msg" v-if="form.passwordConfirm && !isPasswordMatch">
                     <span>비밀번호가 일치하지 않습니다.</span>
                 </div>
 
@@ -30,7 +30,13 @@
                     </div>
                 </div>
 
-                 <div class="role-group">
+                <div class="input-group mg-top">
+                     <div class="input-row">
+                        <input type="tel" v-model="form.phone" class="form-input" placeholder="전화번호 (- 없이 입력)" required />
+                    </div>
+                </div>
+
+                <div class="role-group">
                     <label class="role-label">
                         <input type="radio" v-model="form.role" value="ROLE_USER" class="role-input hidden">
                         <span class="role-text">일반 회원</span>
@@ -39,12 +45,6 @@
                         <input type="radio" v-model="form.role" value="ROLE_AGENT" class="role-input hidden">
                         <span class="role-text">공인중개사</span>
                     </label>
-                </div>
-
-                <div class="input-group mg-top">
-                     <div class="input-row">
-                        <input type="tel" v-model="form.phone" class="form-input" placeholder="휴대전화번호 (- 없이 입력)" required />
-                    </div>
                 </div>
 
                 <div v-if="form.role === 'ROLE_AGENT'" class="mg-top">
