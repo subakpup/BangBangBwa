@@ -1,21 +1,21 @@
 <template>
-  <div class="flex flex-col h-full w-full relative">
+  <div class="home-container">
 
     <FilterBar ref="filterBar" @filter-change="handleFilterChange" @open-ai="handleOpenAi" />
 
-    <div class="flex flex-1 overflow-hidden relative">
+    <div class="content-wrapper">
 
-      <aside class="w-[400px] bg-white border-r p-4 flex-shrink-0 z-10 overflow-y-auto">
+      <aside class="sidebar custom-scrollbar">
         <div v-if="!selectProperty" class="flex flex-col h-full w-full">
           
-          <div class="p-4 border-b border-gray-100 flex-shrink-0">
-            <h2 class="text-xl font-bold">
-              <span class="text-primary">{{ currentType }}</span> 리스트
-              <span class="text-sm text-gray-500 font-normal">({{ productList.length }}개)</span>
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">
+              <span>{{ currentType }}</span>
+              <span class="sidebar-count">({{ productList.length }}개)</span>
             </h2>
           </div>
 
-          <div class="flex-1 overflow-hidden">
+          <div class="list-wrapper">
             <ProductList 
               :items="productList" 
               @item-click="handleItemClick" 
@@ -31,19 +31,22 @@
         </div>
       </aside>
 
-      <div class="flex-1 bg-gray-100 relative z-0">
+      <div class="map-container">
         <KakaoMap 
           ref="kakaoMapRef" 
           :items="productList" 
-          @marker-click="handleItemClick"/>
+          @marker-click="handleItemClick"
+        />
       </div>
 
     </div>
+
     <Teleport to="body">
       <AiModal
         :show="showAiModal" 
         @close="showAiModal = false" 
-        @search="handleAiSearchResult" />
+        @search="handleAiSearchResult" 
+      />
     </Teleport>
   </div>
 </template>
@@ -51,9 +54,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 
-import { tradeTypeMap, typeMap } from '@/utils/productUtil';
+import { searchProducts } from '@/api/productApi';                // 매물 검색 API
+import { tradeTypeMap, typeMap } from '@/utils/productUtil';      // 타입 매퍼
 import KakaoMap from '@/components/map/KakaoMap.vue';             // 카카오맵
 import FilterBar from '@/components/home/FilterBar.vue';          // 홈뷰 헤더(필터 바)
 import AiModal from '@/components/modal/AiModal.vue';             // AI 모달
@@ -74,18 +77,19 @@ const handleFilterChange = async (filterData) => {
     const houseType = route.query.type || '';
     const tradeType = tradeTypeMap[filterData.tradeType] || '전체';
 
-    const response = await axios.post('http://localhost:8080/products/search', {
+    const request = {
       keyword: filterData.keyword,
       houseType: houseType,
       tradeType: tradeType,
       excluUseAr: filterData.excluUseAr,
       floor: filterData.floor,
-    });
+    };
+
+    const response = await searchProducts(request);
 
     // 응답처리
-    if (response.data.success === 'SUCCESS') {
-        const searchList = response.data.data;
-        productList.value = searchList;
+    if (response.success === 'SUCCESS') {
+        productList.value = response.data;
         
         if (filterData.keyword) {
             currentType.value = `'${filterData.keyword}' 검색 결과`;
