@@ -16,18 +16,11 @@
 /* =========================================
    2. 유틸리티 (Map, Overlay)
    ========================================= */
-.custom-infowindow {
-  @apply p-2.5 bg-white rounded-lg border border-[#ae8b72] text-xs text-center shadow-md;
-}
-
-.custom-overlay {
-  @apply relative cursor-pointer transition-all duration-200 ease-in-out hover:scale-110 hover:z-[1000];
-}
+.custom-infowindow { @apply p-2.5 bg-white rounded-lg border border-[#ae8b72] text-xs text-center shadow-md; }
+.custom-overlay { @apply relative cursor-pointer transition-all duration-200 ease-in-out hover:scale-110 hover:z-[1000]; }
 
 /* 말풍선 공통 */
-.bubble-base {
-  @apply px-3 py-1.5 rounded-[20px] shadow-md font-bold text-[13px] whitespace-nowrap flex items-center justify-center;
-}
+.bubble-base { @apply px-3 py-1.5 rounded-[20px] shadow-md font-bold text-[13px] whitespace-nowrap flex items-center justify-center; }
 .overlay-content { @apply bubble-base bg-[#ae8b72] text-white border-2 border-white; }
 .infra-tooltip { @apply bubble-base bg-white text-[#ae8b72] border-2 border-[#ae8b72]; }
 
@@ -37,34 +30,28 @@
 @layer components {
   
   /* 기본 버튼 스타일 */
-  .btn-base {
-    @apply bg-[#AE8B72] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm cursor-pointer;
-  }
+  .btn-base { @apply bg-[#AE8B72] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm cursor-pointer; }
   
   /* 기본 입력창/선택창 스타일 */
-  .input-base {
-    @apply border border-[#CEAC93] rounded-md text-sm bg-white outline-none focus:border-[#AE8B72] placeholder-gray-400 transition-colors;
-  }
+  .input-base { @apply border border-[#CEAC93] rounded-md text-sm bg-white outline-none focus:border-[#AE8B72] placeholder-gray-400 transition-colors; }
 
   /* 카드/박스 공통 스타일 */
-  .card-base {
-    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
-  }
+  .card-base { @apply bg-white border border-gray-200 rounded-lg shadow-sm; }
 
   /* --- 레이아웃 --- */
-  .app-layout, .layout-container {
-    @apply h-screen flex flex-col overflow-hidden font-sans bg-[#FFFBE8];
-  }
-  .app-main, .main-content {
-    @apply flex-1 flex flex-col overflow-y-auto custom-scrollbar relative;
-  }
+  .app-layout, .layout-container { @apply h-screen flex flex-col overflow-hidden font-sans bg-[#FFFBE8]; }
+  .app-main, .main-content { @apply flex-1 flex flex-col overflow-y-auto custom-scrollbar relative; }
   .mg-top { @apply mt-4; }
   .mg-top-lg { @apply mt-8; }
 
   
-  /* --- [페이지: 회원가입 (Signup)] --- */
-  .signup-wrapper { @apply flex flex-col items-center min-h-full flex-1 bg-[#FFFBE8] px-5 py-10; }
+  /* --- [페이지: 인증 (로그인/회원가입)] --- */
+  .signup-wrapper, .login-wrapper { 
+    @apply flex flex-col items-center min-h-full flex-1 bg-[#FFFBE8] px-5 py-10; 
+  }
+  
   .signup-container { @apply w-full max-w-[460px] py-5; }
+  .login-container { @apply w-full max-w-[460px] py-5 my-auto; }
   .signup-title { @apply text-center text-[#AE8B72] mb-8 font-bold text-2xl; }
 
   .input-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm; }
@@ -72,11 +59,14 @@
 
   .btn-submit { @apply w-full py-4 text-lg font-bold text-white bg-[#AE8B72] rounded-lg shadow-md transition-all duration-200; }
   .btn-submit:hover { @apply bg-[#8c6b54] shadow-lg transform -translate-y-0.5; }
-
   .btn-submit:active { @apply transform translate-y-0 shadow-sm; }
   
+  /* 비밀번호 찾기 | 회원가입 */
+  .auth-links { @apply flex justify-center items-center gap-4 mt-8 text-sm text-[#CEAC93]; }
+  .auth-links a { @apply hover:text-[#AE8B72] hover:underline transition-colors; }
+  
   .form-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent py-2 placeholder-[#E3C9A5]; }
-  /* 자동완성 배경 제거 */
+  
   .form-input:-webkit-autofill,
   .form-input:-webkit-autofill:hover, 
   .form-input:-webkit-autofill:focus {
@@ -84,13 +74,11 @@
     transition: background-color 5000s ease-in-out 0s;
   }
   
-  /* 날짜 아이콘 커스텀 */
   .date-input::-webkit-calendar-picker-indicator {
     filter: invert(0.5) sepia(1) saturate(1) hue-rotate(340deg);
     @apply cursor-pointer;
   }
 
-  /* 역할 선택 라디오 */
   .role-group { @apply flex border border-[#CEAC93] rounded-lg overflow-hidden mt-4; }
   .role-label { @apply flex-1 text-center cursor-pointer relative; }
   .role-text { @apply block py-3.5 text-[15px] text-[#CEAC93] bg-white transition-all border-r border-[#CEAC93]; }
@@ -98,34 +86,30 @@
   .role-input:checked + .role-text { @apply bg-[#E3C9A5] text-[#AE8B72] font-bold; }
   .error-msg { @apply p-2 text-[13px] text-red-500; }
 
-
   /* --- [페이지: 홈 (HomeView)] --- */
   .home-container { @apply flex flex-col h-full w-full relative; }
   .content-wrapper { @apply flex flex-1 overflow-hidden relative; }
   .map-container { @apply flex-1 bg-gray-100 relative z-0; }
   
-  /* 사이드바 */
   .sidebar { @apply w-[400px] bg-white border-r border-[#CEAC93] p-4 flex-shrink-0 z-10 overflow-y-auto; }
   .sidebar-header { @apply p-4 border-b border-gray-100 flex-shrink-0 mb-2; }
   .sidebar-title { @apply text-xl font-bold text-[#AE8B72]; }
   .sidebar-count { @apply text-sm text-gray-500 font-normal ml-1; }
   .list-wrapper { @apply flex-1 overflow-y-auto custom-scrollbar relative; }
 
-
   /* --- [컴포넌트: 헤더 (TheHeader)] --- */
-  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-20; }
+  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-50; }
   .header-logo { @apply text-2xl font-bold text-[#AE8B72] flex items-center gap-2; }
   .header-nav { @apply hidden md:flex items-center gap-6 text-gray-600 font-medium; }
   .nav-link { @apply hover:text-[#AE8B72] transition; }
   .header-auth { @apply flex items-center gap-4; }
   .btn-login { @apply text-gray-600 hover:text-[#AE8B72] font-medium; }
-  .btn-signup { @apply btn-base; } /* 공통 버튼 사용 */
-
+  .btn-signup { @apply btn-base; }
 
   /* --- [컴포넌트: 필터바 (FilterBar)] --- */
-  .filter-bar { @apply bg-[#FFFBE8] border-b border-[#CEAC93] px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-20; }
+  .filter-bar { @apply bg-[#FFFBE8] border-b border-[#CEAC93] px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-10; }
   .search-wrapper { @apply relative; }
-  .search-input { @apply input-base pl-4 pr-10 py-2 w-64; } /* 공통 인풋 + 개별 사이즈 */
+  .search-input { @apply input-base pl-4 pr-10 py-2 w-64; }
   .search-btn { @apply absolute right-2 top-1.5 p-1 text-gray-400 hover:text-[#AE8B72] hover:bg-gray-100 rounded-full transition; }
   .filter-divider { @apply w-px h-6 bg-[#CEAC93] mx-2; }
   .filter-select { @apply input-base px-3 py-2 hover:border-[#AE8B72] cursor-pointer text-gray-700; }
@@ -133,7 +117,6 @@
   .dropdown-box { @apply absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 animate-fade-in-up; }
   .range-slider { @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#AE8B72]; }
   .btn-ai { @apply ml-auto flex items-center gap-2 bg-gradient-to-r from-[#AE8B72] to-[#CEAC93] text-white px-4 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition; }
-
 
   /* --- [컴포넌트: 리스트 (ProductList)] --- */
   .list-container { @apply overflow-y-auto custom-scrollbar p-4 h-full; }
@@ -145,7 +128,6 @@
   .card-price { @apply font-bold text-lg truncate text-gray-900; }
   .card-title { @apply text-sm text-gray-600 font-bold truncate; }
   .empty-state { @apply h-64 flex flex-col items-center justify-center text-gray-400; }
-
 
   /* --- [컴포넌트: 상세 (ProductDetail)] --- */
   .detail-container { @apply h-full flex flex-col bg-white; }
@@ -173,8 +155,7 @@
 
   .detail-footer { @apply p-4 border-t border-gray-200 bg-white flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20; }
   .btn-like { @apply flex-1 border border-[#AE8B72]/20 bg-[#CEAC93]/10 py-3 rounded-xl font-bold text-[#AE8B72] hover:bg-[#CEAC93]/20 transition flex items-center justify-center gap-2; }
-  .btn-contact { @apply flex-[2] btn-base py-3 flex items-center justify-center gap-2 hover:bg-[#8c6b54]; } /* 공통 버튼 + 확장 */
-
+  .btn-contact { @apply flex-[2] btn-base py-3 flex items-center justify-center gap-2 hover:bg-[#8c6b54]; }
 
   /* --- [컴포넌트: 지도 오버레이 (KakaoMap)] --- */
   .map-overlay { @apply absolute top-4 right-4 z-20 w-36 flex flex-col gap-2 max-h-[90%]; }
@@ -182,6 +163,22 @@
   .infra-btn { @apply flex items-center gap-3 p-2 hover:bg-[#AE8B72]/10 rounded-md transition-all duration-200 text-left; }
   .infra-icon { @apply w-5 h-5 text-gray-400 group-hover:text-[#AE8B72] group-hover:scale-110 transition-transform; }
   .btn-reset { @apply bg-white/90 text-red-500 text-xs font-bold py-2 px-3 rounded-lg shadow border border-red-100 hover:bg-red-50 transition flex items-center justify-center gap-1; }
+
+  /* --- [컴포넌트: 헤더 (TheHeader)] --- */
+  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-20; }
+  .header-logo { @apply text-2xl font-bold text-[#AE8B72] flex items-center gap-2; }
+  .header-nav { @apply hidden md:flex items-center gap-6 text-gray-600 font-medium; }
+  .nav-link { @apply hover:text-[#AE8B72] transition; }
+  .header-auth { @apply flex items-center gap-4; }
+  .btn-login { @apply text-gray-600 hover:text-[#AE8B72] font-medium; }
+  .btn-signup { @apply btn-base; }
+
+  .header-user-btn { @apply flex items-center gap-2 border border-gray-200 rounded-full pl-1 pr-3 py-1 hover:shadow-md hover:border-[#AE8B72] transition bg-white cursor-pointer; }
+  .header-user-avatar { @apply w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500; }
+  .header-dropdown-menu { @apply absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-xl py-2 z-[100] animate-fade-in-up; }
+  .dropdown-item { @apply flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-[#FFFBE8] hover:text-[#AE8B72] transition-colors w-full text-left font-medium; }
+  .dropdown-divider { @apply h-px bg-gray-100 my-1; }
+  .dropdown-overlay { @apply fixed inset-0 z-40 cursor-default; }
 }
 
 /* =========================================
