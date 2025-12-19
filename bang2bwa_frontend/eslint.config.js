@@ -21,4 +21,10 @@ export default defineConfig([
 
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
+
+  {
+    rules: {
+      'no-unused-vars': 'off',
+    },
+  },
 ])

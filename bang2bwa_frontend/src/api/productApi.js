@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:8080';
+import { api } from '@/api/index';
 
 /**
  * 매물 검색 API
@@ -9,9 +7,9 @@ const BASE_URL = 'http://localhost:8080';
  */
 export const searchProducts = async (params) => {
     try {
-        const response = await axios.post(`${BASE_URL}/products/search`, params);
+        const response = await api.post('/products/search', params);
         return response.data;
     } catch (error) {
-        throw error;
+        return error;
     }
 };

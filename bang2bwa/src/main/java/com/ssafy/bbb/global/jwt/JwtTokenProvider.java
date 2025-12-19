@@ -60,6 +60,7 @@ public class JwtTokenProvider {
 		String accessToken = Jwts.builder()
 									.subject(authentication.getName())
 									.claim("userId", userDetails.getUserId())
+									.claim("name", userDetails.getName())
 									.claim("auth", authorities)
 									.expiration(accessTokenExpiresIn)
 									.signWith(key)
@@ -93,8 +94,9 @@ public class JwtTokenProvider {
 		
 		Long userId = claims.get("userId", Long.class);
 		String email = claims.getSubject();
+		String name = claims.get("name", String.class);
 		
-		CustomUserDetails principal = new CustomUserDetails(userId, email, (List<GrantedAuthority>) authorities);
+		CustomUserDetails principal = new CustomUserDetails(userId, email, name, (List<GrantedAuthority>) authorities);
 		
 		return new UsernamePasswordAuthenticationToken(principal, "", authorities);
 	}

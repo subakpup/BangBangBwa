@@ -16,13 +16,75 @@
     </div>
 
     <div class="header-auth">
-        <button class="btn-login">로그인</button>
+      <template v-if="!isLogin">
+        <RouterLink to="/login" class="btn-login">로그인</RouterLink>
         <RouterLink to="/signup" class="btn-signup">회원가입</RouterLink>
+      </template>
+
+      <template v-else>
+        <div class="relative">
+          <button @click="toggleDropdown" class="header-user-btn">
+            <div class="header-user-avatar">
+              <User class="w-5 h-5"/>
+            </div>
+            <span class="text-sm font-bold text-gray-700">{{ userName }}</span>
+            <ChevronDown class="w-4 h-4 text-gray-400 transition-transform duration-200" 
+                        :class="{ 'rotate-180': isDropdownOpen }" />
+          </button>
+
+          <div v-if="isDropdownOpen" class="header-dropdown-menu">
+            <RouterLink to="/mypage" class="dropdown-item" @click="closeDropdown">
+              <User class="w-4 h-4" />
+              마이페이지
+            </RouterLink>
+
+            <RouterLink to="/mypage/like" class="dropdown-item" @click="closeDropdown">
+              <Heart class="w-4 h-4" />
+              찜 목록
+            </RouterLink>
+
+            <div class="dropdown-divider"></div>
+
+            <button @click="handleLogout" class="dropdown-item text-red-500 hover:bg-red-50">
+              <LogOut class="w-4 h-4" />
+              로그아웃
+            </button>
+          </div>
+
+          <div v-if="isDropdownOpen" 
+              @click="closeDropdown" 
+              class="dropdown-overlay">
+          </div>
+        </div>
+      </template>
     </div>
   </header>
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
-import { Home } from 'lucide-vue-next'
+import { ref } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
+import { Home, User, ChevronDown, Heart, LogOut } from 'lucide-vue-next';
+import { isLogin, logout, userName } from '@/stores/auth';
+
+const router = useRouter();
+
+// 드롭다운 상태 관리
+const isDropdownOpen = ref(false);
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+// 드롭다운 닫기
+const closeDropdown = () => {
+  isDropdownOpen.value = false;
+};
+
+// 로그아웃 핸들러
+const handleLogout = async () => {
+  closeDropdown();
+  await logout();
+  router.push('/');
+};
 </script>
