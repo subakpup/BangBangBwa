@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import com.ssafy.bbb.model.dto.ReservationDto;
+import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.enums.ReservationStatus;
 
 public interface ReservationDao {
@@ -31,4 +32,6 @@ public interface ReservationDao {
 	public List<ReservationDto> findExpiredPendingReservations();
 
 	public List<ReservationDto> findExpiredReportedReservations();
+
+	public UserInfoDto.MyReservationDto findMyResrvationInfoByUserId(Long userId);
 }

@@ -14,6 +14,7 @@ import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.global.jwt.JwtTokenProvider;
 import com.ssafy.bbb.model.dao.RefreshTokenDao;
+import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
 	private final EmailVerificationService emailVerificationService;
 	private final RefreshTokenDao refreshTokenDao;
 	private final UserDao userDao;
+	private final ReservationDao reservationDao;
 	
 	
 	@Override
@@ -125,8 +127,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public UserInfoDto getUserInfo(Long userId) {
-		return userDao.findUserInfoById(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		UserInfoDto user = userDao.findUserInfoById(userId)
+									.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		
+		user.setReservation(reservationDao.findMyResrvationInfoByUserId(userId));
+		
+		return user;
 	}
 	
 	@Override
