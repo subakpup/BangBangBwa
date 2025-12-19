@@ -6,7 +6,7 @@
   
   <!-- 관심 매물 -->
   
-  <select id="existsStarProduct">
+  <select id="existsStarProdct">
   	SELECT COUNT(*) FROM star_products
   	WHERE user_id = #{userId} AND product_id = #{productId}
   </select>
@@ -31,7 +31,7 @@
   
   <select id="existsStarDong">
   	SELECT COUNT(*) FROM star_dongs
-  	WHERE user_id = #{user_id} AND sgg_nm = #{sggNm} AND umd_nm = #{umdNm}
+  	WHERE user_id = #{userId} AND sgg_nm = #{sggNm} AND umd_nm = #{umdNm}
   </select>
   
   <insert id="saveStarDong">
