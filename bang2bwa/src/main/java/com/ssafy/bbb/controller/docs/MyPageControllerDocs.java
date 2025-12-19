@@ -1,7 +1,10 @@
 package com.ssafy.bbb.controller.docs;
 
+import java.util.List;
+
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
@@ -20,4 +23,7 @@ public interface MyPageControllerDocs {
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제합니다.")
     public ApiResponse<String> withdraw(CustomUserDetails user);
+    
+    @Operation(summary = "내 매물 조회(중개업자)", description = "자신이 등록한 매물을 확인합니다.")
+    public ApiResponse<List<MyProductDto>> myProduct(CustomUserDetails user);
 }

@@ -75,4 +75,23 @@
   		FROM reservations r JOIN products p ON r.product_id = p.product_id
   		WHERE r.user_id = #{userId}
   	</select>
+  	
+  	<select id="findProductByAgentId">
+  		SELECT 
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm, ' ', p.jibun) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent
+  		FROM reservations r RIGHT JOIN products p ON (r.product_id = p.product_id)
+  		WHERE p.agent_id = #{agentId}
+  	</select>
   </mapper>

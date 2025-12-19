@@ -1,5 +1,7 @@
 package com.ssafy.bbb.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ssafy.bbb.controller.docs.MyPageControllerDocs;
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
@@ -21,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/my-page")
 @RequiredArgsConstructor
 public class MyPageController implements MyPageControllerDocs {
 	private final UserService userService;
@@ -58,5 +61,11 @@ public class MyPageController implements MyPageControllerDocs {
 		return ApiResponse.successWithNoContent("회원 탈퇴가 완료되었습니다.");
 	}
 
-	
+	@Override
+	@GetMapping("/products")
+	public ApiResponse<List<MyProductDto>> myProduct(@AuthenticationPrincipal CustomUserDetails user) {
+		List<MyProductDto> myProducts = userService.myProducts(user.getUserId());
+		
+		return ApiResponse.success(myProducts);
+	}
 }

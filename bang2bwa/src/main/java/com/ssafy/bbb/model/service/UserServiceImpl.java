@@ -1,5 +1,7 @@
 package com.ssafy.bbb.model.service;
 
+import java.util.List;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +18,7 @@ import com.ssafy.bbb.global.jwt.JwtTokenProvider;
 import com.ssafy.bbb.model.dao.RefreshTokenDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
@@ -164,5 +167,10 @@ public class UserServiceImpl implements UserService {
 		refreshTokenDao.deleteToken(email);
 		
 		userDao.deleteUser(userId);
+	}
+	
+	@Override
+	public List<MyProductDto> myProducts(Long agentId) {
+		return reservationDao.findProductByAgentId(agentId);
 	}
 }
