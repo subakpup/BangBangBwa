@@ -16,15 +16,6 @@
                                required />
                     </div>
                     
-                    <div v-if="emailStep >= 1" class="input-row" style="border-top: 1px solid #eee;">
-                        <input type="text" 
-                               v-model="verificationCode" 
-                               class="form-input" 
-                               placeholder="인증번호 6자리" 
-                               :disabled="emailStep === 2"
-                               @input="errors.code = false" />
-                    </div>
-
                     <div class="input-row">
                         <input type="password" 
                                v-model="form.password" 
@@ -48,13 +39,6 @@
                 </div>
                 <div class="error-msg" v-if="isEmailDuplicate">
                     <span>이미 가입된 이메일입니다. 다른 이메일을 사용해주세요.</span>
-                </div>
-
-                <div class="error-msg" v-if="errors.code">
-                    <span>인증번호를 입력해주세요.</span>
-                </div>
-                <div class="error-msg" v-if="isCodeMismatch">
-                    <span>인증번호가 올바르지 않습니다.</span>
                 </div>
 
                 <div class="error-msg" v-if="errors.password">
@@ -90,9 +74,8 @@
                     <span>생년월일을 입력해주세요.</span>
                 </div>
 
-
                 <div class="input-group mg-top">
-                     <div class="input-row">
+                      <div class="input-row">
                         <input type="tel" 
                                v-model="form.phone" 
                                class="form-input" 
@@ -105,8 +88,7 @@
                     <span>휴대전화번호를 입력해주세요.</span>
                 </div>
 
-
-                 <div class="role-group">
+                <div class="role-group">
                     <label class="role-label">
                         <input type="radio" v-model="form.role" value="ROLE_USER" class="role-input hidden">
                         <span class="role-text">일반 회원</span>
@@ -135,6 +117,24 @@
                     </div>
                 </div>
                 
+                <div v-if="emailStep >= 1" class="input-group mg-top">
+                    <div class="input-row">
+                        <input type="text" 
+                               v-model="verificationCode" 
+                               class="form-input" 
+                               placeholder="인증번호 6자리" 
+                               :disabled="emailStep === 2"
+                               @input="errors.code = false" />
+                    </div>
+                </div>
+
+                <div class="error-msg" v-if="errors.code">
+                    <span>인증번호를 입력해주세요.</span>
+                </div>
+                <div class="error-msg" v-if="isCodeMismatch">
+                    <span>인증번호가 올바르지 않습니다.</span>
+                </div>
+
                 <div class="mg-top-lg">
                     <button @click.prevent="handleAuthStep" class="btn-submit">
                         {{ buttonText }}
@@ -257,7 +257,7 @@ const processEmailRequest = async () => {
     try {
         // 중복 체크
         const checkResponse = await checkEmail(form.value.email);
-        if (!checkResponse || checkResponse.success !== 'SUCCESS') {
+        if (checkResponse.success !== 'SUCCESS') {
             isEmailDuplicate.value = true;
             return;
         }
@@ -265,7 +265,7 @@ const processEmailRequest = async () => {
 
         // 메일 발송
         const mailResponse = await sendEmailVerification(form.value.email);
-        if (!(mailResponse instanceof Error)) {
+        if (!(mailResponse.success == "FAIL")) {
             alert("인증번호가 발송되었습니다. 메일을 확인해주세요!");
             emailStep.value = STEP.VERIFY;
         } else {
@@ -286,7 +286,7 @@ const processCodeVerification = async () => {
 
     try {
         const response = await verifyEmail(form.value.email, verificationCode.value);
-        if (response === "인증 성공" || response.success || !(response instanceof Error)) {
+        if (response.success == "SUCCESS") {
             alert("이메일 인증이 완료되었습니다!");
             emailStep.value = STEP.DONE;
             isCodeMismatch.value = false;
@@ -307,11 +307,10 @@ const processSignup = async () => {
 
     try {
         const response = await signup(form.value);
-        if (response instanceof Error || response.code === 'ERROR') {
+        if (response.success == "SUCCESS") {
             alert(response.message || "회원가입에 실패하였습니다.");
         } else {
-            alert("가입을 환영합니다, 주인님! 🎉");
-            router.push({ name: 'home' });
+            router.push({ name: 'login' });
         }
     } catch (error) {
         console.error(error);
