@@ -37,6 +37,7 @@ public class SecurityConfig {
 			.httpBasic(basic -> basic.disable())
 			// 요청 권한 설정 (여기가 핵심!)
 			.authorizeHttpRequests(auth -> auth 
+					.requestMatchers("/my-page/products/**").hasRole("AGENT")
 					.requestMatchers("/products/search", "/products/**").permitAll() // 로그인 없이도 들어갈 수 있는 곳들 (검색, 상세 조회)
 					.requestMatchers("/users/signup", "users/login", "users/refresh").permitAll() // 회원가입, 로그인, 토큰 재발급은 모두에게 허용
 					.requestMatchers("/users/email-verification/**").permitAll() // 이메일 체크 관련 모두에게 허용

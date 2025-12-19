@@ -1,5 +1,8 @@
 package com.ssafy.bbb.model.service;
 
+import java.util.List;
+
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
@@ -31,4 +34,7 @@ public interface UserService {
 	
 	// 회원 탈퇴
 	public void withdraw(Long userId, String email);
+	
+	// 내 매물 조회 (중개업자 전용)
+	public List<MyProductDto> myProducts(Long agentId);
 }
