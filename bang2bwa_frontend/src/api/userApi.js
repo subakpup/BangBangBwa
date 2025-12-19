@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const BASE_URL = 'http://localhost:8080/users';
+import { api } from "@/api/index";
 
 // POST /singup (Body: SignupRequestDto)
 export const signup = async (request) => {
     try {
-        const response = await axios.post(`${BASE_URL}/signup`, request);
+        const response = await api.post('/users/signup', request);
         return response.data;
     } catch (error) {
         return error;
@@ -15,7 +13,7 @@ export const signup = async (request) => {
 // GET /email-verification/duplicate
 export const checkEmail = async (email) => {
     try {
-        const response = await axios.get(`${BASE_URL}/email-verification/duplicate`, {
+        const response = await api.get('/users/email-verification/duplicate', {
             params: { email }
         });
         return response.data;
@@ -27,7 +25,7 @@ export const checkEmail = async (email) => {
 // POST /email-verification/request
 export const sendEmailVerification = async (email) => {
     try {
-        const response = await axios.post(`${BASE_URL}/email-verification/request`, null, {
+        const response = await api.post('/users/email-verification/request', null, {
             params: { email }
         });
         return response.data;
@@ -39,9 +37,29 @@ export const sendEmailVerification = async (email) => {
 // POST /email-verification/verify
 export const verifyEmail = async (email, code) => {
     try {
-        const response = await axios.post(`${BASE_URL}/email-verification/verify`, null, {
+        const response = await api.post('/users/email-verification/verify', null, {
             params: { email, code }
         });
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+};
+
+// POST /login (body: LoginRequestDto)
+export const login = async (request) => {
+    try {
+        const response = await api.post('/users/login', request);
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+};
+
+// POST /logout
+export const logout = async () => {
+    try {
+        const response = await api.post('/users/logout');
         return response.data;
     } catch (error) {
         return error;
