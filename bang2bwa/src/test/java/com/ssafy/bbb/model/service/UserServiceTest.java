@@ -31,7 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.global.jwt.JwtTokenProvider;
-import com.ssafy.bbb.model.dao.RefreshTokenDao;
+import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
@@ -41,6 +41,7 @@ import com.ssafy.bbb.model.dto.user.UserDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
 import com.ssafy.bbb.model.enums.Role;
+import com.ssafy.bbb.util.RedisUtil;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -50,8 +51,9 @@ class UserServiceTest {
 
     @Mock private AuthenticationManager authenticationManager;
     @Mock private JwtTokenProvider jwtTokenProvider;
-    @Mock private RefreshTokenDao refreshTokenDao;
+    @Mock private RedisUtil redisUtil;
     @Mock private UserDao userDao;
+    @Mock private ReservationDao reservationDao;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private EmailVerificationService emailVerificationService;
 
@@ -59,6 +61,7 @@ class UserServiceTest {
     private final String EMAIL = "test@ssafy.com";
     private final String PASSWORD = "password1234";
     private final Long USER_ID = 1L;
+    private final String REDIS_REFRESH_PREFIX = "RT:";
 
     @Nested
     @DisplayName("로그인 테스트")
@@ -85,7 +88,7 @@ class UserServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.getAccessToken()).isEqualTo("access");
-            verify(refreshTokenDao).saveToken(EMAIL, "refresh");
+            verify(redisUtil).setDataExpire(eq(REDIS_REFRESH_PREFIX + EMAIL), eq("refresh"), anyLong());
         }
 
         @Test
@@ -204,7 +207,7 @@ class UserServiceTest {
             given(jwtTokenProvider.validateToken("oldRefresh")).willReturn(true);
             given(jwtTokenProvider.getAuthentication("oldAccess")).willReturn(auth);
             given(auth.getName()).willReturn(EMAIL);
-            given(refreshTokenDao.getToken(EMAIL)).willReturn("oldRefresh");
+            given(redisUtil.getData(REDIS_REFRESH_PREFIX + EMAIL)).willReturn("oldRefresh");
             given(jwtTokenProvider.createToken(auth)).willReturn(newToken);
 
             // when
@@ -212,7 +215,7 @@ class UserServiceTest {
 
             // then
             assertThat(result).isEqualTo(newToken);
-            verify(refreshTokenDao).saveToken(EMAIL, "newRefresh");
+            verify(redisUtil).setDataExpire(eq(REDIS_REFRESH_PREFIX + EMAIL), eq("newRefresh"), anyLong());
         }
 
         @Test
@@ -238,7 +241,7 @@ class UserServiceTest {
             given(jwtTokenProvider.validateToken("oldRefresh")).willReturn(true);
             given(jwtTokenProvider.getAuthentication("oldAccess")).willReturn(auth);
             given(auth.getName()).willReturn(EMAIL);
-            given(refreshTokenDao.getToken(EMAIL)).willReturn("differentToken"); // 불일치
+            given(redisUtil.getData(REDIS_REFRESH_PREFIX + EMAIL)).willReturn("differentToken"); // 불일치
 
             // when & then
             assertThatThrownBy(() -> userService.refresh(oldToken))
@@ -327,6 +330,7 @@ class UserServiceTest {
         // given
         UserInfoDto userInfoDto = new UserInfoDto();
         given(userDao.findUserInfoById(USER_ID)).willReturn(Optional.of(userInfoDto));
+        given(reservationDao.findMyResrvationInfoByUserId(USER_ID)).willReturn(null);
 
         // when
         UserInfoDto result = userService.getUserInfo(USER_ID);
@@ -354,7 +358,7 @@ class UserServiceTest {
         userService.logout(EMAIL);
 
         // then
-        verify(refreshTokenDao).deleteToken(EMAIL);
+        verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
     }
 
     @Test
@@ -364,7 +368,7 @@ class UserServiceTest {
         userService.withdraw(USER_ID, EMAIL);
 
         // then
-        verify(refreshTokenDao).deleteToken(EMAIL);
+        verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
         verify(userDao).deleteUser(USER_ID);
     }
 }
