@@ -4,6 +4,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,8 +56,10 @@ public class UserController implements UserControllerDocs {
 	
 	@Override
 	@PostMapping("/logout")
-	public ApiResponse<String> logout(@AuthenticationPrincipal CustomUserDetails user) {
-		userService.logout(user.getUsername());
+	public ApiResponse<String> logout(@AuthenticationPrincipal CustomUserDetails user
+									, @RequestHeader("Authorization") String accessToken) {
+		
+		userService.logout(user.getUsername(), accessToken.substring(7));
 		
 		return ApiResponse.successWithNoContent("로그아웃 되었습니다.");
 	}

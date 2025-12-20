@@ -19,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.ssafy.bbb.global.jwt.JwtAuthenticationFilter;
 import com.ssafy.bbb.global.jwt.JwtTokenProvider;
+import com.ssafy.bbb.util.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final JwtTokenProvider jwtTokenProvider;
+	private final RedisUtil redisUtil;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -43,9 +45,9 @@ public class SecurityConfig {
 					.requestMatchers("/users/email-verification/**").permitAll() // 이메일 체크 관련 모두에게 허용
 					.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Swagger 관련 설정도 모두에게 허용
 					.requestMatchers("/reservations/**").permitAll() // 개발중에 잠시 열어둠.
-          .requestMatchers("/house/**").permitAll() // 개발 중에 잠시 열어둠.
+					.requestMatchers("/house/**").permitAll() // 개발 중에 잠시 열어둠.
 					.anyRequest().authenticated()) // 나머지는 다 로그인 해야 함
-			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 		
 		return http.build();
 	}

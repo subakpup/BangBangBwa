@@ -23,7 +23,7 @@ public interface MyPageControllerDocs {
     public ApiResponse<String> updatePassword(@Parameter(hidden=true) CustomUserDetails user, PasswordUpdateDto newPassword);
 
     @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제합니다.")
-    public ApiResponse<String> withdraw(@Parameter(hidden=true) CustomUserDetails user);
+    public ApiResponse<String> withdraw(@Parameter(hidden=true) CustomUserDetails user, String accessToken);
     
     @Operation(summary = "내 매물 조회(중개업자)", description = "자신이 등록한 매물을 확인합니다.")
     public ApiResponse<List<MyProductDto>> myProduct(@Parameter(hidden=true) CustomUserDetails user);

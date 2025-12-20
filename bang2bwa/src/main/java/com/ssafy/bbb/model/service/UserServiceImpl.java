@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.global.jwt.JwtTokenProvider;
-import com.ssafy.bbb.model.dao.RefreshTokenDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.MyProductDto;
@@ -27,6 +26,7 @@ import com.ssafy.bbb.model.dto.user.UserDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
 import com.ssafy.bbb.model.enums.Role;
+import com.ssafy.bbb.util.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +39,15 @@ public class UserServiceImpl implements UserService {
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
+	private final RedisUtil redisUtil;
 	
 	private final EmailVerificationService emailVerificationService;
-	private final RefreshTokenDao refreshTokenDao;
 	private final UserDao userDao;
 	private final ReservationDao reservationDao;
 	
+	private static final String REFRESH_PREFIX = "RT:";
+	private static final String BLACKLIST_PREFIX = "BL:";
+	private static final long REFRESH_EXPIRE_TIME = 86400L; // 1일
 	
 	@Override
 	@Transactional
@@ -57,7 +60,10 @@ public class UserServiceImpl implements UserService {
 			
 			TokenInfo tokenInfo = jwtTokenProvider.createToken(authentication);
 			
-			refreshTokenDao.saveToken(request.getEmail(), tokenInfo.getRefreshToken());
+			redisUtil.setDataExpire(REFRESH_PREFIX + request.getEmail()
+								, tokenInfo.getRefreshToken()
+								, REFRESH_EXPIRE_TIME);
+			
 			return tokenInfo;
 			
 		} catch(UsernameNotFoundException | BadCredentialsException e) {
@@ -69,8 +75,13 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void logout(String email) {
-		refreshTokenDao.deleteToken(email);
+	public void logout(String email, String accessToken) {
+		redisUtil.deleteData(REFRESH_PREFIX + email);
+		
+		Long expiration = jwtTokenProvider.getRemainExpiration(accessToken);
+		if(expiration > 0) {
+			redisUtil.setDataExpire(BLACKLIST_PREFIX + accessToken, "Logout", expiration/1000);
+		}
 	}
 	
 	@Override
@@ -82,7 +93,7 @@ public class UserServiceImpl implements UserService {
 		
 		Authentication authentication = jwtTokenProvider.getAuthentication(oldToken.getAccessToken());
 		
-		String savedToken = refreshTokenDao.getToken(authentication.getName());
+		String savedToken = redisUtil.getData(REFRESH_PREFIX + authentication.getName());
 		
 		if(savedToken == null || !savedToken.equals(oldToken.getRefreshToken())) {
 			throw new CustomException(ErrorCode.EXPIRED_TOKEN);
@@ -90,7 +101,9 @@ public class UserServiceImpl implements UserService {
 		
 		TokenInfo newToken = jwtTokenProvider.createToken(authentication);
 		
-		refreshTokenDao.saveToken(authentication.getName(), newToken.getRefreshToken());
+		redisUtil.setDataExpire(REFRESH_PREFIX + authentication.getName()
+								, newToken.getRefreshToken()
+								, REFRESH_EXPIRE_TIME);
 		return newToken;
 	}
 	
@@ -163,8 +176,13 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void withdraw(Long userId, String email) {
-		refreshTokenDao.deleteToken(email);
+	public void withdraw(Long userId, String email, String accessToken) {
+		redisUtil.deleteData(REFRESH_PREFIX + email);
+		
+		Long expiration = jwtTokenProvider.getRemainExpiration(accessToken);
+		if(expiration > 0) {
+			redisUtil.setDataExpire(BLACKLIST_PREFIX + accessToken, "Withdraw", expiration/1000);
+		}
 		
 		userDao.deleteUser(userId);
 	}

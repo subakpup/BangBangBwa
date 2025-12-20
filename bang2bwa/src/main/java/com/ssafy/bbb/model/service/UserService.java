@@ -15,7 +15,7 @@ public interface UserService {
 	public TokenInfo login(LoginRequestDto request);
 	
 	// 로그아웃
-	public void logout(String email);
+	public void logout(String email, String accessToken);
 	
 	// 토큰 재발급
 	public TokenInfo refresh(TokenInfo oldToken);
@@ -33,7 +33,7 @@ public interface UserService {
 	public void updatePassword(Long userId, PasswordUpdateDto request);
 	
 	// 회원 탈퇴
-	public void withdraw(Long userId, String email);
+	public void withdraw(Long userId, String email, String accessToken);
 	
 	// 내 매물 조회 (중개업자 전용)
 	public List<MyProductDto> myProducts(Long agentId);

@@ -31,7 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.global.jwt.JwtTokenProvider;
-import com.ssafy.bbb.model.dao.RefreshTokenDao;
+import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.LoginRequestDto;
@@ -41,6 +41,7 @@ import com.ssafy.bbb.model.dto.user.UserDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
 import com.ssafy.bbb.model.enums.Role;
+import com.ssafy.bbb.util.RedisUtil;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -50,8 +51,9 @@ class UserServiceTest {
 
     @Mock private AuthenticationManager authenticationManager;
     @Mock private JwtTokenProvider jwtTokenProvider;
-    @Mock private RefreshTokenDao refreshTokenDao;
+    @Mock private RedisUtil redisUtil;
     @Mock private UserDao userDao;
+    @Mock private ReservationDao reservationDao;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private EmailVerificationService emailVerificationService;
 
@@ -59,6 +61,9 @@ class UserServiceTest {
     private final String EMAIL = "test@ssafy.com";
     private final String PASSWORD = "password1234";
     private final Long USER_ID = 1L;
+    private final String REDIS_REFRESH_PREFIX = "RT:";
+    private final String BLACKLIST_PREFIX = "BL:";
+    private final String TOKEN = "accesstoken";
 
     @Nested
     @DisplayName("로그인 테스트")
@@ -85,7 +90,7 @@ class UserServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.getAccessToken()).isEqualTo("access");
-            verify(refreshTokenDao).saveToken(EMAIL, "refresh");
+            verify(redisUtil).setDataExpire(eq(REDIS_REFRESH_PREFIX + EMAIL), eq("refresh"), anyLong());
         }
 
         @Test
@@ -204,7 +209,7 @@ class UserServiceTest {
             given(jwtTokenProvider.validateToken("oldRefresh")).willReturn(true);
             given(jwtTokenProvider.getAuthentication("oldAccess")).willReturn(auth);
             given(auth.getName()).willReturn(EMAIL);
-            given(refreshTokenDao.getToken(EMAIL)).willReturn("oldRefresh");
+            given(redisUtil.getData(REDIS_REFRESH_PREFIX + EMAIL)).willReturn("oldRefresh");
             given(jwtTokenProvider.createToken(auth)).willReturn(newToken);
 
             // when
@@ -212,7 +217,7 @@ class UserServiceTest {
 
             // then
             assertThat(result).isEqualTo(newToken);
-            verify(refreshTokenDao).saveToken(EMAIL, "newRefresh");
+            verify(redisUtil).setDataExpire(eq(REDIS_REFRESH_PREFIX + EMAIL), eq("newRefresh"), anyLong());
         }
 
         @Test
@@ -238,7 +243,7 @@ class UserServiceTest {
             given(jwtTokenProvider.validateToken("oldRefresh")).willReturn(true);
             given(jwtTokenProvider.getAuthentication("oldAccess")).willReturn(auth);
             given(auth.getName()).willReturn(EMAIL);
-            given(refreshTokenDao.getToken(EMAIL)).willReturn("differentToken"); // 불일치
+            given(redisUtil.getData(REDIS_REFRESH_PREFIX + EMAIL)).willReturn("differentToken"); // 불일치
 
             // when & then
             assertThatThrownBy(() -> userService.refresh(oldToken))
@@ -327,6 +332,7 @@ class UserServiceTest {
         // given
         UserInfoDto userInfoDto = new UserInfoDto();
         given(userDao.findUserInfoById(USER_ID)).willReturn(Optional.of(userInfoDto));
+        given(reservationDao.findMyResrvationInfoByUserId(USER_ID)).willReturn(null);
 
         // when
         UserInfoDto result = userService.getUserInfo(USER_ID);
@@ -348,23 +354,31 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("[성공] 로그아웃 테스트: 리프레시 토큰 삭제")
+    @DisplayName("[성공] 로그아웃 테스트: 리프레시 토큰 삭제 및 액세스 토큰 블랙리스트 등록")
     void logout_Success() {
+    	// given
+    	given(jwtTokenProvider.getRemainExpiration(TOKEN)).willReturn(600000L);
+    	
         // when
-        userService.logout(EMAIL);
+        userService.logout(EMAIL, TOKEN);
 
         // then
-        verify(refreshTokenDao).deleteToken(EMAIL);
+        verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
+        verify(redisUtil).setDataExpire(BLACKLIST_PREFIX + TOKEN, "Logout", 600L);
     }
 
     @Test
-    @DisplayName("[성공] 회원 탈퇴 테스트: 토큰 삭제 및 유저 삭제")
+    @DisplayName("[성공] 회원 탈퇴 테스트: 토큰 삭제 및 유저 삭제 및 액세스 토큰 블랙리스트 등록")
     void withdraw_Success() {
+    	// given
+    	given(jwtTokenProvider.getRemainExpiration(TOKEN)).willReturn(600000L);
+    	
         // when
-        userService.withdraw(USER_ID, EMAIL);
+        userService.withdraw(USER_ID, EMAIL, TOKEN);
 
         // then
-        verify(refreshTokenDao).deleteToken(EMAIL);
+        verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
         verify(userDao).deleteUser(USER_ID);
+        verify(redisUtil).setDataExpire(BLACKLIST_PREFIX + TOKEN, "Withdraw", 600L);
     }
 }

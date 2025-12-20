@@ -119,6 +119,20 @@ public class JwtTokenProvider {
 		return false;
 	}
 	
+	// 토큰의 남은 유효기간 검증
+	public Long getRemainExpiration(String token) {
+		Date expiration = Jwts.parser()
+							.verifyWith(key)
+							.build()
+							.parseSignedClaims(token)
+							.getPayload()
+							.getExpiration();
+		
+		Long now = new Date().getTime();
+		
+		return (expiration.getTime() - now); // 남은 시간(ms 단위)
+	}
+	
 	
 	private Claims parseClaims(String accessToken) {
 		try {
