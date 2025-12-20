@@ -28,6 +28,7 @@ import com.ssafy.bbb.model.enums.PaymentStatus;
 import com.ssafy.bbb.model.enums.PaymentType;
 import com.ssafy.bbb.model.enums.ReservationStatus;
 import com.ssafy.bbb.util.GeometryUtils;
+import com.ssafy.bbb.util.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,13 @@ public class ReservationServiceImpl implements ReservationService {
 
 	private final PgClient pgClient;
 	private final NotificationService notificationService;
+	private final RedisUtil redisUtil;
+	
+	private static final String PENDING_PREFIX = "expire:reservation:pending:";
+	private static final String REPORTED_PREFIX = "expire:reservation:reported:";
+	
+	private static final long PENDING_EXPIRE = 3600L; // 1시간
+	private static final long REPORTED_EXPIRE = 600L; // 10분
 
 	// 예약자 예약 요청
 	@Override
@@ -109,6 +117,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(agentEmail, "[방방봐] 새로운 예약 요청이 도착했습니다!", message.toString());
 		}
+		
+		// 8. redis에 1시간 pending timer 설정
+		redisUtil.setDataExpire(PENDING_PREFIX + reservation.getReservationId(), "ON", PENDING_EXPIRE);
 	}
 
 	// 예약자 사정으로 인한 예약 취소
@@ -160,6 +171,9 @@ public class ReservationServiceImpl implements ReservationService {
 			notificationService.sendEmail(userEmail, "[방방봐] 예약이 취소되었습니다.", "");
 		if (agentEmail != null && !agentEmail.isEmpty())
 			notificationService.sendEmail(agentEmail, "[방방봐] 사용자의 요청으로 예약이 취소되었습니다.", "");
+		
+		// 7. pending timer 해제
+		redisUtil.deleteData(PENDING_PREFIX + reservationId);
 	}
 
 	// 중개업자 예약 거절
@@ -199,6 +213,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(userEmail, "[방방봐] 예약 요청이 거절되었습니다.", message.toString());
 		}
+		
+		// 7. pending timer 해제
+		redisUtil.deleteData(PENDING_PREFIX + reservationId);
 	}
 
 	// 중개업자 예약 승인
@@ -253,6 +270,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(userEmail, "[방방봐] 예약 요청이 확정 되었습니다!", message.toString());
 		}
+		
+		// 7. pending timer 해제
+		redisUtil.deleteData(PENDING_PREFIX + reservationId);
 	}
 
 	// 만남 성사
@@ -354,6 +374,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(offenderEmail, "[방방봐]", message.toString());
 		}
+		
+		// redis에 reporter timer(10분 설정)
+		redisUtil.setDataExpire(REPORTED_PREFIX + reservationId, "ON", REPORTED_EXPIRE);
 	}
 
 	@Override
@@ -404,6 +427,9 @@ public class ReservationServiceImpl implements ReservationService {
 		if (reporterEmail != null && !reporterEmail.isEmpty()) {
 			notificationService.sendEmail(reporterEmail, "[방방봐]", "상대방이 근처에 있습니다. 잠시만 기다려주세요.");
 		}
+		
+		// reported timer 해제
+		redisUtil.deleteData(REPORTED_PREFIX + reservationId);
 	}
 
 	@Override
