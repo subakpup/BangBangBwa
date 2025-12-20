@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,8 +56,10 @@ public class MyPageController implements MyPageControllerDocs {
 	
 	@Override
 	@DeleteMapping
-	public ApiResponse<String> withdraw(@AuthenticationPrincipal CustomUserDetails user) {
-		userService.withdraw(user.getUserId(), user.getUsername());
+	public ApiResponse<String> withdraw(@AuthenticationPrincipal CustomUserDetails user
+									, @RequestHeader("Authorization") String accessToken) {
+		
+		userService.withdraw(user.getUserId(), user.getUsername(), accessToken.substring(7));
 		
 		return ApiResponse.successWithNoContent("회원 탈퇴가 완료되었습니다.");
 	}
