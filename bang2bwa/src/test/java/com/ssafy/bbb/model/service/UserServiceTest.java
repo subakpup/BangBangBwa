@@ -62,6 +62,8 @@ class UserServiceTest {
     private final String PASSWORD = "password1234";
     private final Long USER_ID = 1L;
     private final String REDIS_REFRESH_PREFIX = "RT:";
+    private final String BLACKLIST_PREFIX = "BL:";
+    private final String TOKEN = "accesstoken";
 
     @Nested
     @DisplayName("로그인 테스트")
@@ -352,23 +354,31 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("[성공] 로그아웃 테스트: 리프레시 토큰 삭제")
+    @DisplayName("[성공] 로그아웃 테스트: 리프레시 토큰 삭제 및 액세스 토큰 블랙리스트 등록")
     void logout_Success() {
+    	// given
+    	given(jwtTokenProvider.getRemainExpiration(TOKEN)).willReturn(600000L);
+    	
         // when
-        userService.logout(EMAIL);
+        userService.logout(EMAIL, TOKEN);
 
         // then
         verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
+        verify(redisUtil).setDataExpire(BLACKLIST_PREFIX + TOKEN, "Logout", 600L);
     }
 
     @Test
-    @DisplayName("[성공] 회원 탈퇴 테스트: 토큰 삭제 및 유저 삭제")
+    @DisplayName("[성공] 회원 탈퇴 테스트: 토큰 삭제 및 유저 삭제 및 액세스 토큰 블랙리스트 등록")
     void withdraw_Success() {
+    	// given
+    	given(jwtTokenProvider.getRemainExpiration(TOKEN)).willReturn(600000L);
+    	
         // when
-        userService.withdraw(USER_ID, EMAIL);
+        userService.withdraw(USER_ID, EMAIL, TOKEN);
 
         // then
         verify(redisUtil).deleteData(REDIS_REFRESH_PREFIX + EMAIL);
         verify(userDao).deleteUser(USER_ID);
+        verify(redisUtil).setDataExpire(BLACKLIST_PREFIX + TOKEN, "Withdraw", 600L);
     }
 }
