@@ -35,6 +35,11 @@
   		where product_id = #{id};
   	</update>
   	
+  	<delete id="delete">
+  		DELETE FROM products
+  		WHERE product_id = #{productId}
+  	</delete>
+  	
   	<select id="findById">
   		select * from products
   		where product_id = #{id};

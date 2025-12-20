@@ -15,6 +15,8 @@ public interface ProductDao {
 	public Long save(ProductDto product);
 
 	public Integer update(@Param("id") Long productId, @Param("product") ProductDto product);
+	
+	public Integer delete(Long productId);
 
 	public ProductDto findById(Long productId);
 
