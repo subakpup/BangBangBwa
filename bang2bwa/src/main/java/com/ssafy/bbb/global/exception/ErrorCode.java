@@ -15,6 +15,7 @@ public enum ErrorCode {
 
 	// 2. 유저, 토큰 관련 에러
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
+	FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없는 요청입니다."),
 	DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 	INVALID_EMAIL(HttpStatus.CONFLICT, "인증을 하지 않았거나, 인증시간이 끝난 이메일입니다. 다시 인증해주세요."),
 	LOGIN_FAIL(HttpStatus.UNAUTHORIZED, "이메일/비밀번호가 일치하지 않습니다."),
