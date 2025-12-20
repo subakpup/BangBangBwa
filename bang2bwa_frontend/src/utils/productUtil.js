@@ -14,6 +14,16 @@ export const tradeTypeMap = {
   월세: "RENT",
 };
 
+// 예약 상태 매핑
+export const statusMap = {
+   SOLD_OUT: "계약 확정",
+   QUIT: "예약 종료",
+   REPORETED: "신고됨",
+   RESERVED: "예약 확정",
+   PENDING: "예약 대기",
+   AVAILABLE: "예약 가능",
+};
+
 // 억, 만 단위 포맷팅 함수
 export const formatMoney = (amount) => {
   if (!amount) return "0";
