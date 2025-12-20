@@ -58,6 +58,9 @@ public class ProductController {
 		return ApiResponse.success(product, "매물 수정이 완료되었습니다.");
 	}
 	
+	/**
+	 * 매물 삭제 요청 URL: DELETE /products/{productId}
+	 */
 	@DeleteMapping("/{productId}")
 	public ApiResponse<Void> deleteProduct(@PathVariable Long productId
 										  , @AuthenticationPrincipal CustomUserDetails agent) {

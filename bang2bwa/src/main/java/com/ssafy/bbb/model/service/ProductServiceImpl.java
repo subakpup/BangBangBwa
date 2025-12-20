@@ -98,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
 			throw new CustomException(ErrorCode.FORBIDDEN_USER);
 		}
 		
+		// 삭제할 이미지 목록
 		List<ProductImageDto> images = productDao.findImagesByProductId(productId);
 		
 		if (images != null && !images.isEmpty()) {
