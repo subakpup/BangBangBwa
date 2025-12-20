@@ -3,11 +3,12 @@ package com.ssafy.bbb.model.dto.notice;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * 게시글 생성/수정 DTO
  */
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 public class PostRequestDto {
 	private @NonNull String title;
@@ -18,11 +19,4 @@ public class PostRequestDto {
 	private Long postId;
 	private Long userId;
 	
-	public void setPostId(Long postId) {
-		this.postId = postId;
-	}
-	
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
 }
