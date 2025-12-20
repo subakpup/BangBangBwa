@@ -12,6 +12,8 @@ public interface ProductService {
 	public Long create(Long agentId, ProductDto product, List<MultipartFile> files);
 
 	public ProductDto modify(Long productId, Long agentId, ProductDto product, List<MultipartFile> newFiles);
+	
+	public void delete(Long productId, Long agentId);
 
 	public List<ProductDto> search(ProductSearchDto request);
 

@@ -84,6 +84,33 @@ public class ProductServiceImpl implements ProductService {
 		// 3. 반환
 		return modifiedProduct;
 	}
+	
+	@Override
+	@Transactional
+	public void delete(Long productId, Long agentId) {
+		ProductDto product = productDao.findById(productId);
+		
+		if (product == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+		}
+		
+		if (!product.getAgentId().equals(agentId)) {
+			throw new CustomException(ErrorCode.FORBIDDEN_USER);
+		}
+		
+		List<ProductImageDto> images = productDao.findImagesByProductId(productId);
+		
+		if (images != null && !images.isEmpty()) {
+			List<Long> imageIds = new ArrayList<>();
+			for (ProductImageDto img : images) {
+				imageIds.add(img.getImageId());
+			}
+			
+			imageDelete(imageIds);
+		}
+		
+		productDao.delete(productId);
+	}
 
 	private void imageUpload(Long productId, ProductDto product, List<MultipartFile> files) {
 
