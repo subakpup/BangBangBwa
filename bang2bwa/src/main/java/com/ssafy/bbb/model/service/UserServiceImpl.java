@@ -46,6 +46,7 @@ public class UserServiceImpl implements UserService {
 	private final ReservationDao reservationDao;
 	
 	private static final String REFRESH_PREFIX = "RT:";
+	private static final String BLACKLIST_PREFIX = "BL:";
 	private static final long REFRESH_EXPIRE_TIME = 86400L; // 1일
 	
 	@Override
@@ -74,8 +75,13 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void logout(String email) {
+	public void logout(String email, String accessToken) {
 		redisUtil.deleteData(REFRESH_PREFIX + email);
+		
+		Long expiration = jwtTokenProvider.getRemainExpiration(accessToken);
+		if(expiration > 0) {
+			redisUtil.setDataExpire(BLACKLIST_PREFIX + accessToken, "Logout", expiration/1000);
+		}
 	}
 	
 	@Override
@@ -170,8 +176,13 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void withdraw(Long userId, String email) {
+	public void withdraw(Long userId, String email, String accessToken) {
 		redisUtil.deleteData(REFRESH_PREFIX + email);
+		
+		Long expiration = jwtTokenProvider.getRemainExpiration(accessToken);
+		if(expiration > 0) {
+			redisUtil.setDataExpire(BLACKLIST_PREFIX + accessToken, "Withdraw", expiration/1000);
+		}
 		
 		userDao.deleteUser(userId);
 	}
