@@ -2,7 +2,6 @@ package com.ssafy.bbb.model.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,10 +45,8 @@ public class UserServiceImpl implements UserService {
 	private final UserDao userDao;
 	private final ReservationDao reservationDao;
 	
-	@Value("${jwt.refresh-expiration}")
-	private long REFRESH_EXPIRE_TIME;
-	
 	private static final String REFRESH_PREFIX = "RT:";
+	private static final long REFRESH_EXPIRE_TIME = 86400L; // 1일
 	
 	@Override
 	@Transactional
