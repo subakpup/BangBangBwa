@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 			try {
 				// 디스크에서 사진 삭제
 				for (String deletePath : deletePaths) {
-					Path path = Paths.get(deletePath);
+					Path path = Paths.get(fileStore.getFullPath(deletePath));
 					Files.delete(path);
 				}
 			} catch (IOException e) {

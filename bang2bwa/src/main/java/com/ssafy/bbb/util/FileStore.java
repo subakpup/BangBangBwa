@@ -18,22 +18,19 @@ public class FileStore {
 
 	@Value("${product.image.dir}")
 	private String relativePath; // 상대 경로
-
-	private String imageDir; // 실제 저장 경로
-
-	private String targetDir; // 실제 저장 경로 (productId 포함)
+	private String absolutePath; // 절대 경로
 
 	// 빈 생성 직후 프로젝트 설정 파일에서 읽어온 경로와 프로젝트의 루트 경로를 합하여 반환.
 	@PostConstruct
 	public void init() {
 		String projectPath = System.getProperty("user.dir"); // 현재 프로젝트의 루트 경로
 
-		this.imageDir = Paths.get(projectPath, relativePath).toString() + "/";
+		this.absolutePath = Paths.get(projectPath, relativePath).toString() + "/";
 	}
 
-	// 파일 전체 경로 반환
-	public String getFullPath(String filename) {
-		return Paths.get(targetDir, filename).toString();
+	// 파일 전체 경로(물리적 경로) 반환
+	public String getFullPath(String savePath) {
+		return absolutePath + "/" + savePath;
 	}
 
 	// 파일을 실제 디스크에 저장, DB에 저장할 DTO로 변환하여 반환
@@ -45,22 +42,25 @@ public class FileStore {
 		String originalFilename = multipartFile.getOriginalFilename();
 		String saveName = createSaveName(originalFilename);
 
-		targetDir = imageDir + productId + "/";
+		String folderPath = absolutePath + productId + "/";
 
 		// 저장 경로 존재 여부 확인(없으면 새로 만듦)
-		File uploadDir = new File(targetDir);
+		File uploadDir = new File(folderPath);
 		if (!uploadDir.exists()) {
 			uploadDir.mkdirs();
 		}
 
-		String savePath = getFullPath(saveName);
-
 		// 실제 디스크에 파일 저장
+		String savePath = folderPath + saveName;
 		multipartFile.transferTo(new File(savePath));
 
 		// DB에 저장할 DTO를 반환
-		return ProductImageDto.builder().productId(productId).originalName(originalFilename).saveName(saveName)
-				.savePath(savePath).build();
+		return ProductImageDto.builder()
+					.productId(productId)
+					.originalName(originalFilename)
+					.saveName(saveName)
+					.savePath(productId + "/" + saveName)
+					.build();
 	}
 
 	// UUID를 이용한 새 파일명 생성.
