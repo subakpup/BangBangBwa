@@ -47,7 +47,11 @@ public enum ErrorCode {
 
 	// 6. 공공데이터 API 관련 에러
 	OPEN_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공공데이터 API 연동 중 오류가 발생했습니다."),
-	DATA_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 중 오류가 발생했습니다.");
+	DATA_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 중 오류가 발생했습니다."),
+	
+	// 7. 게시판 관련 에러
+	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
+	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
 	
 	// 필요한 에러 추가..
 

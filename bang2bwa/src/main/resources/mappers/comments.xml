@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.CommentDao">
+  	
+  	<insert id="insert" parameterType="com.ssafy.bbb.model.dto.notice.CommentRequestDto" useGeneratedKeys="true" keyProperty="commentId">
+  		INSERT INTO comments(content, created_at, last_modified_at, post_id, user_id, parent_id)
+  		VALUES(#{content}, NOW(), NOW(), #{postId}, #{userId}, #{parentId})  		
+  	</insert>
+  	
+  	<select id="commentList" resultType="com.ssafy.bbb.model.dto.notice.CommentResponseDto">
+  		SELECT c.*, u.name
+  		FROM comments c
+  		JOIN users u ON c.user_id = u.user_id
+  		WHERE c.post_id = #{postId}
+  		ORDER BY 
+  				COALESCE(c.parent_id, c.comment_id) ASC,
+  				c.created_at ASC
+  	</select>
+  	
+  	<update id="update" parameterType="com.ssafy.bbb.model.dto.notice.CommentRequestDto">
+  		UPDATE comments
+  		SET	content = #{content},
+  			last_modified_at = NOW()
+  		WHERE comment_id = #{commentId}
+  	</update>
+  	
+  	<delete id="delete">
+  		DELETE FROM comments
+  		WHERE comment_id = #{commentId}
+  	</delete>
+  	
+  	<select id="findById" resultType="com.ssafy.bbb.model.dto.notice.CommentResponseDto">
+  		SELECT comment_id, user_id, post_id, content
+  		FROM comments
+  		WHERE comment_id = #{commentId}
+  	</select>
+  	
+  </mapper>
