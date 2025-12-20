@@ -11,7 +11,7 @@ import com.ssafy.bbb.model.dto.notice.PostSearchDto;
 
 public interface PostDao {
 	// 게시글 작성
-	int insert(PostRequestDto request);
+	Long insert(PostRequestDto request);
 
 	// 게시글 목록 조회
 	List<PostListDto> postList(@Param("search") PostSearchDto search

@@ -7,7 +7,7 @@ import com.ssafy.bbb.model.dto.notice.CommentResponseDto;
 
 public interface CommentDao {
 	// 댓글 작성
-	int insert(CommentRequestDto request);
+	Long insert(CommentRequestDto request);
 	
 	// 댓글 조회
 	List<CommentResponseDto> commentList(Long postId);
