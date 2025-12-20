@@ -8,8 +8,8 @@ import org.apache.ibatis.annotations.Param;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
-import com.ssafy.bbb.model.enums.ReservationStatus;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
+import com.ssafy.bbb.model.enums.ReservationStatus;
 
 public interface ProductDao {
 	public Long save(ProductDto product);
@@ -38,6 +38,8 @@ public interface ProductDao {
 
 	// 아이디로 매물 위치 정보(위도, 경도) select.
 	public LocationDto findLocationById(Long productId);
+	
+	// 매물 조회
 	public List<ProductDto> search(ProductSearchDto request);
 
 	// 전체 마커 조회
