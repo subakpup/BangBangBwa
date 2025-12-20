@@ -1,14 +1,15 @@
 package com.ssafy.bbb.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.bbb.controller.docs.ReservationControllerDocs;
 import com.ssafy.bbb.global.response.ApiResponse;
+import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -28,79 +29,79 @@ public class ReservationController implements ReservationControllerDocs {
 	@PostMapping
 	public ApiResponse<String> createReservation(
 			@RequestBody ReservationRequestDto request
-			, @RequestHeader("user-id") Long userId) {
+			, @AuthenticationPrincipal CustomUserDetails user) {
 			
-		reservationService.requestReservation(request, userId);
+		reservationService.requestReservation(request, user.getUserId());
 
 		return ApiResponse.successWithNoContent("예약이 완료되었습니다.");
 	}
 
 	// 부동산 업자 예약 승인
-	@PostMapping("{reservationId}/accept")
+	@PostMapping("/{reservationId}/accept")
 	public ApiResponse<String> acceptReservation(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long userId) {
+			, @AuthenticationPrincipal CustomUserDetails user) {
 		
-		reservationService.acceptReservation(reservationId, userId);
+		reservationService.acceptReservation(reservationId, user.getUserId());
 
 		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
 
 	// 부동산 업자 예약 거절
-	@PostMapping("{reservationId}/reject")
+	@PostMapping("/{reservationId}/reject")
 	public ApiResponse<String> rejectReservation(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long agentId
+			, @AuthenticationPrincipal CustomUserDetails agent
 			, @RequestBody RejectReasonDto rejectResone) {
 		
-		reservationService.rejectReservation(reservationId, agentId, rejectResone.getRejectReason());
+		reservationService.rejectReservation(reservationId, agent.getUserId(), rejectResone.getRejectReason());
 
 		return ApiResponse.successWithNoContent("예약을 거절하였습니다.");
 	}
 
 	// 예약자 예약 취소
-	@PostMapping("{reservationId}/cancel")
+	@PostMapping("/{reservationId}/cancel")
 	public ApiResponse<String> cancelReservation(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long userId) {
+			, @AuthenticationPrincipal CustomUserDetails user) {
 		
-		reservationService.cancelReservation(reservationId, userId);
+		reservationService.cancelReservation(reservationId, user.getUserId());
 
 		return ApiResponse.successWithNoContent("예약을 취소하였습니다.");
 	}
 
 	// 만남 성사
-	@PostMapping("{reservationId}/confirm")
+	@PostMapping("/{reservationId}/confirm")
 	public ApiResponse<String> confirmReservation(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long userId
+			, @AuthenticationPrincipal CustomUserDetails user
 			, @RequestBody LocationDto curLocation) {
 		
-		reservationService.confirmMeeting(reservationId, userId, curLocation);
+		reservationService.confirmMeeting(reservationId, user.getUserId(), curLocation);
 
 		return ApiResponse.successWithNoContent("예약을 확인하였습니다. 상대방의 동의 후 보증금이 반환됩니다.");
 	}
 
 	// 노쇼 신고
-	@PostMapping("{reservationId}/noshow")
+	@PostMapping("/{reservationId}/noshow")
 	public ApiResponse<String> reportNoShow(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long reporterId
+			, @AuthenticationPrincipal CustomUserDetails reporter
 			, @RequestBody LocationDto curLocation) {
 		
-		reservationService.reportNoShow(reservationId, reporterId, curLocation);
+		reservationService.reportNoShow(reservationId, reporter.getUserId(), curLocation);
 
 		return ApiResponse.successWithNoContent("신고가 접수되었습니다.");
 	}
 
 	// 신고 이의 제기
-	@PostMapping("{reservationId}/defend")
+	@PostMapping("/{reservationId}/defend")
 	public ApiResponse<String> defendNoShow(
 			@PathVariable Long reservationId
-			, @RequestHeader("user-id") Long userId
+			, @AuthenticationPrincipal CustomUserDetails user
 			, @RequestBody LocationDto curLocation) {
 		
-		reservationService.defendReport(reservationId, userId, curLocation);
+		reservationService.defendReport(reservationId, user.getUserId(), curLocation);
 
 		return ApiResponse.successWithNoContent("매물 근처임이 확인되었습니다.");
 	}

@@ -63,4 +63,11 @@ public class ProductDto {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
+	
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
+	}
 }

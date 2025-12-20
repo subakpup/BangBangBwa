@@ -34,9 +34,10 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@Transactional
-	public Long create(ProductDto product, List<MultipartFile> files) {
+	public Long create(Long agentId, ProductDto product, List<MultipartFile> files) {
 		// 지번 주소를 이용해 좌표 설정
 		setLatLng(product);
+		product.setAgentId(agentId); // 등록 agent 설정
 
 		// 매물 정보 DB 저장
 		productDao.save(product);
@@ -49,7 +50,20 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@Transactional
-	public ProductDto modify(Long productId, ProductDto product, List<MultipartFile> newfiles) {
+	public ProductDto modify(Long productId, Long agentId, ProductDto product, List<MultipartFile> newfiles) {
+		ProductDto existingProduct = productDao.findById(productId);
+		if(existingProduct == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+		}
+		
+		if(existingProduct.getAgentId() != agentId) {
+			throw new CustomException(ErrorCode.FORBIDDEN_USER);
+		}
+		
+		// 혹시 모를 데이터 오염을 방지하기 위해, 데이터 강제 삽입
+		product.setProductId(productId);
+		product.setAgentId(agentId);
+		
 		// 지번 주소를 이용해 좌표 설정
 		setLatLng(product);
 
@@ -64,10 +78,6 @@ public class ProductServiceImpl implements ProductService {
 
 		// 수정된 매물 정보 조회
 		ProductDto modifiedProduct = productDao.findById(productId);
-		if (modifiedProduct == null) {
-			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-		}
-
 		List<ProductImageDto> currentImages = productDao.findImagesByProductId(productId);
 		modifiedProduct.setImages(currentImages);
 
@@ -110,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 			try {
 				// 디스크에서 사진 삭제
 				for (String deletePath : deletePaths) {
-					Path path = Paths.get(deletePath);
+					Path path = Paths.get(fileStore.getFullPath(deletePath));
 					Files.delete(path);
 				}
 			} catch (IOException e) {

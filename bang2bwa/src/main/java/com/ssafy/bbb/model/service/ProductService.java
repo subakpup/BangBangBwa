@@ -9,9 +9,9 @@ import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 
 public interface ProductService {
-	public Long create(ProductDto product, List<MultipartFile> files);
+	public Long create(Long agentId, ProductDto product, List<MultipartFile> files);
 
-	public ProductDto modify(Long productId, ProductDto product, List<MultipartFile> newFiles);
+	public ProductDto modify(Long productId, Long agentId, ProductDto product, List<MultipartFile> newFiles);
 
 	public List<ProductDto> search(ProductSearchDto request);
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -34,10 +35,9 @@ import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
-import com.ssafy.bbb.model.enums.HouseType;
-import com.ssafy.bbb.model.enums.TradeType;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.model.enums.HouseType;
+import com.ssafy.bbb.model.enums.ReservationStatus;
 import com.ssafy.bbb.model.enums.TradeType;
 import com.ssafy.bbb.util.FileStore;
 
@@ -45,18 +45,15 @@ import com.ssafy.bbb.util.FileStore;
 @DisplayName("ProductService 비지니스 로직 테스트")
 class ProductServiceTest {
 
-	@InjectMocks
-	private ProductServiceImpl productService;
-	@Mock
-	private ProductDao productDao;
-
-	@Mock
-	private FileStore fileStore; // 파일 등록, 수정 기능을 테스트 하기위한 Mock 추가
+	@InjectMocks private ProductServiceImpl productService;
+	@Mock private ProductDao productDao; 
+	@Mock private FileStore fileStore; // 파일 등록, 수정 기능을 테스트 하기위한 Mock 추가
+	@Mock private GeocodingService geocordingService;
 
 	// 더미 DTO 생성
 	private ProductDto createDummyDto(Long id) {
-		ProductDto dto = ProductDto.builder().jibun("서울시 강남구").houseType(HouseType.APART).tradeType(TradeType.SALE)
-				.name("SSAFY Apart").dealAmount(10000L).build();
+		ProductDto dto = ProductDto.builder().jibun("서울시 강남구").houseType(HouseType.APART).tradeType(TradeType.SALE).status(ReservationStatus.AVAILABLE)
+				.name("SSAFY Apart").dealAmount(10000L).agentId(1L).build();
 
 		if (id != null) {
 			ReflectionTestUtils.setField(dto, "productId", id);
@@ -81,12 +78,17 @@ class ProductServiceTest {
 			// given
 			ProductDto requestDto = createDummyDto(null);
 			Long generatedId = 14L;
+			
+			given(geocordingService.getCoordinate(anyString()))
+		    .willReturn(new double[] { 37.5665, 126.9780 });
 
 			List<MultipartFile> files = new ArrayList<>();
 			MultipartFile mockFile1 = mock(MultipartFile.class);
 			MultipartFile mockFile2 = mock(MultipartFile.class);
 			files.add(mockFile1);
 			files.add(mockFile2);
+			
+			
 
 			// productDao.save => ID 주입
 			willAnswer(invocation -> {
@@ -101,7 +103,7 @@ class ProductServiceTest {
 			given(fileStore.storeFile(any(), eq(generatedId))).willReturn(createDummyImageDto(generatedId));
 
 			// when
-			Long resultId = productService.create(requestDto, files);
+			Long resultId = productService.create(1L, requestDto, files);
 
 			// then
 			assertThat(resultId).isEqualTo(generatedId);
@@ -119,6 +121,9 @@ class ProductServiceTest {
 			ProductDto requestDto = createDummyDto(null);
 			Long generatedId = 15L;
 			List<MultipartFile> emptyFiles = Collections.emptyList();
+			
+			given(geocordingService.getCoordinate(anyString()))
+		    .willReturn(new double[] { 37.5665, 126.9780 });
 
 			willAnswer(invocation -> {
 				ProductDto arg = invocation.getArgument(0);
@@ -127,7 +132,7 @@ class ProductServiceTest {
 			}).given(productDao).save(any(ProductDto.class));
 
 			// when
-			Long resultId = productService.create(requestDto, emptyFiles);
+			Long resultId = productService.create(1L, requestDto, emptyFiles);
 
 			// then
 			assertThat(resultId).isEqualTo(generatedId);
@@ -160,6 +165,9 @@ class ProductServiceTest {
 			ProductDto updatedResponse = createDummyDto(targetId);
 
 			// --- Mocking Start ---
+			
+			given(geocordingService.getCoordinate(anyString()))
+		    .willReturn(new double[] { 37.5665, 126.9780 });
 
 			// (A) 파일 삭제 로직 Mocking
 			// Service 내부에서 Files.delete(path)를 호출하므로, 실제 존재하는 임시 파일을 만들어 경로를 넘겨줘야 에러가 안남.
@@ -167,6 +175,7 @@ class ProductServiceTest {
 			List<String> deletePaths = List.of(tempFile.toString());
 
 			given(productDao.findSavePathByIds(deleteImageIds)).willReturn(deletePaths);
+			given(fileStore.getFullPath(anyString())).willReturn(tempFile.toString());
 
 			// (B) 파일 추가 로직 Mocking
 			given(newFile.isEmpty()).willReturn(false);
@@ -178,7 +187,7 @@ class ProductServiceTest {
 			given(productDao.findImagesByProductId(targetId)).willReturn(new ArrayList<>());
 
 			// when
-			ProductDto result = productService.modify(targetId, updateRequest, newFiles);
+			ProductDto result = productService.modify(targetId, 1L, updateRequest, newFiles);
 
 			// then
 			assertThat(result).isNotNull();
@@ -215,7 +224,7 @@ class ProductServiceTest {
 			given(productDao.findById(wrongId)).willReturn(null);
 
 			// when & then
-			assertThatThrownBy(() -> productService.modify(wrongId, updateReq, files))
+			assertThatThrownBy(() -> productService.modify(wrongId, 1L, updateReq, files))
 					.isInstanceOf(CustomException.class).extracting("errorCode").isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
 		}
 	}

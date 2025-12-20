@@ -52,7 +52,7 @@ public interface UserControllerDocs {
 	public ApiResponse<TokenInfo> refresh(@RequestBody TokenInfo oldToken);
 	
 	@Operation(summary = "로그아웃", description = "서버에서 Refresh Token을 삭제합니다.")
-    public ApiResponse<String> logout(CustomUserDetails user);
+    public ApiResponse<String> logout(@Parameter(hidden=true) CustomUserDetails user);
 
     @Operation(summary = "이메일 인증 코드 발송", description = "이메일로 6자리 인증 코드를 전송합니다.")
     public ApiResponse<String> sendEmailVerification(String email);

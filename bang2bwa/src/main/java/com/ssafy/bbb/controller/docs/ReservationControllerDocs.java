@@ -2,9 +2,9 @@ package com.ssafy.bbb.controller.docs;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.ssafy.bbb.global.response.ApiResponse;
+import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -76,7 +76,7 @@ public interface ReservationControllerDocs {
 		})
 	public ApiResponse<String> createReservation(
 			@RequestBody ReservationRequestDto request
-			, @Parameter(description = "로그인한 유저의 ID", required = true, example = "1") @RequestHeader("user-id") Long userId);
+			, @Parameter(hidden=true) CustomUserDetails user);
 
 	// 부동산 업자 예약 승인
 	@Operation(summary = "예약 승인", description = "중개인이 예약을 승인하고 보증금을 예치합니다.")
@@ -152,7 +152,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> acceptReservation(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @Parameter(description = "로그인한 중개인 ID", required=true, example = "10") @RequestHeader("user-id") Long userId);
+			, @Parameter(hidden=true) CustomUserDetails user);
 
 	@Operation(summary = "예약 거절", description = "중개인이 예약을 거절합니다.")
 	@ApiResponses({
@@ -210,7 +210,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> rejectReservation(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId //
-			, @Parameter(description = "로그인한 중개인 ID", required=true, example = "10") @RequestHeader("user-id") Long agentId
+			, @Parameter(hidden=true) CustomUserDetails agent
 			, @RequestBody RejectReasonDto rejectResone);
 
 	@Operation(summary = "예약 취소", description = "예약자 사정으로 인해 예약을 취소하고 위약금 정책을 적용합니다.")
@@ -286,7 +286,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> cancelReservation(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @Parameter(description = "로그인한 유저의 ID", required = true, example = "1") @RequestHeader("user-id") Long userId);
+			, @Parameter(hidden=true) CustomUserDetails user);
 
 	@Operation(summary = "만남 확인 (위치 인증)", description = "약속 장소 도착 후 만남을 확인합니다. (쌍방 확인 시 정산)")
 	@ApiResponses({
@@ -361,7 +361,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> confirmReservation(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @Parameter(description = "로그인한 유저의 ID", required = true, example = "1") @RequestHeader("user-id") Long userId
+			, @Parameter(hidden=true) CustomUserDetails user
 			, @RequestBody LocationDto curLocation);
 
 	@Operation(summary = "노쇼 신고", description = "상대방이 나타나지 않았을 때 신고합니다.")
@@ -454,7 +454,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> reportNoShow(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @Parameter(description = "로그인한 유저의 ID", required = true, example = "1") @RequestHeader("user-id") Long reporterId
+			, @Parameter(hidden=true) CustomUserDetails reporter
 			, @RequestBody LocationDto curLocation);
 
 	@Operation(summary = "이의 제기 (노쇼 방어)", description = "허위 신고에 대해 현장 위치를 인증하여 방어합니다.")
@@ -564,6 +564,6 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> defendNoShow(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @RequestHeader("user-id") Long userId
+			, @Parameter(hidden=true) CustomUserDetails user
 			, @RequestBody LocationDto curLocation);
 }
