@@ -21,7 +21,7 @@ import com.ssafy.bbb.model.service.StarService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/stars")
+@RequestMapping("/wishlist")
 @RequiredArgsConstructor
 public class StarController implements StarControllerDocs {
 	private final StarService starService;

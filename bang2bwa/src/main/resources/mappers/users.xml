@@ -38,9 +38,9 @@
   	<update id="updateUser">
   		UPDATE users
   		<set>
-  			<if test="name != null and name != ''">name=#{name},</if>
-  			<if test="phone != null and phone != ''">phone=#{phone},</if>
-  			<if test="birth != null and birth != ''">birth=#{birth},</if>
+  			<if test="updateDto.name != null and updateDto.name != ''">name=#{updateDto.name},</if>
+  			<if test="updateDto.phone != null and updateDto.phone != ''">phone=#{updateDto.phone},</if>
+  			<if test="updateDto.birth != null">birth=#{updateDto.birth},</if>
   		</set>
   		WHERE user_id = #{userId}
   	</update>
@@ -48,9 +48,9 @@
   	<update id="updateAgent">
   		UPDATE agents
   		<set>
-  			<if test="ceoName != null and ceoName != ''">ceo_name=#{ceoName},</if>
-  			<if test="realtorAgency != null and realtorAgency != ''">realtor_agency=#{realtorAgency},</if>
-  			<if test="businessNumber != null and businessNumber != ''">business_number=#{businessNumber},</if>
+  			<if test="updateDto.ceoName != null and updateDto.ceoName != ''">ceo_name=#{updateDto.ceoName},</if>
+  			<if test="updateDto.realtorAgency != null and updateDto.realtorAgency != ''">realtor_agency=#{updateDto.realtorAgency},</if>
+  			<if test="updateDto.businessNumber != null and updateDto.businessNumber != ''">business_number=#{updateDto.businessNumber},</if>
   		</set>
   		WHERE agent_id = #{agentId}
   	</update>
