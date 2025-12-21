@@ -199,4 +199,15 @@ public class ProductServiceImpl implements ProductService {
 		return markers;
 	}
 
+	@Override
+	public ProductDto findById(Long productId) {
+		ProductDto product = productDao.findById(productId);
+		
+		if (product == null) {
+			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+		}
+		
+		return product;
+	}
+
 }
