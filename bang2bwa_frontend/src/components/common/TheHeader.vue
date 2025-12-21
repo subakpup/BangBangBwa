@@ -10,7 +10,6 @@
             <RouterLink :to="{ path: '/', query: { type: 'ONEROOM' }}" class="nav-link">원룸</RouterLink>
             <RouterLink :to="{ path: '/', query: { type: 'OFFICETEL' }}" class="nav-link">오피스텔</RouterLink>
             
-            <RouterLink to="/notice" class="nav-link">공지사항</RouterLink>
             <RouterLink to="/board" class="nav-link">게시판</RouterLink>
         </nav>
     </div>
