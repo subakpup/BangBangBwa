@@ -74,6 +74,8 @@
   			p.monthly_rent
   		FROM reservations r JOIN products p ON r.product_id = p.product_id
   		WHERE r.user_id = #{userId}
+  		ORDER BY visit_date DESC
+		LIMIT 1
   	</select>
   	
   	<select id="findProductByAgentId">
