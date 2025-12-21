@@ -179,6 +179,37 @@
   .dropdown-item { @apply flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-[#FFFBE8] hover:text-[#AE8B72] transition-colors w-full text-left font-medium; }
   .dropdown-divider { @apply h-px bg-gray-100 my-1; }
   .dropdown-overlay { @apply fixed inset-0 z-40 cursor-default; }
+
+
+
+  /* --- [페이지: 게시판 (Board)] --- */
+  .board-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto; }
+  
+  /* 게시판 헤더 (제목 + 필터 + 글쓰기버튼) */
+  .board-header-row { @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6; }
+  .board-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  
+  /* 지역 선택 드롭다운 */
+  .region-select { @apply input-base px-4 py-2 min-w-[200px] cursor-pointer; }
+
+  /* 게시판 리스트 (테이블) */
+  .board-table-container { @apply bg-white border border-[#CEAC93] rounded-lg overflow-hidden shadow-sm; }
+  .board-table { @apply w-full text-sm text-left; }
+  .board-th { @apply bg-[#FFFBE8] text-[#AE8B72] font-bold px-4 py-3 border-b border-[#CEAC93]; }
+  .board-td { @apply px-4 py-3 border-b border-gray-100 text-gray-700; }
+  .board-tr { @apply hover:bg-gray-50 transition cursor-pointer; }
+  
+  /* 게시글 상세 */
+  .post-container { @apply bg-white p-8 rounded-lg shadow-sm border border-[#CEAC93]; }
+  .post-header { @apply border-b border-gray-200 pb-4 mb-6; }
+  .post-title-text { @apply text-2xl font-bold text-gray-800 mb-2; }
+  .post-meta { @apply flex items-center gap-4 text-xs text-gray-500; }
+  .post-badge { @apply px-2 py-0.5 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .post-content { @apply min-h-[300px] text-gray-800 leading-relaxed whitespace-pre-line; }
+
+  /* 글쓰기 폼 */
+  .write-editor { @apply w-full p-4 min-h-[400px] border border-[#CEAC93] rounded-lg outline-none resize-none focus:ring-1 focus:ring-[#AE8B72]; }
 }
 
 /* =========================================
