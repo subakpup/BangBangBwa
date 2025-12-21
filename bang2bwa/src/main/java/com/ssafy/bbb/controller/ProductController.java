@@ -3,6 +3,7 @@ package com.ssafy.bbb.controller;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,17 @@ public class ProductController {
 		ProductDto product = productService.modify(productId, agent.getUserId(), modifyForm, images);
 
 		return ApiResponse.success(product, "매물 수정이 완료되었습니다.");
+	}
+	
+	/**
+	 * 매물 삭제 요청 URL: DELETE /products/{productId}
+	 */
+	@DeleteMapping("/{productId}")
+	public ApiResponse<Void> deleteProduct(@PathVariable Long productId
+										  , @AuthenticationPrincipal CustomUserDetails agent) {
+		productService.delete(productId, agent.getUserId());
+		
+		return ApiResponse.successWithNoContent("매물 삭제가 완료되었습니다.");
 	}
 
 	/**

@@ -228,6 +228,129 @@ class ProductServiceTest {
 					.isInstanceOf(CustomException.class).extracting("errorCode").isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
 		}
 	}
+	
+	@Nested
+	@DisplayName("상품 삭제 테스트")
+	class DeleteTest {
+
+		@Test
+		@DisplayName("[SUCCESS] 이미지 파일이 포함된 매물 삭제가 정상적으로 수행된다.")
+		void success_with_images() throws IOException {
+			// given
+			Long targetId = 100L;
+			Long agentId = 1L;
+
+			// 1. 매물 정보 Mock
+			ProductDto product = createDummyDto(targetId);
+			product.setAgentId(agentId);
+
+			// 2. 이미지 정보 Mock (2개 생성)
+			ProductImageDto img1 = createDummyImageDto(targetId);
+			ProductImageDto img2 = createDummyImageDto(targetId);
+			
+			ReflectionTestUtils.setField(img1, "imageId", 10L); 
+			ReflectionTestUtils.setField(img2, "imageId", 11L);
+			List<ProductImageDto> images = List.of(img1, img2);
+
+			Path tempFile1 = Files.createTempFile("test_delete_1", ".jpg");
+			Path tempFile2 = Files.createTempFile("test_delete_2", ".jpg");
+			
+			// Service 로직에서 이 리스트를 순회함
+			List<String> deletePaths = List.of("path/1", "path/2");
+
+			// --- Mocking ---
+			given(productDao.findById(targetId)).willReturn(product);
+			given(productDao.findImagesByProductId(targetId)).willReturn(images);
+			
+			// imageDelete 내부 로직 Mocking
+			given(productDao.findSavePathByIds(anyList())).willReturn(deletePaths);
+			
+			// [중요] 첫 번째 호출 땐 tempFile1, 두 번째 호출 땐 tempFile2를 리턴하도록 설정 (Chaining)
+			given(fileStore.getFullPath(anyString()))
+				.willReturn(tempFile1.toString()) // 첫 번째 루프용
+				.willReturn(tempFile2.toString());// 두 번째 루프용
+
+			// when
+			productService.delete(targetId, agentId);
+
+			// then
+			then(productDao).should(times(1)).findById(targetId);
+			then(productDao).should(times(1)).findImagesByProductId(targetId);
+			then(productDao).should(times(1)).findSavePathByIds(anyList());
+			then(productDao).should(times(1)).deleteImages(anyList());
+			then(productDao).should(times(1)).delete(targetId);
+
+			// Cleanup: 테스트 후 파일 정리
+			Files.deleteIfExists(tempFile1);
+			Files.deleteIfExists(tempFile2);
+		}
+
+		@Test
+		@DisplayName("[SUCCESS] 이미지가 없는 매물도 정상적으로 삭제된다.")
+		void success_no_images() {
+			// given
+			Long targetId = 200L;
+			Long agentId = 1L;
+
+			ProductDto product = createDummyDto(targetId);
+			product.setAgentId(agentId);
+
+			// Mocking
+			given(productDao.findById(targetId)).willReturn(product);
+			given(productDao.findImagesByProductId(targetId)).willReturn(Collections.emptyList());
+
+			// when
+			productService.delete(targetId, agentId);
+
+			// then
+			then(productDao).should(times(1)).findById(targetId);
+			then(productDao).should(times(1)).findImagesByProductId(targetId);
+			
+			// 이미지가 없으므로 아래 로직은 실행되지 않아야 함
+			then(productDao).should(never()).findSavePathByIds(anyList());
+			then(fileStore).should(never()).getFullPath(anyString());
+			then(productDao).should(never()).deleteImages(anyList());
+
+			// 매물 삭제는 실행되어야 함
+			then(productDao).should(times(1)).delete(targetId);
+		}
+
+		@Test
+		@DisplayName("[FAIL] 존재하지 않는 매물 삭제 시 예외가 발생한다.")
+		void fail_not_found() {
+			// given
+			Long wrongId = 999L;
+			Long agentId = 1L;
+
+			given(productDao.findById(wrongId)).willReturn(null);
+
+			// when & then
+			assertThatThrownBy(() -> productService.delete(wrongId, agentId))
+					.isInstanceOf(CustomException.class)
+					.extracting("errorCode")
+					.isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
+		}
+
+		@Test
+		@DisplayName("[FAIL] 타인의 매물을 삭제하려 하면 예외가 발생한다.")
+		void fail_forbidden() {
+			// given
+			Long targetId = 100L;
+			Long ownerId = 1L;
+			Long hackerId = 2L; // 다른 사람
+
+			ProductDto product = createDummyDto(targetId);
+			product.setAgentId(ownerId); // 주인은 1번
+
+			given(productDao.findById(targetId)).willReturn(product);
+
+			// when & then (2번 해커가 1번 매물을 지우려 함)
+			assertThatThrownBy(() -> productService.delete(targetId, hackerId))
+					.isInstanceOf(CustomException.class)
+					.extracting("errorCode")
+					.isEqualTo(ErrorCode.FORBIDDEN_USER);
+		}
+	}
 
 	@Nested
 	@DisplayName("상품 검색 테스트")
