@@ -47,6 +47,8 @@ const handleWithdraw = async () => {
   if (res) {
     alert("탈퇴되었습니다.");
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.clear();
     router.push('/');
   }
 }
