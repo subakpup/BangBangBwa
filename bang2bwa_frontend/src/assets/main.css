@@ -244,6 +244,23 @@
   /* 빈 화면 상태 */
   .wish-empty-state { @apply flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300; }
   .btn-go-home { @apply mt-4 text-[#AE8B72] font-bold hover:underline cursor-pointer; }
+
+  /* --- [페이지: 정보 수정 (MyEdit)] --- */
+  .edit-wrapper { @apply w-full max-w-[460px] px-4 pb-10 mx-auto; }
+  .edit-card { @apply bg-white p-6 rounded-lg shadow-sm border border-[#CEAC93]; }
+  
+  /* 입력 폼 그룹 (테두리 있는 박스) */
+  .edit-form-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm mb-6; }
+  
+  /* 입력 행 (아이콘 + 인풋) */
+  .edit-input-row { @apply flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+  .edit-icon { @apply text-[#CEAC93] w-6 flex justify-center; }
+  .edit-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent ml-3 placeholder-[#E3C9A5]; }
+
+  /* 버튼 그룹 */
+  .edit-btn-group { @apply flex gap-3 mt-8; }
+  .btn-cancel { @apply btn-base flex-1 bg-gray-400 hover:bg-gray-500 py-3 text-center flex items-center justify-center; }
+  .btn-save { @apply btn-submit flex-1 text-base py-3 flex items-center justify-center; }
 }
 
 /* =========================================

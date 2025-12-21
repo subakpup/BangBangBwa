@@ -21,7 +21,7 @@ export const getUserInfo = async () => {
 export const updateUserInfo = async (data) => {
     try {
         const response = await api.patch('/mypage', data);
-        return response.data;
+        return response;
     } catch (error) {
         return error;
     }
