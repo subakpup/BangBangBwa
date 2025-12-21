@@ -227,6 +227,23 @@
   .reservation-time-box { @apply flex-1 p-3 bg-gray-50 rounded-lg; }
   .reservation-price-box { @apply text-sm bg-[#FFFBE8] p-3 rounded text-center text-gray-700 border border-[#AE8B72]; }
   .reservation-desc-box { @apply text-sm text-gray-500 bg-gray-50 p-3 rounded; }
+
+  /* --- [페이지: 찜 목록 (Wishlist)] --- */
+  .wishlist-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto h-full flex flex-col; }
+  
+  .wishlist-header { @apply flex items-center justify-between mb-6; }
+  .wishlist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .wishlist-count { @apply text-sm text-gray-500; }
+
+  /* 반응형 그리드: 모바일 1열, 태블릿 이상 2열 */
+  .wishlist-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4 pb-10; }
+  
+  /* 찜 카드 (기존 product-card 확장) */
+  .wish-card { @apply product-card bg-white h-32; } 
+
+  /* 빈 화면 상태 */
+  .wish-empty-state { @apply flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300; }
+  .btn-go-home { @apply mt-4 text-[#AE8B72] font-bold hover:underline cursor-pointer; }
 }
 
 /* =========================================
