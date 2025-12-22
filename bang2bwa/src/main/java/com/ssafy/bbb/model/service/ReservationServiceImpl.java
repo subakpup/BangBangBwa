@@ -1,5 +1,6 @@
 package com.ssafy.bbb.model.service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -47,6 +48,7 @@ public class ReservationServiceImpl implements ReservationService {
 	private final NotificationService notificationService;
 	private final RedisUtil redisUtil;
 	
+	private static final String NOTIFY_PREFIX = "expire:reservation:notify:";
 	private static final String PENDING_PREFIX = "expire:reservation:pending:";
 	private static final String REPORTED_PREFIX = "expire:reservation:reported:";
 	
@@ -270,6 +272,12 @@ public class ReservationServiceImpl implements ReservationService {
 
 			notificationService.sendEmail(userEmail, "[방방봐] 예약 요청이 확정 되었습니다!", message.toString());
 		}
+		
+		String agentEmail = userDao.findEmailById(agentId);
+		long visitTimer = Math.abs(Duration.between(LocalDateTime.now(), reservation.getVisitDate()).getSeconds());
+		
+		// redis에 약속시간에 소멸되는 키를 생성. => 소멸시 이메일을 보낼 것.
+		redisUtil.setDataExpire(NOTIFY_PREFIX + reservation.getReservationId(), "TRUE", visitTimer);
 		
 		// 7. pending timer 해제
 		redisUtil.deleteData(PENDING_PREFIX + reservationId);
