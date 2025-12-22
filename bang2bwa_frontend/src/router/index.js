@@ -12,6 +12,8 @@ import BoardView from "@/views/board/BoardView.vue";
 import BoardList from '@/components/board/BoardList.vue'
 import BoardDetail from '@/components/board/BoardDetail.vue';
 import BoardWrite from '@/components/board/BoardWrite.vue';
+import ReservationRequest from '@/views/reservation/ReservationRequest.vue'
+import ReservationPayment from '@/views/reservation/ReservationPayment.vue'
 
 
 
@@ -59,7 +61,6 @@ const router = createRouter({
         },
       ],
     },
-    },
     {
       path: "/signup",
       name: "signup",
@@ -89,6 +90,25 @@ const router = createRouter({
       path: "/mypage/edit/password",
       name: "password-change",
       component: MyPasswordChangeView,
+    },
+    // 1. 예약 요청 페이지 (매물 ID를 받음)
+    {
+      path: "/reservation/request/:propertyId",
+      name: "reservation-request",
+      component: ReservationRequest,
+      props: true, // 매물 정보를 props나 history state로 넘기기 위함
+    },
+    // 2. 결제 페이지
+    {
+      path: "/reservation/payment",
+      name: "reservation-payment",
+      component: ReservationPayment,
+    },
+    // 3. 만남 확인/신고 페이지 (예약 ID를 받음)
+    {
+      path: "/reservation/action/:reservationId",
+      name: "reservation-action",
+      component: ReservationAction,
     },
   ],
 });

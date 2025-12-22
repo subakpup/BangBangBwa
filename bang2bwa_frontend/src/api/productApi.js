@@ -13,3 +13,16 @@ export const searchProducts = async (params) => {
         return error;
     }
 };
+
+/**
+ * 매물 상세 조회
+ * GET /products/{productId}
+ */
+export const getProductDetail = async (productId) => {
+  try {
+    const response = await api.get(`/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    return error.response || error;
+  }
+};
