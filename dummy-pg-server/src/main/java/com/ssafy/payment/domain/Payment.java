@@ -41,6 +41,8 @@ public class Payment {
 	// "PAID": 수수료 정산, "CANCLED": 결제 취소
 	@Column(nullable = false)
 	private String status; // 결제 상태 (READY -> AUTHORIZED -> PAID or CANCELED)
+	
+	private String accountToken; // 가승인시 받은 계좌 정보(웹훅 url) 저장
 
 	private String failReason; // 실패 시 사유 (잔액부족 등)
 
@@ -48,12 +50,13 @@ public class Payment {
 	private LocalDateTime paidAt; // 실제 결제 일시
 
 	@Builder
-	public Payment(String paymentKey, String orderId, Long amount, String type, String status) {
+	public Payment(String paymentKey, String orderId, Long amount, String type, String status, String accountToken) {
 		this.paymentKey = paymentKey;
 		this.orderId = orderId;
 		this.originalAmount = amount;
 		this.type = type;
 		this.status = status;
+		this.accountToken = accountToken;
 		this.authorizedAt = LocalDateTime.now();
 	}
 
