@@ -71,7 +71,7 @@ class PostServiceTest {
         given(postDao.postList(any(), anyInt(), anyLong())).willReturn(mockList);
 
         // when
-        List<PostListDto> result = postService.getPostList(search, pageable);
+        List<PostListDto> result = (List<PostListDto>) postService.getPostList(search, pageable);
 
         // then
         assertThat(result).hasSize(2);

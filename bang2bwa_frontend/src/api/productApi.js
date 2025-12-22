@@ -26,7 +26,9 @@ export const recommendProducts = async (params) => {
         return response.data;
     } catch (error) {
         throw error;
-      
+    }
+};
+
 /**
  * 매물 생성 API
  * @param {ProductDto} productDto 
