@@ -1,5 +1,7 @@
 package com.ssafy.bbb.configuration;
 
+import java.util.Map;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +37,7 @@ public class AiConfig {
     ChatClient chatClient(ChatClient.Builder builder) {
         return builder
                 .defaultSystem(spec -> spec.text(systemPrompt)
-                        .params(java.util.Map.of("name", "방방봐 AI"))) // 프롬프트 내 {name} 치환
+                        .params(Map.of("name", "방방봐 AI"))) // 프롬프트 내 {name} 치환
                 .build();
     }
 }
