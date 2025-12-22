@@ -14,6 +14,7 @@ import BoardDetail from '@/components/board/BoardDetail.vue';
 import BoardWrite from '@/components/board/BoardWrite.vue';
 import ReservationRequest from '@/views/reservation/ReservationRequest.vue'
 import ReservationPayment from '@/views/reservation/ReservationPayment.vue'
+import ReservationAction from '@/views/reservation/ReservationAction.vue'
 
 
 

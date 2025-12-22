@@ -22,12 +22,15 @@ import com.ssafy.bbb.model.dao.VirtualBankDao;
 import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
+import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
+import com.ssafy.bbb.model.dto.ReservationResponseDto;
 import com.ssafy.bbb.model.dto.VirtualBankDto;
 import com.ssafy.bbb.model.dto.pg.PgAuthRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgCaptureRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgResponseDto;
+import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.enums.PaymentStatus;
 import com.ssafy.bbb.model.enums.PaymentType;
 import com.ssafy.bbb.model.enums.ReservationStatus;
@@ -448,6 +451,24 @@ public class ReservationServiceImpl implements ReservationService {
 		
 		// reported timer 해제
 		redisUtil.deleteData(REPORTED_PREFIX + reservationId);
+	}
+	
+	@Override
+	public ReservationResponseDto getReservationDetail(Long reservationId) {
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		ProductDto product = productDao.findById(reservation.getProductId());
+		product.setImages(productDao.findImagesByProductId(reservation.getProductId()));
+		UserInfoDto agent = userDao.findUserInfoById(reservation.getAgentId()).get();
+		
+		return ReservationResponseDto.builder()
+								.reservationId(reservationId)
+								.productName(product.getName())
+								.productAddress(product.getSggNm() + product.getUmdNm() + product.getJibun())
+								.productImage((product.getImages()==null?null:product.getImages().get(0).getSavePath()))
+								.visitDate(reservation.getVisitDate())
+								.agentName(agent.getName())
+								.status(reservation.getStatus())
+								.build();
 	}
 
 	@Override
