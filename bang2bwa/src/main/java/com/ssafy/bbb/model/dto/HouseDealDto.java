@@ -18,6 +18,7 @@ public class HouseDealDto {
 	private @NonNull Long houseInfoId; // 매물 ID(FK)
 	private @NonNull Long dealAmount; // 거래 가격
 	
+	private Long monthlyRent; // 월세
 	private LocalDate dealDate; // 거래일자
 	private String floor; // 층
 	private Double excluUseAr; // 전용 면적

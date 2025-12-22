@@ -11,9 +11,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.ToString;
 
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -68,24 +69,4 @@ public class ProductDto {
 		this.longitude = longitude;
 	}
 	
-	public void setProductId(Long productId) {
-		this.productId = productId;
-	}
-	
-	public void setAgentId(Long agentId) {
-		this.agentId = agentId;
-	}
-	
-	public void setAiRecommended(boolean isAiRecommended) {
-		this.isAiRecommended = isAiRecommended;
-	}
-	
-	public void setAiReason(String aiReason) {
-		this.aiReason = aiReason;
-	}
-	
-	// 전체 주소 반환
-	public String getFullAddress() {
-		return sggNm + " " + umdNm + " " + jibun;
-	}
 }
