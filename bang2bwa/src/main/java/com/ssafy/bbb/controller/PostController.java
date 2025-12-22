@@ -1,7 +1,5 @@
 package com.ssafy.bbb.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.PageResponse;
 import com.ssafy.bbb.model.dto.notice.PostDetailDto;
 import com.ssafy.bbb.model.dto.notice.PostListDto;
 import com.ssafy.bbb.model.dto.notice.PostRequestDto;
@@ -42,10 +41,10 @@ public class PostController {
 	}
 	
 	@GetMapping
-	public ApiResponse<List<PostListDto>> getPostList(@ModelAttribute PostSearchDto search
+	public ApiResponse<PageResponse<PostListDto>> getPostList(@ModelAttribute PostSearchDto search
 													, @PageableDefault(size = 10) Pageable pageable) {
 		
-		List<PostListDto> result = postService.getPostList(search, pageable);
+		PageResponse<PostListDto> result = postService.getPostList(search, pageable);
 		
 		return ApiResponse.success(result, "게시글 조회에 성공하였습니다.");
 	}
