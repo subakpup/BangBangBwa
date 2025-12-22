@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class VirtualBankDto {
     private Long bankId;       // 은행 PK
     private String bankName;   // 은행 이름
-    private String webhookUrl; // 웹훅 URL (중요: 프론트로 내려줄 땐 제외하는 것이 좋음)
+    private String webhookUrl; // 웹훅 URL (중요: 프론트로 내려줄 땐 제외)
 }
