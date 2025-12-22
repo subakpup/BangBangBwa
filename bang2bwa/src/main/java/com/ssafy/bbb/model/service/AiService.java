@@ -44,11 +44,10 @@ public class AiService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND_FOR_AI);
         }
 
-        // 2. 프롬프트 포맷팅 (설명이 너무 길면 잘라주는 게 좋음)
+        // 2. 프롬프트 포맷팅
         String candidatesText = candidates.stream()
                 .map(p -> {
                     String priceInfo = formatPrice(p);
-                    // 설명이 null이면 빈 문자열 처리, 너무 길면 100자로 자르기 (토큰 절약)
                     String safeDesc = p.getDesc() != null ? 
                         (p.getDesc().length() > 100 ? p.getDesc().substring(0, 100) + "..." : p.getDesc()) : "설명 없음";
 
@@ -97,7 +96,7 @@ public class AiService {
                                             .call()
                                             .entity(converter);
 
-        // 6. [중요] 결과 재조립 (AI 추천 상단 배치 + 나머지 하단 배치)
+        // 6. 결과 재조립 (AI 추천 상단 배치 + 나머지 하단 배치)
         List<ProductDto> sortedList = new ArrayList<>();
         
         // 검색 속도 향상을 위해 Map으로 변환 (List 순회 X -> Map 조회 O)
@@ -121,7 +120,6 @@ public class AiService {
         return sortedList;
     }
 
-    // 가격 포맷팅 도우미 메서드
     private String formatPrice(ProductDto p) {
         if (p.getTradeType().equals(TradeType.SALE)) {
             return String.format("매매 %d만원", p.getDealAmount());
@@ -133,10 +131,9 @@ public class AiService {
     }
     
     private void convertUnits(AiSearchDto dto) {
-        // 10000 뒤에 'L'을 붙여서 Long 타입임을 명시 (안전한 계산을 위해)
         long UNIT = 10000L; 
 
-        // 1. 매매가 (dealAmount) - 가장 중요!
+        // 1. 매매가 (dealAmount)
         if (dto.getDealAmount() != null) {
             if (dto.getDealAmount().getMin() != null) {
                 dto.getDealAmount().setMin(dto.getDealAmount().getMin() * UNIT);
@@ -146,7 +143,7 @@ public class AiService {
             }
         }
 
-        // 2. 보증금 (deposit) - 전세금도 21억 넘을 수 있음
+        // 2. 보증금 (deposit)
         if (dto.getDeposit() != null) {
             if (dto.getDeposit().getMin() != null) {
                 dto.getDeposit().setMin(dto.getDeposit().getMin() * UNIT);
