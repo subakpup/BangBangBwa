@@ -12,7 +12,10 @@ export const getPostList = async (params) => {
     if(params.sggNm) cleanParams.sggNm = params.sggNm;
     if(params.keyword) cleanParams.keyword = params.keyword;
 
-    const response = await api.get("/posts", { cleanParams });
+    cleanParams.page = (params.page || 1) - 1; 
+    cleanParams.size = params.size || 10;
+
+    const response = await api.get("/posts", { params: cleanParams });
     return response.data; // ApiResponse<List<PostListDto>>
   } catch (error) {
     return error.response || error;
