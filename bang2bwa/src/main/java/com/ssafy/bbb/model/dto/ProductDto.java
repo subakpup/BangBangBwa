@@ -21,7 +21,10 @@ import lombok.ToString;
 public class ProductDto {
 	private Long productId; // pk
 
+	private @NonNull String sggNm; // 시군구 이름 
+	private @NonNull String umdNm; // 법정동
 	private @NonNull String jibun; // 지번
+	
 	private @NonNull HouseType houseType; // 매물 종류
 	private @NonNull TradeType tradeType; // 거래 종류
 	private @NonNull ReservationStatus status; // 예약 상태 확인
@@ -37,12 +40,10 @@ public class ProductDto {
 	private Double totalFloorAr; // 연면적
 	private Double plottageAr; // 대지면적
 
-	private Long dealAmount; // 매매가격
+	private Long dealAmount; // 매매 가격
 	private Long deposit; // 보증금
 	private Integer monthlyRent; // 월세
 
-	private String sggNm; // 시군구 이름 
-	private String umdNm; // 법정동
 	private Long agentId; // 공인중개사 (fk)
 
 	private Double latitude; // 위도
