@@ -18,10 +18,12 @@ import com.ssafy.bbb.model.dao.PaymentDao;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
+import com.ssafy.bbb.model.dao.VirtualBankDao;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
+import com.ssafy.bbb.model.dto.VirtualBankDto;
 import com.ssafy.bbb.model.dto.pg.PgAuthRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgCaptureRequestDto;
 import com.ssafy.bbb.model.dto.pg.PgResponseDto;
@@ -43,6 +45,7 @@ public class ReservationServiceImpl implements ReservationService {
 	private final ReservationDao reservationDao;
 	private final PaymentDao paymentDao;
 	private final UserDao userDao;
+	private final VirtualBankDao virtualBankDao;
 
 	private final PgClient pgClient;
 	private final NotificationService notificationService;
@@ -71,13 +74,17 @@ public class ReservationServiceImpl implements ReservationService {
 		if (status != ReservationStatus.AVAILABLE) {
 			throw new CustomException(ErrorCode.PRODUCT_NOT_AVAILABLE);
 		}
+		
+		VirtualBankDto bank = virtualBankDao.findById(request.getBankId());
 
 		// 3. PG 서버 통신: 가승인 요청
 		String orderId = "ORD_USER_" + UUID.randomUUID().toString();
 		Long amount = 10000L;
-		String paymentKey = connPgServerPreAuth(orderId, amount);
+		
+		String paymentKey = connPgServerPreAuth(orderId, amount, bank.getWebhookUrl());
 
 		Long agentId = (Long) productInfo.get("agentId");
+		
 		// 4. 예약 정보 저장
 		ReservationDto reservation = ReservationDto.builder() //
 				.agentId(agentId) // 중개사 pk
@@ -223,7 +230,7 @@ public class ReservationServiceImpl implements ReservationService {
 	// 중개업자 예약 승인
 	@Override
 	@Transactional
-	public void acceptReservation(Long reservationId, Long agentId) {
+	public void acceptReservation(Long reservationId, Long agentId, Long bankId) {
 		// 1. 예약 정보 조회
 		ReservationDto reservation = reservationDao.findById(reservationId);
 		if (reservation == null) {
@@ -238,11 +245,13 @@ public class ReservationServiceImpl implements ReservationService {
 		if (reservation.getStatus() != ReservationStatus.PENDING) {
 			throw new CustomException(ErrorCode.RESERVATION_NOT_PENDING);
 		}
+		
+		VirtualBankDto bank = virtualBankDao.findById(bankId);
 
 		// 3. PG 서버 통신: 가승인 요청
 		String orderId = "ORD_AGENT_" + UUID.randomUUID().toString();
 		Long amount = 10000L;
-		String paymentKey = connPgServerPreAuth(orderId, amount);
+		String paymentKey = connPgServerPreAuth(orderId, amount, bank.getWebhookUrl());
 
 		// 4. 예약 테이블 업데이트
 		reservationDao.reservationAccept(reservationId, paymentKey, ReservationStatus.RESERVED);
@@ -495,13 +504,14 @@ public class ReservationServiceImpl implements ReservationService {
 		notificationService.sendEmail(offenderEmail, "[방방봐] 노쇼 처벌이 집행되었습니다.", "이의제기 시간이 경과하여 보증금이 몰수되었습니다.");
 	}
 
-	private String connPgServerPreAuth(String orderId, Long amount) {
+	private String connPgServerPreAuth(String orderId, Long amount, String accountToken) {
 		// 3-1. 통신
-		PgAuthRequestDto pgRequest = PgAuthRequestDto.builder() //
-				.orderId(orderId) // 주문번호
-				.amount(amount) // 보증금
-				.type("DEPOSIT") // 부분 결제 요청
-				.build();
+		PgAuthRequestDto pgRequest = PgAuthRequestDto.builder()
+											.orderId(orderId) // 주문번호
+											.amount(amount) // 보증금
+											.type("DEPOSIT") // 부분 결제 요청
+											.accountToken(accountToken)
+											.build();
 
 		PgResponseDto pgResponse = pgClient.requestPreAuth(pgRequest);
 

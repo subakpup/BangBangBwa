@@ -9,7 +9,7 @@ public interface ReservationService {
 
 	public void cancelReservation(Long reservationId, Long userId);
 
-	public void acceptReservation(Long reservationId, Long agentId);
+	public void acceptReservation(Long reservationId, Long agentId, Long bankId);
 
 	public void rejectReservation(Long reservationId, Long agentId, String cancelReason);
 

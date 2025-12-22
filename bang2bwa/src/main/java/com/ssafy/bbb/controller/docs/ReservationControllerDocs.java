@@ -1,5 +1,7 @@
 package com.ssafy.bbb.controller.docs;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -152,6 +154,7 @@ public interface ReservationControllerDocs {
 	})
 	public ApiResponse<String> acceptReservation(
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
+			, @RequestBody Map<String, Long> bank
 			, @Parameter(hidden=true) CustomUserDetails user);
 
 	@Operation(summary = "예약 거절", description = "중개인이 예약을 거절합니다.")

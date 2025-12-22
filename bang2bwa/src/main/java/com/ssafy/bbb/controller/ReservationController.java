@@ -1,5 +1,7 @@
 package com.ssafy.bbb.controller;
 
+import java.util.Map;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,9 +42,10 @@ public class ReservationController implements ReservationControllerDocs {
 	@PostMapping("/{reservationId}/accept")
 	public ApiResponse<String> acceptReservation(
 			@PathVariable Long reservationId
+			, @RequestBody Map<String, Long> bank
 			, @AuthenticationPrincipal CustomUserDetails user) {
 		
-		reservationService.acceptReservation(reservationId, user.getUserId());
+		reservationService.acceptReservation(reservationId, user.getUserId(), bank.get("bankId"));
 
 		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
