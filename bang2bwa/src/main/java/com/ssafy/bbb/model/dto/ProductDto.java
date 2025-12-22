@@ -41,8 +41,8 @@ public class ProductDto {
 	private Long deposit; // 보증금
 	private Integer monthlyRent; // 월세
 
-	private String sggNm; // 시군구 이름 (fk)
-	private String umdNm; // 법정동 (fk)
+	private String sggNm; // 시군구 이름 
+	private String umdNm; // 법정동
 	private Long agentId; // 공인중개사 (fk)
 
 	private Double latitude; // 위도

@@ -21,7 +21,7 @@ public class AddressController {
 	@GetMapping
 	public ApiResponse<List<Map<String, Object>>> handleRequest(@RequestParam String action
 												 , @RequestParam(required = false) String sidoCode
-												 , @RequestParam(required = false) String SggCode) {
+												 , @RequestParam(required = false) String sggCode) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		
 		if (action.equals("sido")) {
@@ -46,6 +46,8 @@ public class AddressController {
 				list.add(map);
 			}
 		}
+		
+		list.sort(Comparator.comparing(m -> (String) m.get("sidoCode")));
 		
 		return list;
 	}
