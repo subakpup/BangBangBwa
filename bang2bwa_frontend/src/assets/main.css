@@ -223,6 +223,172 @@
   .form-actions { @apply flex items-center justify-end gap-3 mt-10 pt-6 border-t border-gray-100; }
   .btn-cancel { @apply px-6 py-3 rounded-lg text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition; }
   .btn-save { @apply btn-base py-3 px-8 text-[15px] font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5; }
+
+
+  /* --- [페이지: 게시판 (Board)] --- */
+  /* .board-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto; } */
+  .board-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto; }
+  
+  /* 게시판 헤더 (제목 + 필터 + 글쓰기버튼) */
+  /* .board-header-row { @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6; } */
+  .board-header-row { @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 w-full; }
+  .board-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .board-table-container { @apply bg-white border border-[#CEAC93] rounded-lg shadow-sm w-full overflow-x-auto; }
+
+  /* [검색 영역 수정] */
+  .search-box { @apply flex items-center gap-2; /* 입력창과 버튼을 가로로 배치 */}
+  .search-box { @apply flex items-center gap-2 w-full md:w-auto; }
+
+  /* 검색 버튼 (입력창 밖으로 꺼냄) */
+  .btn-search { @apply h-[42px] px-4 rounded-lg bg-[#AE8B72] text-white flex items-center justify-center border border-[#AE8B72] hover:bg-[#9C7A61] transition-colors cursor-pointer; }
+  
+  /* 지역 선택 드롭다운 */
+  .region-select { @apply input-base px-4 py-2 min-w-[200px] cursor-pointer; }
+
+  /* 게시판 리스트 (테이블) */
+  .board-table-container { @apply bg-white border border-[#CEAC93] rounded-lg overflow-hidden shadow-sm; }
+  .board-table { @apply w-full text-sm text-left; }
+  .board-th { @apply bg-[#FFFBE8] text-[#AE8B72] font-bold px-4 py-3 border-b border-[#CEAC93]; }
+  .board-td { @apply px-4 py-3 border-b border-gray-100 text-gray-700; }
+  .board-tr { @apply hover:bg-gray-50 transition cursor-pointer; }
+  
+  /* 게시글 상세 */
+  .post-container { @apply bg-white p-8 rounded-lg shadow-sm border border-[#CEAC93]; }
+  .post-header { @apply border-b border-gray-200 pb-4 mb-6; }
+  .post-title-text { @apply text-2xl font-bold text-gray-800 mb-2; }
+  .post-meta { @apply flex items-center gap-4 text-xs text-gray-500; }
+  .post-badge { @apply px-2 py-0.5 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .post-content { @apply min-h-[300px] text-gray-800 leading-relaxed whitespace-pre-line; }
+
+  /* 글쓰기 폼 */
+  .write-editor { @apply w-full p-4 min-h-[400px] border border-[#CEAC93] rounded-lg outline-none resize-none focus:ring-1 focus:ring-[#AE8B72]; }
+
+  /* --- [페이지네이션 (Pagination)] --- */
+  .pagination-container { @apply flex justify-center items-center gap-2 mt-10 mb-8; }
+  
+  /* 페이지 버튼 기본 스타일 (통일감: 흰배경 + 연한 브라운 테두리) */
+  .page-btn { @apply min-w-[36px] h-[36px] px-2 flex items-center justify-center rounded-lg 
+              bg-white border border-[#CEAC93] 
+              text-gray-600 text-sm font-medium
+                transition-all duration-200 ease-in-out
+              hover:bg-[#FFFBE8] hover:text-[#AE8B72] hover:border-[#AE8B72]
+                disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-[#CEAC93] disabled:cursor-not-allowed; 
+  }
+  
+  /* 현재 페이지 활성화 (Active) 스타일 */
+  .page-btn.active { @apply bg-[#AE8B72] border-[#AE8B72] text-white font-bold shadow-sm scale-105; }
+
+  /* 화살표 아이콘 미세 조정 */
+  .page-btn svg { @apply w-4 h-4; }
+
+  /* --- [댓글 영역 (Comment)] --- */
+  .comment-section { @apply mt-10 border-t border-[#CEAC93] pt-8; }
+  
+  .comment-title { @apply text-lg font-bold text-[#AE8B72] mb-4 flex items-center gap-2; }
+
+  /* 댓글 리스트 아이템 */
+  .comment-item { @apply flex gap-4 p-5 mb-3 bg-white border border-gray-100 rounded-lg shadow-sm transition-all hover:border-[#CEAC93]; }
+  
+  /* 프로필 아이콘 (원형) */
+  .comment-avatar { @apply w-10 h-10 rounded-full bg-[#E5D0C2] text-white flex items-center justify-center text-sm font-bold flex-shrink-0; }
+  
+  .comment-content-box { @apply flex-1; }
+  .comment-meta { @apply flex items-center gap-2 text-xs text-gray-400 mb-1; }
+  .comment-writer { @apply font-bold text-gray-700 text-sm; }
+  .comment-text { @apply text-gray-700 text-sm leading-relaxed whitespace-pre-wrap; }
+
+  /* 댓글 작성 영역 */
+  .comment-form-box { @apply mt-6 flex gap-2 items-start bg-[#FFFBE8] p-4 rounded-lg border border-[#CEAC93]; }
+  
+  .comment-input { @apply flex-1 bg-white border border-[#CEAC93] rounded-md p-3 text-sm outline-none 
+                    focus:ring-1 focus:ring-[#AE8B72] resize-none h-[50px] transition-all focus:h-[80px]; 
+    }
+  
+  .btn-comment-submit { @apply h-[50px] px-6 rounded-md bg-[#AE8B72] text-white text-sm font-bold 
+                        hover:bg-[#9C7A61] transition-colors disabled:opacity-50 disabled:cursor-not-allowed; 
+  }
+  /* --- [페이지: 마이페이지 (MyPage)] --- */
+  .mypage-wrapper { @apply w-full max-w-2xl px-4; }
+  
+  /* 프로필 영역 */
+  .profile-card { @apply card-base p-8 flex flex-col items-center bg-white mb-6; }
+  /* .profile-avatar-box { @apply w-24 h-24 bg-[#FFFBE8] rounded-full flex items-center justify-center text-[#AE8B72] mb-4 border border-[#CEAC93]; } */
+  .profile-avatar-box { @apply w-24 h-24 bg-[#F3F4F6] rounded-full flex items-center justify-center text-[#6B7280] mb-3; }
+
+  .profile-name-row { @apply flex items-center gap-2 mb-1; }
+  .profile-name { @apply text-xl font-bold text-gray-800; }
+  .profile-email { @apply text-sm text-gray-500 mb-6; }
+
+  /* 역할 뱃지 */
+  .role-badge { @apply px-2 py-0.5 rounded text-xs font-bold text-white transition-colors; }
+  .role-badge-agent { @apply bg-[#AE8B72]; }
+  .role-badge-user { @apply bg-gray-400; }
+
+  /* 정보 리스트 (공통: 라벨 + 값) */
+  .info-list-container { @apply w-full border-t border-gray-100 py-4 space-y-3; }
+  .info-row { @apply flex justify-between items-center; }
+  .info-label { @apply text-gray-500 text-sm; }
+  .info-value { @apply text-gray-800 text-sm font-medium; }
+
+  /* 공인중개사 전용 박스 */
+  .agent-info-box { @apply w-full bg-gray-50 p-4 rounded-lg mt-2 border border-[#AE8B72]; }
+  .agent-info-header { @apply text-[#AE8B72] font-bold text-sm mb-3 border-b border-[#CEAC93]/30 pb-2 flex items-center; }
+
+  /* 마이페이지 버튼 그룹 */
+  .mypage-btn-group { @apply w-full flex gap-3 mt-6; }
+  .btn-outline-brown { @apply btn-base flex-1 py-3 bg-white text-[#AE8B72] border border-[#AE8B72] hover:bg-[#FFFBE8] flex items-center justify-center; }
+  .btn-fill-brown { @apply btn-base flex-1 py-3 flex items-center justify-center; }
+  .btn-text-withdraw { @apply text-xs text-gray-400 underline hover:text-red-500 mt-4 cursor-pointer; }
+
+  /* 예약 내역 카드 */
+  .reservation-card { @apply card-base p-6 bg-white relative overflow-hidden; }
+  .reservation-deco-bar { @apply absolute top-0 left-0 w-1 h-full bg-[#AE8B72]; }
+  
+  .reservation-header { @apply flex justify-between items-center mb-4 pl-2; }
+  .reservation-title { @apply font-bold text-gray-800 text-lg flex items-center; }
+  .reservation-status-badge { @apply text-xs px-2 py-1 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .reservation-content { @apply pl-2 space-y-4; }
+  .reservation-sub-title { @apply text-xs text-gray-400 mb-1; }
+  
+  .reservation-time-box { @apply flex-1 p-3 bg-gray-50 rounded-lg; }
+  .reservation-price-box { @apply text-sm bg-[#FFFBE8] p-3 rounded text-center text-gray-700 border border-[#AE8B72]; }
+  .reservation-desc-box { @apply text-sm text-gray-500 bg-gray-50 p-3 rounded; }
+
+  /* --- [페이지: 찜 목록 (Wishlist)] --- */
+  .wishlist-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto h-full flex flex-col; }
+  
+  .wishlist-header { @apply flex items-center justify-between mb-6; }
+  .wishlist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .wishlist-count { @apply text-sm text-gray-500; }
+
+  /* 반응형 그리드: 모바일 1열, 태블릿 이상 2열 */
+  .wishlist-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4 pb-10; }
+  
+  /* 찜 카드 (기존 product-card 확장) */
+  .wish-card { @apply product-card bg-white h-32; } 
+
+  /* 빈 화면 상태 */
+  .wish-empty-state { @apply flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300; }
+  .btn-go-home { @apply mt-4 text-[#AE8B72] font-bold hover:underline cursor-pointer; }
+
+  /* --- [페이지: 정보 수정 (MyEdit)] --- */
+  .edit-wrapper { @apply w-full max-w-[460px] px-4 pb-10 mx-auto; }
+  .edit-card { @apply bg-white p-6 rounded-lg shadow-sm border border-[#CEAC93]; }
+  
+  /* 입력 폼 그룹 (테두리 있는 박스) */
+  .edit-form-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm mb-6; }
+  
+  /* 입력 행 (아이콘 + 인풋) */
+  .edit-input-row { @apply flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+  .edit-icon { @apply text-[#CEAC93] w-6 flex justify-center; }
+  .edit-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent ml-3 placeholder-[#E3C9A5]; }
+
+  /* 버튼 그룹 */
+  .edit-btn-group { @apply flex gap-3 mt-8; }
+  .btn-cancel { @apply btn-base flex-1 bg-gray-400 hover:bg-gray-500 py-3 text-center flex items-center justify-center; }
+  .btn-save { @apply btn-submit flex-1 text-base py-3 flex items-center justify-center; }
 }
 
 /* =========================================

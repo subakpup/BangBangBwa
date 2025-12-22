@@ -17,6 +17,8 @@ public interface PostDao {
 	List<PostListDto> postList(@Param("search") PostSearchDto search
 							 , @Param("limit") int limit
 							 , @Param("offset") long offset);
+	
+	int postCount(@Param("search") PostSearchDto search);
 
 	// 게시글 상세 조회
 	PostDetailDto postDetail(Long postId);

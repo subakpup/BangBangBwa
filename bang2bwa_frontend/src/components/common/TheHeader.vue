@@ -37,7 +37,7 @@
               마이페이지
             </RouterLink>
 
-            <RouterLink to="/mypage/like" class="dropdown-item" @click="closeDropdown">
+            <RouterLink to="/mypage/wishlist" class="dropdown-item" @click="closeDropdown">
               <Heart class="w-4 h-4" />
               찜 목록
             </RouterLink>

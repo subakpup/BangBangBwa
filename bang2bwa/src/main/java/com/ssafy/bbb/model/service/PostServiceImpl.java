@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.PostDao;
+import com.ssafy.bbb.model.dto.PageResponse;
 import com.ssafy.bbb.model.dto.notice.PostDetailDto;
 import com.ssafy.bbb.model.dto.notice.PostListDto;
 import com.ssafy.bbb.model.dto.notice.PostRequestDto;
@@ -39,17 +40,26 @@ public class PostServiceImpl implements PostService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<PostListDto> getPostList(PostSearchDto search, Pageable pageable) {
+	public PageResponse<PostListDto> getPostList(PostSearchDto search, Pageable pageable) {
 		int limit = pageable.getPageSize();
 		long offset = pageable.getOffset();
 		
 		List<PostListDto> list = postDao.postList(search, limit, offset);
+		int totalCount = postDao.postCount(search);
+		
+		int totalPage = (int)Math.ceil((double)totalCount/limit);
 		
 		if (list.isEmpty()) {
 			throw new CustomException(ErrorCode.POST_NOT_FOUND);
 		}
 		
-		return list;
+		return PageResponse.<PostListDto>builder()
+							.content(list)
+							.totalPage(totalPage)
+							.totalCount(totalCount)
+							.currentPage(pageable.getPageNumber() + 1)
+							.size(limit)
+							.build();
 	}
 
 	/**
