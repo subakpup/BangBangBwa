@@ -88,4 +88,11 @@ public class ProductController {
 
 		return ApiResponse.success(markerList, "마커 조회가 완료되었습니다.");
 	}
+	
+	@GetMapping("/{productId}")
+	public ApiResponse<ProductDto> getProduct(@PathVariable Long productId) {
+		ProductDto product = productService.findProduct(productId);
+		
+		return ApiResponse.success(product);
+	}
 }
