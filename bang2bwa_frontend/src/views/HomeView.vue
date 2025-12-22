@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { searchProducts } from '@/api/productApi';                // 매물 검색 API
@@ -113,8 +113,18 @@ const handleOpenAi = () => {
 };
 
 // AI 분석 결과 처리 함수
-const handleAiSearchResult = () => {
-  alert('분석 완료!');
+const handleAiSearchResult = async (aiResultList) => {
+  showAiModal.value = false;
+  productList.value = aiResultList;
+  currentType.value = `AI 맞춤 추천 결과`;
+  selectProperty.value = null;
+
+  await nextTick();
+
+  if (aiResultList.length > 0 && kakaoMapRef.value) {
+    const topPick = aiResultList[0];
+    kakaoMapRef.value.selectItem(topPick);
+  }
 };
 
 // 매물 클릭 함수
