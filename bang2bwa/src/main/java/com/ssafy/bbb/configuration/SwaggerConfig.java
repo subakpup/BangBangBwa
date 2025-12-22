@@ -25,7 +25,7 @@ public class SwaggerConfig {
 	
 	@Bean
 	GroupedOpenApi starOpenAPI() {
-		String[] paths = { "/stars/**" };
+		String[] paths = { "/wishlist/**" };
 		return GroupedOpenApi.builder().group("찜 기능 관련 API").pathsToMatch(paths).build();
 	}
 }
