@@ -1,10 +1,10 @@
 import { api } from "@/api/index";
 
 export const getSidoList = async () => {
-    const response = await api.get('/adress', {
+    const response = await api.get('/address', {
         params: { action: 'sido' }
     });
-    return response.data;
+    return response.data.data;
 };
 
 export const getSggList = async (sidoCode) => {
@@ -14,5 +14,5 @@ export const getSggList = async (sidoCode) => {
             sidoCode: sidoCode
         }
     });
-    return response.data;
+    return response.data.data;
 }
