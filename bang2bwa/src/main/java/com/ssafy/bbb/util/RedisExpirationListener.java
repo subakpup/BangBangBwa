@@ -79,7 +79,7 @@ public class RedisExpirationListener extends KeyExpirationEventMessageListener {
 	}
 	
 	private void handleNotifyExpiration(String expiredKey) {
-		Long reservationId = Long.parseLong(expiredKey.replace(REPORTED_PREFIX, ""));
+		Long reservationId = Long.parseLong(expiredKey.replace(NOTIFY_PREFIX, ""));
 		
 		ReservationDto reservation = reservationDao.findById(reservationId);
 
@@ -89,9 +89,9 @@ public class RedisExpirationListener extends KeyExpirationEventMessageListener {
 		
 		htmlText.append("<!DOCTYPE html>");
 		htmlText.append("<html lang=\"ko\">");
-		htmlText.append("<span> 예약 일정은 순조롭게 진행되었나요? </span>");
-		htmlText.append("<span> 보증금을 돌려받으시려면 인증을 해주셔야해요! </span>");
-		htmlText.append("<a href='http://localhost:5173/reservation/" + reservationId + "> 예약 인증 하러 가기 </a>");
+		htmlText.append("<p> 예약 일정은 순조롭게 진행되었나요? </p>");
+		htmlText.append("<p> 보증금을 돌려받으시려면 인증을 해주셔야해요! </p>");
+		htmlText.append("<a href='http://localhost:5173/reservation/").append(reservationId).append("'> 예약 인증 하러 가기 </a>");
 		htmlText.append("</html>");
 		
 		String userEmail = userDao.findEmailById(reservation.getUserId());
