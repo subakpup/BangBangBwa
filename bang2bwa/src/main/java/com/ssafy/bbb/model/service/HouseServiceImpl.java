@@ -17,7 +17,6 @@ import com.ssafy.bbb.global.constant.SggData;
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.HouseDao;
-import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.HouseDealDto;
 import com.ssafy.bbb.model.dto.HouseInfoDto;
 import com.ssafy.bbb.model.dto.ProductDto;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HouseServiceImpl implements HouseService {
 
     private final HouseDao houseDao;
-    private final ProductDao productDao;
+    private final ProductService productService;
     
     @Value("${open-api.service-key}")
     private String serviceKey;
@@ -104,7 +103,7 @@ public class HouseServiceImpl implements HouseService {
             urlBuilder.append("?serviceKey=" + serviceKey);
             urlBuilder.append("&LAWD_CD=" + lawdCd);
             urlBuilder.append("&DEAL_YMD=" + dealYmd);
-            urlBuilder.append("&numOfRows=50");
+            urlBuilder.append("&numOfRows=10");
             urlBuilder.append("&_type=json");
 
             URL url = new URL(urlBuilder.toString());
@@ -184,7 +183,7 @@ public class HouseServiceImpl implements HouseService {
     }
     
     /**
-     * [수정됨] 공공데이터를 ProductDto 필드에 맞춰 변환하여 등록
+     * 공공데이터를 ProductDto 필드에 맞춰 변환하여 등록
      */
     private void registProduct(HouseInfoDto info, HouseDealDto deal, ApiInfo api) {
         // 1. 관리자(시스템) 계정 ID
@@ -235,7 +234,6 @@ public class HouseServiceImpl implements HouseService {
                 .status(ReservationStatus.AVAILABLE) // 기본 상태
                 
                 // --- 일반 필드 ---
-                .agentId(SYSTEM_AGENT_ID)
                 .name(info.getBuildName())      // 건물 이름
                 .desc(description)              // 상세 내용
                 .buildYear(info.getBuildYear())
@@ -259,7 +257,7 @@ public class HouseServiceImpl implements HouseService {
 
         // 6. DB 저장
         try {
-            productDao.save(product); 
+            productService.create(SYSTEM_AGENT_ID, product, null); 
         } catch (Exception e) {
             log.warn("가상 매물 등록 실패: {}", e.getMessage());
         }
