@@ -1,12 +1,11 @@
 package com.ssafy.bbb.controller.docs;
 
-import java.util.Map;
-
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -153,8 +152,7 @@ public interface ReservationControllerDocs {
 		)
 	})
 	public ApiResponse<String> acceptReservation(
-			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
-			, @RequestBody Map<String, Long> bank
+			@RequestBody AcceptRequestDto request
 			, @Parameter(hidden=true) CustomUserDetails user);
 
 	@Operation(summary = "예약 거절", description = "중개인이 예약을 거절합니다.")

@@ -19,6 +19,7 @@ import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dao.ReservationDao;
 import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dao.VirtualBankDao;
+import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
@@ -230,9 +231,9 @@ public class ReservationServiceImpl implements ReservationService {
 	// 중개업자 예약 승인
 	@Override
 	@Transactional
-	public void acceptReservation(Long reservationId, Long agentId, Long bankId) {
+	public void acceptReservation(AcceptRequestDto request, Long agentId) {
 		// 1. 예약 정보 조회
-		ReservationDto reservation = reservationDao.findById(reservationId);
+		ReservationDto reservation = reservationDao.findById(request.getReservationId());
 		if (reservation == null) {
 			throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
 		}
@@ -246,7 +247,7 @@ public class ReservationServiceImpl implements ReservationService {
 			throw new CustomException(ErrorCode.RESERVATION_NOT_PENDING);
 		}
 		
-		VirtualBankDto bank = virtualBankDao.findById(bankId);
+		VirtualBankDto bank = virtualBankDao.findById(request.getBankId());
 
 		// 3. PG 서버 통신: 가승인 요청
 		String orderId = "ORD_AGENT_" + UUID.randomUUID().toString();
@@ -254,7 +255,7 @@ public class ReservationServiceImpl implements ReservationService {
 		String paymentKey = connPgServerPreAuth(orderId, amount, bank.getWebhookUrl());
 
 		// 4. 예약 테이블 업데이트
-		reservationDao.reservationAccept(reservationId, paymentKey, ReservationStatus.RESERVED);
+		reservationDao.reservationAccept(request.getReservationId(), paymentKey, ReservationStatus.RESERVED);
 
 		// 5. 결제 이력 저장
 		PaymentDto paymentLog = PaymentDto.builder() //
@@ -263,7 +264,7 @@ public class ReservationServiceImpl implements ReservationService {
 				.amount(amount) // 금액
 				.status(PaymentStatus.AUTHORIZED) // 결제 정보 -> 가승인
 				.paymentType(PaymentType.DEPOSIT) // 결제 타입 -> 보증금
-				.reservationId(reservationId) // 예약 ID 연결
+				.reservationId(request.getReservationId()) // 예약 ID 연결
 				.approvedAt(LocalDateTime.now()) // 결제 시각 저장
 				.userId(agentId) //
 				.build();
@@ -286,10 +287,10 @@ public class ReservationServiceImpl implements ReservationService {
 		long visitTimer = Math.abs(Duration.between(LocalDateTime.now(), reservation.getVisitDate()).getSeconds());
 		
 		// redis에 약속시간에 소멸되는 키를 생성. => 소멸시 이메일을 보낼 것.
-		redisUtil.setDataExpire(NOTIFY_PREFIX + reservation.getReservationId(), "TRUE", visitTimer);
+		redisUtil.setDataExpire(NOTIFY_PREFIX + request.getReservationId(), "TRUE", visitTimer);
 		
 		// 7. pending timer 해제
-		redisUtil.deleteData(PENDING_PREFIX + reservationId);
+		redisUtil.deleteData(PENDING_PREFIX + request.getReservationId());
 	}
 
 	// 만남 성사

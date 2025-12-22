@@ -1,5 +1,6 @@
 package com.ssafy.bbb.model.service;
 
+import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -9,7 +10,7 @@ public interface ReservationService {
 
 	public void cancelReservation(Long reservationId, Long userId);
 
-	public void acceptReservation(Long reservationId, Long agentId, Long bankId);
+	public void acceptReservation(AcceptRequestDto request, Long agentId);
 
 	public void rejectReservation(Long reservationId, Long agentId, String cancelReason);
 
