@@ -51,7 +51,10 @@ public enum ErrorCode {
 	
 	// 7. 게시판 관련 에러
 	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
-	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
+	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
+	
+	// 8. AI 관련 에러
+	PRODUCT_NOT_FOUND_FOR_AI(HttpStatus.NOT_FOUND, "조건에 부합하는 매물을 찾을 수 없습니다.");
 	
 	// 필요한 에러 추가..
 

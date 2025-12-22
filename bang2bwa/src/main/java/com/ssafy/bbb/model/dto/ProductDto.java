@@ -52,6 +52,9 @@ public class ProductDto {
 
 	private List<ProductImageDto> images; // 매물 사진 리스트
 	private List<Long> deleteImageIds; // (수정시 사용) 삭제할 이미지의 아이디 리스트
+	
+	private boolean isAiRecommended; // AI 추천 여부
+	private String aiReason; // AI 추천 이유
 
 	// 이미지를 설정할 setter 메서드
 	public void setImages(List<ProductImageDto> images) {
@@ -67,7 +70,21 @@ public class ProductDto {
 	public void setProductId(Long productId) {
 		this.productId = productId;
 	}
+	
 	public void setAgentId(Long agentId) {
 		this.agentId = agentId;
+	}
+	
+	public void setAiRecommended(boolean isAiRecommended) {
+		this.isAiRecommended = isAiRecommended;
+	}
+	
+	public void setAiReason(String aiReason) {
+		this.aiReason = aiReason;
+	}
+	
+	// 전체 주소 반환
+	public String getFullAddress() {
+		return sggNm + " " + umdNm + " " + jibun;
 	}
 }

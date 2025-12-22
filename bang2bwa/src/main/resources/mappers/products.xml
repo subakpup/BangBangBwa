@@ -175,4 +175,42 @@
   		where latitude is not null and longitude is not null
   	</select>
   	
+  	<select id="aiSearchProduct" parameterType="com.ssafy.bbb.model.dto.AiSearchDto">
+  		SELECT *
+  		FROM products
+  		<where>
+  			AND trade_type = #{tradeType}
+  			AND status = 'AVAILABLE'
+  			AND (
+  				sgg_nm LIKE CONCAT('%', #{location}, '%')
+  				OR
+  				umd_nm LIKE CONCAT('%', #{location}, '%')
+  			)
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'RENT'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  				
+  				<if test="monthlyRent != null and monthlyRent.max > 0">
+  					AND monthly_rent BETWEEN #{monthlyRent.min} AND #{monthlyRent.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'LEASE'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'SALE'">
+  				<if test="dealAmount != null and dealAmount.max > 0">
+  					AND deal_amount BETWEEN #{dealAmount.min} AND #{dealAmount.max}
+  				</if>
+  			</if>
+  		</where>
+  		
+  		LIMIT 10
+  	</select>
+  	
   </mapper>
