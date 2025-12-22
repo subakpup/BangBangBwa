@@ -265,6 +265,87 @@
   .btn-comment-submit { @apply h-[50px] px-6 rounded-md bg-[#AE8B72] text-white text-sm font-bold 
                         hover:bg-[#9C7A61] transition-colors disabled:opacity-50 disabled:cursor-not-allowed; 
   }
+  /* --- [페이지: 마이페이지 (MyPage)] --- */
+  .mypage-wrapper { @apply w-full max-w-2xl px-4; }
+  
+  /* 프로필 영역 */
+  .profile-card { @apply card-base p-8 flex flex-col items-center bg-white mb-6; }
+  /* .profile-avatar-box { @apply w-24 h-24 bg-[#FFFBE8] rounded-full flex items-center justify-center text-[#AE8B72] mb-4 border border-[#CEAC93]; } */
+  .profile-avatar-box { @apply w-24 h-24 bg-[#F3F4F6] rounded-full flex items-center justify-center text-[#6B7280] mb-3; }
+
+  .profile-name-row { @apply flex items-center gap-2 mb-1; }
+  .profile-name { @apply text-xl font-bold text-gray-800; }
+  .profile-email { @apply text-sm text-gray-500 mb-6; }
+
+  /* 역할 뱃지 */
+  .role-badge { @apply px-2 py-0.5 rounded text-xs font-bold text-white transition-colors; }
+  .role-badge-agent { @apply bg-[#AE8B72]; }
+  .role-badge-user { @apply bg-gray-400; }
+
+  /* 정보 리스트 (공통: 라벨 + 값) */
+  .info-list-container { @apply w-full border-t border-gray-100 py-4 space-y-3; }
+  .info-row { @apply flex justify-between items-center; }
+  .info-label { @apply text-gray-500 text-sm; }
+  .info-value { @apply text-gray-800 text-sm font-medium; }
+
+  /* 공인중개사 전용 박스 */
+  .agent-info-box { @apply w-full bg-gray-50 p-4 rounded-lg mt-2 border border-[#AE8B72]; }
+  .agent-info-header { @apply text-[#AE8B72] font-bold text-sm mb-3 border-b border-[#CEAC93]/30 pb-2 flex items-center; }
+
+  /* 마이페이지 버튼 그룹 */
+  .mypage-btn-group { @apply w-full flex gap-3 mt-6; }
+  .btn-outline-brown { @apply btn-base flex-1 py-3 bg-white text-[#AE8B72] border border-[#AE8B72] hover:bg-[#FFFBE8] flex items-center justify-center; }
+  .btn-fill-brown { @apply btn-base flex-1 py-3 flex items-center justify-center; }
+  .btn-text-withdraw { @apply text-xs text-gray-400 underline hover:text-red-500 mt-4 cursor-pointer; }
+
+  /* 예약 내역 카드 */
+  .reservation-card { @apply card-base p-6 bg-white relative overflow-hidden; }
+  .reservation-deco-bar { @apply absolute top-0 left-0 w-1 h-full bg-[#AE8B72]; }
+  
+  .reservation-header { @apply flex justify-between items-center mb-4 pl-2; }
+  .reservation-title { @apply font-bold text-gray-800 text-lg flex items-center; }
+  .reservation-status-badge { @apply text-xs px-2 py-1 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .reservation-content { @apply pl-2 space-y-4; }
+  .reservation-sub-title { @apply text-xs text-gray-400 mb-1; }
+  
+  .reservation-time-box { @apply flex-1 p-3 bg-gray-50 rounded-lg; }
+  .reservation-price-box { @apply text-sm bg-[#FFFBE8] p-3 rounded text-center text-gray-700 border border-[#AE8B72]; }
+  .reservation-desc-box { @apply text-sm text-gray-500 bg-gray-50 p-3 rounded; }
+
+  /* --- [페이지: 찜 목록 (Wishlist)] --- */
+  .wishlist-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto h-full flex flex-col; }
+  
+  .wishlist-header { @apply flex items-center justify-between mb-6; }
+  .wishlist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .wishlist-count { @apply text-sm text-gray-500; }
+
+  /* 반응형 그리드: 모바일 1열, 태블릿 이상 2열 */
+  .wishlist-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4 pb-10; }
+  
+  /* 찜 카드 (기존 product-card 확장) */
+  .wish-card { @apply product-card bg-white h-32; } 
+
+  /* 빈 화면 상태 */
+  .wish-empty-state { @apply flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300; }
+  .btn-go-home { @apply mt-4 text-[#AE8B72] font-bold hover:underline cursor-pointer; }
+
+  /* --- [페이지: 정보 수정 (MyEdit)] --- */
+  .edit-wrapper { @apply w-full max-w-[460px] px-4 pb-10 mx-auto; }
+  .edit-card { @apply bg-white p-6 rounded-lg shadow-sm border border-[#CEAC93]; }
+  
+  /* 입력 폼 그룹 (테두리 있는 박스) */
+  .edit-form-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm mb-6; }
+  
+  /* 입력 행 (아이콘 + 인풋) */
+  .edit-input-row { @apply flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+  .edit-icon { @apply text-[#CEAC93] w-6 flex justify-center; }
+  .edit-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent ml-3 placeholder-[#E3C9A5]; }
+
+  /* 버튼 그룹 */
+  .edit-btn-group { @apply flex gap-3 mt-8; }
+  .btn-cancel { @apply btn-base flex-1 bg-gray-400 hover:bg-gray-500 py-3 text-center flex items-center justify-center; }
+  .btn-save { @apply btn-submit flex-1 text-base py-3 flex items-center justify-center; }
 }
 
 /* =========================================

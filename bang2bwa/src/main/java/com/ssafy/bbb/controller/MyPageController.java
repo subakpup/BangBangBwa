@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/my-page")
+@RequestMapping("/mypage")
 @RequiredArgsConstructor
 public class MyPageController implements MyPageControllerDocs {
 	private final UserService userService;
