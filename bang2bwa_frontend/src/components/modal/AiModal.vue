@@ -151,10 +151,10 @@ const isAnalyzing = ref(false); // 분석 중 로딩 상태
 // 입력 폼 데이터
 const form = reactive({
     type: '월세',
+    deposit: { min: 0, max: null },
+    monthly: { min: 0, max: null},
+    budget: { min: 0, max: null},
     location: '',
-    deposit: { min: 0, max: 5000 },
-    monthly: { min: 0, max: 100},
-    budget: { min: 0, max: 50000},
     options: [], // 선택된 옵션들
 })
 
@@ -168,7 +168,7 @@ const toggleOption = (name) => {
 };
 
 // '분석 시작' 버튼 클릭 핸들러
-const handleSearch = () => {
+const handleSearch = async () => {
   if (isAnalyzing.value) return;
   
   if (!form.location) {
@@ -178,10 +178,26 @@ const handleSearch = () => {
 
   isAnalyzing.value = true;
   
-  setTimeout(() => {
+  try {
+    const payload = {
+      type: form.type,
+      location: form.location,
+      options: form.options,
+      deposit: form.type === '월세' ? form.deposit: null,
+      monthly: form.type === '월세' ? form.monthly : null,
+      budget: form.type !== '월세' ? form.budget : null
+    };
+
+    console.log("AI 분석 요청 전송:", payload);
+
+    await new Promise(r => setTimeout(r, 2000));
+    
+    emit('close');
+  } catch (error) {
+    console.error(error);
+    alert("분석 중 오류가 발생했습니다.");
+  } finally {
     isAnalyzing.value = false;
-    emit('search', { ...form });  // 입력 데이터 부모에게 전달
-    emit('close'); // 모달 닫기
-  }, 1500);
+  }
 };
 </script>
