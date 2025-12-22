@@ -18,4 +18,6 @@ public interface ProductService {
 	public List<ProductDto> search(ProductSearchDto request);
 
 	public List<MapResponseDto> findAllMarkers();
+	
+	public ProductDto findById(Long productId);
 }

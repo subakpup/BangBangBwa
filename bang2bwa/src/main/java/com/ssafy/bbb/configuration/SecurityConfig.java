@@ -47,6 +47,7 @@ public class SecurityConfig {
 					.requestMatchers("/reservations/**").permitAll() // 개발중에 잠시 열어둠.
 					.requestMatchers("/house/**").permitAll() // 개발 중에 잠시 열어둠.
 					.requestMatchers("/api/**").permitAll() // 개발 중에 잠시 열어둠.
+					.requestMatchers("/address/**").permitAll() // 개발 중에 잠시 열어둠.
 					.anyRequest().authenticated()) // 나머지는 다 로그인 해야 함
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 		

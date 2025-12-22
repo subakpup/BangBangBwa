@@ -1,9 +1,8 @@
 package com.ssafy.bbb.model.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 
+import com.ssafy.bbb.model.dto.PageResponse;
 import com.ssafy.bbb.model.dto.notice.PostDetailDto;
 import com.ssafy.bbb.model.dto.notice.PostListDto;
 import com.ssafy.bbb.model.dto.notice.PostRequestDto;
@@ -14,7 +13,7 @@ public interface PostService {
 	public Long writePost(PostRequestDto request);
 	
 	// 게시글 목록 조회
-	public List<PostListDto> getPostList(PostSearchDto search, Pageable pageable);
+	public PageResponse<PostListDto> getPostList(PostSearchDto search, Pageable pageable);
 	
 	// 게시글 상세 조회
 	public PostDetailDto getPostDetail(Long postId);
