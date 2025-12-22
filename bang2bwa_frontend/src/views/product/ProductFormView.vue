@@ -3,7 +3,8 @@
         <div class="regist-card animate-fade-in-up">
 
             <div class="regist-header">
-                <h2 class="regist-title">{{ isEditMode ? '매물 정보 수정' : '매물 등록' }}</h2>
+                <h2 class="regist-title">{{ isEditMode ? '매물 정보 수정' : '새 매물 등록' }}</h2>
+                <p class="text-gray-400 text-sm mt-2">매물의 상세 정보를 입력하여 고객에게 어필해보세요.</p>
             </div>
 
             <form @submit.prevent="submitForm">
@@ -24,33 +25,34 @@
                                 <option v-for="(val, key) in tradeTypeMap" :key="val" :value="val">{{ key }}</option>
                             </select>
                         </div>
-                    </div>
+                        
+                        </div>
                 </section>
 
                 <section class="regist-section">
-                    <h3 class="section-title">가격 정보</h3>
+                    <h3 class="section-title">가격 정보 (단위: 만원)</h3>
                     <div class="highlight-box">
 
                         <div v-if="product.tradeType === 'SALE'" class="form-group">
-                            <label class="form-label">매매가 (만원) <span class="required-mark">*</span></label>
-                            <input type="number" v-model="product.dealAmount" placeholder="예: 35000"
+                            <label class="form-label">매매가 <span class="required-mark">*</span></label>
+                            <input type="number" v-model="product.dealAmount" placeholder="예: 35000 (3억 5천)"
                                 class="regist-input bg-white" />
                         </div>
 
                         <div v-if="product.tradeType === 'LEASE'" class="form-group">
-                            <label class="form-label">전세 보증금 (만원) <span class="required-mark">*</span></label>
-                            <input type="number" v-model="product.deposit" placeholder="예: 20000"
+                            <label class="form-label">전세 보증금 <span class="required-mark">*</span></label>
+                            <input type="number" v-model="product.deposit" placeholder="예: 20000 (2억)"
                                 class="regist-input bg-white" />
                         </div>
 
                         <div v-if="product.tradeType === 'RENT'" class="form-grid">
                             <div class="form-group">
-                                <label class="form-label">보증금 (만원) <span class="required-mark">*</span></label>
+                                <label class="form-label">보증금 <span class="required-mark">*</span></label>
                                 <input type="number" v-model="product.deposit" placeholder="예: 1000"
                                     class="regist-input bg-white" />
                             </div>
                             <div class="form-group">
-                                <label class="form-label">월세 (만원) <span class="required-mark">*</span></label>
+                                <label class="form-label">월세 <span class="required-mark">*</span></label>
                                 <input type="number" v-model="product.monthlyRent" placeholder="예: 50"
                                     class="regist-input bg-white" />
                             </div>
@@ -60,28 +62,57 @@
                 </section>
 
                 <section class="regist-section">
-                    <div class="flex justify-between items-end mb-4">
-                        <h3 class="section-title mb-0">위치 정보</h3>
-                        <button type="button" @click="openAddressSearch"
-                            class="btn-base text-xs py-1.5 px-3 bg-gray-600 hover:bg-gray-700">
-                            주소 검색
-                        </button>
-                    </div>
+                    <h3 class="section-title">위치 정보</h3>
 
-                    <div class="form-grid-3 mb-4">
-                        <div class="form-group">
-                            <label class="form-label">시/군/구</label>
-                            <input type="text" v-model="product.sggNm" readonly class="regist-input readonly"
-                                placeholder="주소 검색" />
+                    <div class="highlight-box bg-white">
+                        <div class="form-grid-3 mb-4">
+
+                            <div class="form-group">
+                                <label class="form-label">시 / 도 <span class="required-mark">*</span></label>
+                                <select v-model="selectedSidoCode" class="regist-input cursor-pointer">
+                                    <option value="" disabled>선택</option>
+                                    <option v-for="sido in sidoList" :key="sido.sidoCode" :value="sido.sidoCode">
+                                        {{ sido.sidoName }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">시 / 군 / 구 <span class="required-mark">*</span></label>
+                                <select v-model="selectedSggCode" class="regist-input cursor-pointer"
+                                    :disabled="!selectedSidoCode">
+                                    <option value="" disabled>선택</option>
+                                    <option v-for="sgg in sggList" :key="sgg.gugunCode" :value="sgg.gugunCode">
+                                        {{ sgg.gugunName }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">법정동 (읍/면/동) <span class="required-mark">*</span></label>
+                                <input type="text" v-model="selectedDongName" placeholder="예: 역삼동" class="regist-input"
+                                    @blur="updateLocationInfo" />
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">법정동</label>
-                            <input type="text" v-model="product.umdNm" readonly class="regist-input readonly" />
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">상세 번지 <span class="required-mark">*</span></label>
+                                <input type="text" v-model="detailJibun" placeholder="예: 123-45 (상세주소)"
+                                    class="regist-input" @blur="updateLocationInfo" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">좌표 (자동생성)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" :value="product.latitude" readonly
+                                        class="regist-input readonly text-xs" placeholder="위도" />
+                                    <input type="text" :value="product.longitude" readonly
+                                        class="regist-input readonly text-xs" placeholder="경도" />
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">지번</label>
-                            <input type="text" v-model="product.jibun" readonly class="regist-input readonly" />
-                        </div>
+                        <p class="text-xs text-gray-400 mt-2">* 상세 주소까지 모두 입력하면 좌표가 자동으로 생성됩니다.</p>
                     </div>
                 </section>
 
@@ -158,7 +189,8 @@
                     </div>
 
                     <div v-if="product.images && product.images.length > 0" class="preview-grid">
-                        <div v-for="(img, index) in product.images" :key="img.imageId || index" class="preview-item group">
+                        <div v-for="(img, index) in product.images" :key="img.imageId || index"
+                            class="preview-item group">
                             <img :src="img.url" alt="매물 사진" class="preview-img" />
                             <button type="button" class="btn-img-delete"
                                 @click="removeExistingImage(img.imageId, index)">
@@ -181,156 +213,227 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createProduct, findById, updateProduct } from '@/api/productApi';
-import { tradeTypeMap, typeMap } from '@/utils/productUtil';
+import { getSidoList, getSggList } from '@/api/addressApi';
+import { typeMap, tradeTypeMap } from '@/utils/productUtil';
 
 const route = useRoute();
 const router = useRouter();
+const fileInput = ref(null);
 
-// 상태 변수
+// --- 상태 변수 ---
 const isEditMode = ref(false);
 const productId = ref(null);
 const selectedFiles = ref([]);
 
+// 주소 관련 상태
+const sidoList = ref([]);
+const sggList = ref([]);
+const selectedSidoCode = ref("");
+const selectedSggCode = ref("");
+const selectedDongName = ref("");
+const detailJibun = ref("");
+
 // DTO 매핑
 const product = ref({
-    // --- 식별자 ---
     productId: null,
-    agentId: null, // 로그인한 유저 정보에서 가져오거나, 조회 시 받아옴
-
-    // --- 위치 정보 ---
-    sggNm: '',      // 시군구
-    umdNm: '',      // 법정동
-    jibun: '',      // 지번
-    latitude: 0.0,  // 위도
-    longitude: 0.0, // 경도
-
-    // --- 매물 기본 정보 ---
-    name: '',       // 건물 이름
-    aptDong: '',    // 동
-    floor: '',      // 층 (String 타입임에 주의)
-    buildYear: null,// 건축 년도
-
-    // --- 면적 정보 (Double) ---
-    excluUseAr: null,   // 전용 면적
-    landAr: null,       // 대지권 면적
-    totalFloorAr: null, // 연면적
-    plottageAr: null,   // 대지면적
-
-    // --- 거래 및 금액 정보 ---
-    houseType: '',      // 'APARTMENT', 'OPIC', 'VILLA' 등 (Enum -> String)
-    tradeType: '',      // 'DEAL'(매매), 'JEONSE'(전세), 'MONTHLY'(월세) (Enum -> String)
-    status: 'AVAILABLE',// 'AVAILABLE', 'RESERVED', 'COMPLETED' (Enum -> String)
-
-    dealAmount: 0,      // 매매가
-    deposit: 0,         // 보증금
-    monthlyRent: 0,     // 월세
-
-    // --- 상세 설명 ---
-    desc: '',           // 상세 내용 (변수명 desc 주의)
-
-    // --- 이미지 처리 ---
-    images: [],         // 조회 시 받아온 기존 이미지 리스트 (ProductImageDto 형태)
-    deleteImageIds: []  // **수정 시 삭제할 이미지 ID들을 담을 리스트**
+    agentId: null,
+    
+    // 주소 정보
+    sggNm: '', // "서울특별시 강남구"
+    umdNm: '', // "역삼동"
+    jibun: '', // "123-45"
+    latitude: 0.0, 
+    longitude: 0.0,
+    
+    // 상세 정보
+    name: '', aptDong: '', floor: '', buildYear: null,
+    excluUseAr: null, landAr: null, totalFloorAr: null, plottageAr: null,
+    
+    // 기본 정보
+    houseType: 'APART', 
+    tradeType: 'SALE', 
+    status: 'AVAILABLE',
+    
+    // 가격
+    dealAmount: 0, 
+    deposit: 0, 
+    monthlyRent: 0,
+    
+    desc: '',
+    images: [], 
+    deleteImageIds: []
 });
 
-// 파일 선택 핸들러
+// --- 비즈니스 로직 ---
+
 const handleFileUpload = (event) => {
     selectedFiles.value = Array.from(event.target.files);
 };
 
-// 이미지 삭제 핸들러
 const removeExistingImage = (imageId, index) => {
     product.value.images.splice(index, 1);
-    if (imageId) {
-        product.value.deleteImageIds.push(imageId);
-    }
+    if (imageId) product.value.deleteImageIds.push(imageId);
 };
 
-// 폼 제출 핸들러
 const submitForm = async () => {
+    // 1. 필수 값 검증
+    if (!product.value.houseType || !product.value.tradeType) {
+        alert("매물 종류와 거래 유형은 필수 입력 항목입니다.");
+        return;
+    }
+    
+    // 주소 필수값 검증
+    if (!product.value.sggNm || !product.value.umdNm || !product.value.jibun) {
+        alert("주소 정보를 모두 입력해주세요 (시/도, 시/군/구, 법정동, 상세주소).");
+        return;
+    }
+
+    // 좌표 생성 확인
+    if (!product.value.latitude || !product.value.longitude) {
+        alert("좌표 생성을 위해 주소를 다시 확인해주세요.");
+        return;
+    }
+
+    // 2. 가격 단위 변환 (만원 -> 원)
+    const submissionData = { ...product.value };
+    
+    if (submissionData.dealAmount) submissionData.dealAmount *= 10000;
+    if (submissionData.deposit) submissionData.deposit *= 10000;
+    if (submissionData.monthlyRent) submissionData.monthlyRent *= 10000;
+
     try {
         let response;
-
         if (isEditMode.value) {
-            response = await updateProduct(productId.value, product.value, selectedFiles.value);
+            response = await updateProduct(productId.value, submissionData, selectedFiles.value);
         } else {
-            response = await createProduct(product.value, selectedFiles.value);
+            response = await createProduct(submissionData, selectedFiles.value);
         }
 
-        if (response && response.message) {
-            alert(response.message);
-        }
+        if (response && response.message) alert(response.message);
 
-        router.push({ name: 'ProductManage' }); // 관리 페이지로 이동
+        router.push({ name: 'productManage' });
     } catch (error) {
-        console.error(error);
+        const errorMsg = error.response?.data?.message || '처리 중 오류가 발생했습니다.';
+        alert(errorMsg);
     }
 };
 
-// 백엔드 API 호출 후 실행되는 함수
+// --- 주소 및 좌표 로직 ---
+
+const fetchSidoList = async () => {
+    try {
+        sidoList.value = await getSidoList();
+    } catch (error) {
+        console.error("시도 로드 실패", error);
+    }
+};
+
+watch(selectedSidoCode, async (newVal) => {
+    if (!newVal) return;
+    try {
+        sggList.value = await getSggList(newVal);
+    } catch (error) {
+        console.error("구군 로드 실패", error);
+    }
+});
+
+watch([selectedSggCode, selectedDongName, detailJibun], () => {
+    if (selectedSidoCode.value && selectedSggCode.value) {
+        updateLocationInfo();
+    }
+});
+
+const updateLocationInfo = () => {
+    const sido = sidoList.value.find(item => item.sidoCode === selectedSidoCode.value);
+    const sgg = sggList.value.find(item => item.gugunCode === selectedSggCode.value);
+
+    if (!sido || !sgg) return;
+
+    const sidoName = sido.sidoName;
+    const sggName = sgg.gugunName;
+    const dongName = selectedDongName.value;
+    const detail = detailJibun.value;
+
+    // DTO 저장 포맷: sggNm = "시도 + 공백 + 구군"
+    product.value.sggNm = `${sidoName} ${sggName}`;
+    product.value.umdNm = dongName;
+    product.value.jibun = detail;
+
+    // 좌표 변환용 전체 주소
+    const fullAddressForGeo = `${sidoName} ${sggName} ${dongName} ${detail}`.trim();
+
+    if (window.kakao && window.kakao.maps) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(fullAddressForGeo, (result, status) => {
+            if (status === kakao.maps.services.Status.OK) {
+                product.value.latitude = parseFloat(result[0].y);
+                product.value.longitude = parseFloat(result[0].x);
+            }
+        });
+    }
+};
+
+// --- 수정 데이터 로드 ---
 const loadProductData = async (id) => {
     try {
         const data = await findById(id);
 
         product.value = {
-            productId: data.productId,
-            agentId: data.agentId,
-
-            // 주소 및 위치
-            sggNm: data.sggNm,
-            umdNm: data.umdNm,
-            jibun: data.jibun,
-            latitude: data.latitude,
-            longitude: data.longitude,
-
-            // 건물 정보
-            name: data.name,
-            aptDong: data.aptDong,
-            floor: data.floor,
-            buildYear: data.buildYear,
-
-            // 면적
-            excluUseAr: data.excluUseAr,
-            landAr: data.landAr,
-            totalFloorAr: data.totalFloorAr,
-            plottageAr: data.plottageAr,
-
-            // 타입 및 상태 (Enum은 문자열로 매핑됨)
-            houseType: data.houseType,
-            tradeType: data.tradeType,
-            status: data.status,
-
-            // 가격
-            dealAmount: data.dealAmount,
-            deposit: data.deposit,
-            monthlyRent: data.monthlyRent,
-
-            // 설명
-            desc: data.desc,
-
-            // 이미지
-            // 백엔드에서 보내준 images 리스트를 그대로 매핑
+            ...product.value,
+            ...data,
             images: data.images || [],
-
-            // 삭제할 이미지 ID 리스트는 초기화 (사용자가 삭제 버튼 누를 때 추가됨)
             deleteImageIds: []
         };
 
+        // 가격 단위 변환 (원 -> 만원)
+        if (product.value.dealAmount) product.value.dealAmount /= 10000;
+        if (product.value.deposit) product.value.deposit /= 10000;
+        if (product.value.monthlyRent) product.value.monthlyRent /= 10000;
+
+        // 주소 UI 복구
+        if (data.sggNm) {
+            const sggNmParts = data.sggNm.split(" "); 
+            
+            if (sggNmParts.length >= 2) {
+                const targetSidoName = sggNmParts[0];
+                const targetSggName = sggNmParts[1];
+
+                const foundSido = sidoList.value.find(s => s.sidoName === targetSidoName);
+                if (foundSido) {
+                    selectedSidoCode.value = foundSido.sidoCode;
+                    await nextTick();
+
+                    const loadedSggList = await getSggList(foundSido.sidoCode);
+                    sggList.value = loadedSggList;
+
+                    const foundSgg = loadedSggList.find(s => s.gugunName === targetSggName);
+                    if (foundSgg) {
+                        selectedSggCode.value = foundSgg.gugunCode;
+                    }
+                }
+            }
+        }
+        
+        if (data.umdNm) selectedDongName.value = data.umdNm;
+        if (data.jibun) detailJibun.value = data.jibun;
+
     } catch (error) {
         console.error("데이터 로드 실패", error);
+        alert("데이터를 불러올 수 없습니다.");
+        router.push({ name: 'ProductManage' });
     }
 };
 
-// 페이지 로드 시 수정 모드인지 확인
 onMounted(async () => {
+    await fetchSidoList();
+
     if (route.params.id) {
         isEditMode.value = true;
         productId.value = route.params.id;
         await loadProductData(productId.value);
     }
 });
-
 </script>

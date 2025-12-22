@@ -102,7 +102,7 @@ export const deleteProduct = async (productId) => {
 export const findById = async (productId) => {
     try {
         const response = await api.get(`/products/${productId}`);
-        return response.data;
+        return response.data.data;
     } catch (error) {
         return error;
     }
