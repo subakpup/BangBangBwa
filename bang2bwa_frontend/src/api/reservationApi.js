@@ -43,6 +43,20 @@ export const reportNoShow = async (reservationId, location) => {
 };
 
 /**
+ * [추가] 노쇼 신고 이의 제기 (방어)
+ * POST /reservations/{reservationId}/defend
+ * Body: { latitude, longitude }
+ */
+export const defendNoShow = async (reservationId, location) => {
+    try {
+        const response = await api.post(`/reservations/${reservationId}/defend`, location);
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+};
+
+/**
  * 예약 취소
  * POST /reservations/{reservationId}/cancel
  */
@@ -74,6 +88,18 @@ export const acceptReservation = async (data) => {
     }
 };
 
+/**
+ * [추가] 예약 상세 정보 조회 (화면 표시용)
+ * GET /reservations/{reservationId}
+ */
+export const getReservationDetail = async (reservationId) => {
+    try {
+        const response = await api.get(`/reservations/${reservationId}`);
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+}
 
 /**
  * 결제 가능 은행(카드사) 목록 조회
