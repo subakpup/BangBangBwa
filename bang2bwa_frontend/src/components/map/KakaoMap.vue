@@ -28,12 +28,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, toRaw, computed } from 'vue';
+import { onMounted, ref, watch, toRaw, defineExpose, defineEmits } from 'vue';
 import { formatPrice, infraCategories } from '@/utils/productUtil';
 import { X } from 'lucide-vue-next';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
-const emit = defineEmits(['marker-click']); // 마커 클릭 이벤트
+const emit = defineEmits(['marker-click', 'bounds-changed']); // 마커 클릭 이벤트
 
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
@@ -41,6 +41,8 @@ const markers = ref([]); // 마커 배열
 const infraMarkers = ref([]); // 인프라 마커들 담을 배열
 const selectedItem = ref(null); // 현재 선택된 매물 객체
 const currentCircle = ref(null); // 현재 그려진 반경 원
+
+const isFirstLoad = ref(true);
 
 // 지도 초기화
 const initMap = () => {
@@ -51,53 +53,68 @@ const initMap = () => {
     };
 
     // 지도 객체 요청
-    mapInstance.value = new window.kakao.maps.Map(container, options);
+    const map = new window.kakao.maps.Map(container, options);
+    mapInstance.value = map;
+
+    window.kakao.maps.event.addListener(map, 'idle', onMapIdle);
 
     if (props.items && props.items.length > 0) {
         updateMarkers(props.items);
     }
 };
 
+const onMapIdle = () => {
+    if (!mapInstance.value) return;
+
+    const map = toRaw(mapInstance.value);
+    const bounds = map.getBounds(); // 영역 정보 가져오기
+
+    // 남서쪽(sw), 북동쪽(ne)
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+
+    // 부모에게 좌표 전달
+    emit('bounds-changed', {
+        minLat: sw.getLat(),
+        minLng: sw.getLng(),
+        maxLat: ne.getLat(),
+        maxLng: ne.getLng()
+    });
+};
+
 // 마커 설정
 const updateMarkers = (newItems) => {
-    // 기존 마커 초기화
+    // 1. 기존 마커 지우기
     if (markers.value.length > 0) {
         markers.value.forEach(marker => marker.setMap(null));
         markers.value = [];
     }
 
-    // 새 리스트 로드 시 선택 상태 초기화
     resetSelection();
 
-    // 데이터가 없으면 리턴
     if (!newItems || newItems.length === 0) return;
 
-    // 지도 범위 재설정
     const bounds = new window.kakao.maps.LatLngBounds();
     const rawMap = toRaw(mapInstance.value);
 
     newItems.forEach(item => {
-        if (!item.latitude || !item.longitude) return; // 좌표 없는 데이터는 패스
+        if (!item.latitude || !item.longitude) return; 
 
         const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
-        const price = formatPrice(item); // 마커 내용(가격)
+        const price = formatPrice(item); 
 
         const content = document.createElement('div');
         content.className = `custom-overlay`;
-
-        // 마커
         content.innerHTML = `
             <div class="overlay-content">
                 <span class="price">${price}</span>
             </div>
         `;
 
-        // 마커 클릭 이벤트
         content.addEventListener('click', () => {
             emit('marker-click', item);
         });
 
-        // 지도 오버레이
         const customOverlay = new window.kakao.maps.CustomOverlay({
             position: position,
             content: content,
@@ -109,9 +126,9 @@ const updateMarkers = (newItems) => {
         bounds.extend(position);
     });
 
-    // 모든 마커가 보이도록 지도 범위 조절
-    if (rawMap && markers.value.length > 0) {
+    if (isFirstLoad.value && markers.value.length > 0) {
         rawMap.setBounds(bounds);
+        isFirstLoad.value = false; // 이제 첫 로딩 끝났으니 false로 변경
     }
 };
 
@@ -199,37 +216,46 @@ const clearInfraMarkers = () => {
 const selectItem = (item) => {
     if (!mapInstance.value || !item) return;
 
-    selectedItem.value = item; // 버튼 표시 트리거
+    // 1. 지도 중심 이동
     const rawMap = toRaw(mapInstance.value);
     const position = new window.kakao.maps.LatLng(item.latitude, item.longitude);
 
-    // 1. 지도 중심 이동
-    mapInstance.value.setLevel(4);
-    mapInstance.value.panTo(position);
-
-    // 2. 기존 원 제거
-    if (currentCircle.value) {
-        currentCircle.value.setMap(null);
+    const currentLevel = mapInstance.value.getLevel();
+    if (currentLevel > 4) {
+        mapInstance.value.setLevel(4);
     }
 
-    // 3. 새로운 반경 500m 원 생성 및 표시
-    const circle = new window.kakao.maps.Circle({
-        center: position, // 원 중심 좌표
-        radius: 500, // 원 반지름
-        strokeWeight: 2, // 선 두께
-        strokeColor: '#ae8b72', // 선 색깔
-        strokeOpacity: 0.8,
-        strokeStyle: 'solid',
-        fillColor: '#ae8b72', // 채우기 색깔
-        fillOpacity: 0.2
-    });
+    mapInstance.value.panTo(position);
 
-    circle.setMap(rawMap);
-    currentCircle.value = circle;
+    // 2. 딜레이 후 UI 업데이트
+    setTimeout(() => {
+        selectedItem.value = item;
 
-    // 4. 이전에 검색된 인프라 마커 초기화
-    clearInfraMarkers();
-}
+        // 기존 원 제거
+        if (currentCircle.value) {
+            currentCircle.value.setMap(null);
+        }
+
+        // 새로운 반경 500m 원 생성 및 표시
+        const circle = new window.kakao.maps.Circle({
+            center: position,
+            radius: 500,
+            strokeWeight: 2,
+            strokeColor: '#ae8b72',
+            strokeOpacity: 0.8,
+            strokeStyle: 'solid',
+            fillColor: '#ae8b72',
+            fillOpacity: 0.2
+        });
+
+        circle.setMap(rawMap);
+        currentCircle.value = circle;
+
+        // 이전에 검색된 인프라 마커 초기화
+        clearInfraMarkers();
+        
+    }, 400);
+};
 
 // 선택 초기화: 뒤로가기 누를 때 원과 버튼을 지우는 함수
 const resetSelection = () => {
