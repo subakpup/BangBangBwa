@@ -32,4 +32,7 @@ public class MyProductDto {
 	private Long dealAmount;			// 매매가
 	private Long deposit;				// 보증금
 	private Long monthlyRent;			// 월세
+	
+	private Long productId;
+	private Long reservationId;
 }
