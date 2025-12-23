@@ -10,6 +10,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,7 +104,7 @@ public class HouseServiceImpl implements HouseService {
             urlBuilder.append("?serviceKey=" + serviceKey);
             urlBuilder.append("&LAWD_CD=" + lawdCd);
             urlBuilder.append("&DEAL_YMD=" + dealYmd);
-            urlBuilder.append("&numOfRows=10");
+            urlBuilder.append("&numOfRows=100");
             urlBuilder.append("&_type=json");
 
             URL url = new URL(urlBuilder.toString());
@@ -223,6 +224,16 @@ public class HouseServiceImpl implements HouseService {
             info.getBuildYear(), deal.getExcluUseAr()
         );
 
+        if (!StringUtils.hasText(info.getSggNm()) || 
+        	!StringUtils.hasText(info.getUmdNm()) || 
+        	!StringUtils.hasText(info.getJibun()) ||
+        	info.getHouseType() == null || // Enum은 null 체크
+        	tradeType == null) {
+        	    
+        	    log.warn("필수 정보 누락으로 매물 생성 건너뜀: {}", info);
+        	    return;
+        }
+        
         // 5. ProductDto 생성 (DTO 필드 기준)
         ProductDto product = ProductDto.builder()
                 // --- @NonNull 필수 필드 ---
