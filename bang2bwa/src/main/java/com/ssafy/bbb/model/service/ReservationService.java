@@ -1,7 +1,10 @@
 package com.ssafy.bbb.model.service;
 
+import java.util.List;
+
 import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 import com.ssafy.bbb.model.dto.ReservationResponseDto;
@@ -26,4 +29,6 @@ public interface ReservationService {
 	public void processAutoPunishment(ReservationDto reservation);
 	
 	public ReservationResponseDto getReservationDetail(Long reservationId, Long userId);
+	
+	public List<MyProductDto> getMyReservationProducts(Long agentId);
 }

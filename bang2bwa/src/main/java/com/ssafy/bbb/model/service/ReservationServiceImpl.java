@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ import com.ssafy.bbb.model.dao.UserDao;
 import com.ssafy.bbb.model.dao.VirtualBankDao;
 import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.PaymentDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
@@ -460,6 +462,11 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 		
 		return reservationDao.selectReservationDetail(reservationId);
+	}
+	
+	@Override
+	public List<MyProductDto> getMyReservationProducts(Long agentId) {
+		return reservationDao.findMyReservationProducts(agentId);
 	}
 
 	@Override

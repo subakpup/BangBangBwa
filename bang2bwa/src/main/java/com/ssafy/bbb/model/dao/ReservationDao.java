@@ -40,4 +40,6 @@ public interface ReservationDao {
 	public List<MyProductDto> findProductByAgentId(Long agentId);
 	
 	public ReservationResponseDto selectReservationDetail(Long reservationId);
+	
+	public List<MyProductDto> findMyReservationProducts(Long agentId);
 }

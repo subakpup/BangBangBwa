@@ -1,5 +1,7 @@
 package com.ssafy.bbb.controller.docs;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -7,6 +9,7 @@ import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 import com.ssafy.bbb.model.dto.ReservationResponseDto;
@@ -572,4 +575,6 @@ public interface ReservationControllerDocs {
 	@Operation(summary = "예약 단건 조회", description="예약 단건을 조회합니다.")
 	public ApiResponse<ReservationResponseDto> getReservationDetail(Long reservationId
 																	, @Parameter(hidden=true) CustomUserDetails user);
+	
+	public ApiResponse<List<MyProductDto>> getMyReservationProducts(@Parameter(hidden=true) CustomUserDetails user);
 }

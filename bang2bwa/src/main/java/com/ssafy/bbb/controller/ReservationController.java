@@ -1,5 +1,7 @@
 package com.ssafy.bbb.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
 import com.ssafy.bbb.model.dto.ReservationResponseDto;
@@ -118,4 +121,11 @@ public class ReservationController implements ReservationControllerDocs {
         
         return ApiResponse.success(result);
     }
+	
+	@GetMapping("/products")
+	public ApiResponse<List<MyProductDto>> getMyReservationProducts(@AuthenticationPrincipal CustomUserDetails agent) {
+		List<MyProductDto> myReservationProductList = reservationService.getMyReservationProducts(agent.getUserId());
+		
+		return ApiResponse.success(myReservationProductList);
+	}
 }
