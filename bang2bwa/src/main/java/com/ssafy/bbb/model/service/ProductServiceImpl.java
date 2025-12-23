@@ -211,4 +211,9 @@ public class ProductServiceImpl implements ProductService {
 		
 		return product;
 	}
+	
+	@Override
+	public List<ProductDto> findProductList(Long agentId) {
+		return productDao.findMyProductList(agentId);
+	}
 }

@@ -46,5 +46,7 @@ public interface ProductDao {
 
 	// 전체 마커 조회
 	public List<ProductDto> findAllMarkers();
+	
+	public List<ProductDto> findMyProductList(Long agentId);
 
 }

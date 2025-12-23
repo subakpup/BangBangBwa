@@ -175,4 +175,8 @@
   		where latitude is not null and longitude is not null
   	</select>
   	
+  	<select id="findMyProductList">
+  		SELECT * FROM products WHERE agent_id = #{agentId}
+  	</select>
+  	
   </mapper>

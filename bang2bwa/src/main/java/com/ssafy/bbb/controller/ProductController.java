@@ -95,4 +95,12 @@ public class ProductController {
 		
 		return ApiResponse.success(product);
 	}
+	
+	// 내 매물 조회
+	@GetMapping
+	public ApiResponse<List<ProductDto>> getMyProductList(@AuthenticationPrincipal CustomUserDetails agent) {
+		List<ProductDto> productList = productService.findProductList(agent.getUserId());
+		
+		return ApiResponse.success(productList);
+	}
 }

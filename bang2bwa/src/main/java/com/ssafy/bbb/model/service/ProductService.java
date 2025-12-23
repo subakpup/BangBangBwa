@@ -20,4 +20,6 @@ public interface ProductService {
 	public List<MapResponseDto> findAllMarkers();
 	
 	public ProductDto findProduct(Long productId);
+	
+	public List<ProductDto> findProductList(Long agentId);
 }
