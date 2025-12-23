@@ -46,18 +46,21 @@ public class ProductDto {
 	private Integer monthlyRent; // 월세
 
 	private Long agentId; // 공인중개사 (fk)
+	private String agentName;	// users 테이블의 name
+    private String agentOfficeName;	// agents 테이블의 realtor_agency
 
 	private Double latitude; // 위도
 	private Double longitude; // 경도
 
 	private String desc; // 상세 내용
 
+	private ProductImageDto thumbnail; // 썸네일
 	private List<ProductImageDto> images; // 매물 사진 리스트
 	private List<Long> deleteImageIds; // (수정시 사용) 삭제할 이미지의 아이디 리스트
 	
 	private boolean isAiRecommended; // AI 추천 여부
 	private String aiReason; // AI 추천 이유
-
+	
 	// 이미지를 설정할 setter 메서드
 	public void setImages(List<ProductImageDto> images) {
 		this.images = images;

@@ -41,8 +41,11 @@
   	</delete>
   	
   	<select id="findById">
-  		select * from products
-  		where product_id = #{id};
+  		SELECT p.*, u.name as agentName, a.realtor_agency as agentOfficeName
+        FROM products p
+        LEFT JOIN users u ON p.agent_id = u.user_id
+        LEFT JOIN agents a ON p.agent_id = a.agent_id
+        WHERE p.product_id = #{productId}
   	</select>
   	
   	<select id="findImagesByProductId">
@@ -100,11 +103,15 @@
   		<result column="status" property="status" />
   	</resultMap>
   	
-  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto">
-  		select *
-  		from products
+  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto" resultMap="ProductSearchMap">
+  		SELECT *,
+  			(SELECT save_path 
+  			 FROM product_images 
+  			 WHERE product_id = products.product_id 
+  			 LIMIT 1) AS thumbnail_path
+  		FROM products
   		<where>
-  			<if test="keyword != null and keyword != ''">
+            <if test="keyword != null and keyword != ''">
   				and (
   					name like concat('%', #{keyword}, '%')
   					or jibun like concat('%', #{keyword}, '%')
@@ -166,7 +173,14 @@
                 	</when>
             	</choose>
         	</if>
+
+            <if test="minLat != null and maxLat != null and minLng != null and maxLng != null">
+                AND latitude BETWEEN #{minLat} AND #{maxLat}
+                AND longitude BETWEEN #{minLng} AND #{maxLng}
+            </if>
   		</where>
+
+        LIMIT #{limit} OFFSET #{offset}
   	</select>
   	
   	<select id="findAllMarkers">
@@ -212,5 +226,13 @@
   		
   		LIMIT 10
   	</select>
+  	
+  	<resultMap id="ProductSearchMap" type="com.ssafy.bbb.model.dto.ProductDto" autoMapping="true">
+        <id column="product_id" property="productId"/>
+        
+        <association property="thumbnail" javaType="com.ssafy.bbb.model.dto.ProductImageDto">
+            <result column="thumbnail_path" property="savePath"/>
+        </association>
+    </resultMap>
   	
   </mapper>

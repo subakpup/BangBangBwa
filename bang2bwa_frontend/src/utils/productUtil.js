@@ -1,3 +1,5 @@
+import { api } from '@/api';
+import noImage from '@/assets/no-image.jpg'
 import { TrainFront, Bus, Store, School, ShoppingCart, Hospital, Pill, Shirt, Siren, Trees } from 'lucide-vue-next';
 
 // 매물 종류 매핑
@@ -65,6 +67,17 @@ export const formatPrice = (item) => {
   }
 };
 
+// 주소 포맷팅 함수
+export const formatAddress = (item) => {
+    if (!item) return '';
+    const sgg = item.sggNm || '';
+    const umd = item.umdNm || '';
+    const jibun = item.jibun || '';
+    
+    // 공백이 여러 개인 경우 하나로 줄이고 앞뒤 공백 제거
+    return `${sgg} ${umd} ${jibun}`.replace(/\s+/g, ' ').trim();
+};
+
 export const infraCategories = [
     { name: '지하철', code: 'SW8', type: 'category', icon: TrainFront },
     { name: '버스', keyword: '버스정류장', type: 'keyword', icon: Bus },
@@ -77,3 +90,19 @@ export const infraCategories = [
     { name: '치안센터', code: 'PO3', type: 'category', icon: Siren },
     { name: '공원', keyword: '공원', type: 'keyword', icon: Trees },
 ];
+
+export const getProductMainImage = (item) => {
+  if (!item.images || item.images.length === 0) {
+    return noImage;
+  }
+
+  const img = item.images[0];
+  const path = img.savePath;
+
+  if (path) {
+    const baseUrl = api.defaults.baseURL;
+    return `${baseUrl}/images/${path}`; 
+  }
+
+  return noImage;
+};
