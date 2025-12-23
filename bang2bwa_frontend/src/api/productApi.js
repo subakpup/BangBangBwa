@@ -26,3 +26,22 @@ export const getProductDetail = async (productId) => {
     return error.response || error;
   }
 };
+
+// [중개인] 내가 등록한 전체 매물 조회
+export const getMyProductList = async () => {
+    try {
+        const response = await api.get('/products');
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+};
+
+export const deleteProduct = async (productId) => {
+    try {
+        const response = await api.delete(`/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+};

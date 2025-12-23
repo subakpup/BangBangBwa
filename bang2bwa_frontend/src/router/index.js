@@ -15,6 +15,7 @@ import BoardWrite from '@/components/board/BoardWrite.vue';
 import ReservationRequest from '@/views/reservation/ReservationRequest.vue'
 import ReservationPayment from '@/views/reservation/ReservationPayment.vue'
 import ReservationAction from '@/views/reservation/ReservationAction.vue'
+import MyProductListView from '@/views/MyProductListView.vue'
 
 
 
@@ -111,6 +112,14 @@ const router = createRouter({
       name: "reservation-action",
       component: ReservationAction,
     },
+    {
+    // 내 매물 관리 (중개인 전용)
+    path: '/agent/products',
+    name: 'my-product-list',
+    component: MyProductListView,
+    // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
+    meta: { auth: true, role: 'AGENT' } 
+  	},
   ],
 });
 

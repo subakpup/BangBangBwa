@@ -71,16 +71,14 @@ export const cancelReservation = async (reservationId) => {
 
 /**
  * [중개인] 예약 승인 및 결제
- * POST /reservations/{reservationId}/accept
+ * POST /reservations/accept
  * Body: { reservationId, bankId }
  */
-export const acceptReservation = async (data) => {
+export const acceptReservation = async (reservationId, bankId) => {
     try {
-        // Controller URL: /reservations/{reservationId}/accept
-        // DTO: { reservationId, bankId }
-        const response = await api.post(`/reservations/${data.reservationId}/accept`, {
-            reservationId: data.reservationId,
-            bankId: data.bankId
+        const response = await api.post('/reservations/accept', {
+            reservationId: Number(reservationId), // 숫자로 변환하여 전송 (안전장치)
+            bankId: Number(bankId)
         });
         return response.data;
     } catch (error) {
@@ -109,6 +107,28 @@ export const getBankList = async () => {
     try {
         const response = await api.get('/api/banks');
         return response.data; // ApiResponse<List<VirtualBankDto>>
+    } catch (error) {
+        return error.response || error;
+    }
+};
+
+// [중개인] 예약이 잡힌 내 매물 조회
+export const getMyReservationProducts = async () => {
+    try {
+        const response = await api.get('/reservations/products');
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+};
+
+// [중개인] 예약 거절 (바로 거절 처리)
+export const rejectReservation = async (reservationId, reason) => {
+    try {
+        const response = await api.post(`/reservations/${reservationId}/reject`, {
+            reason: reason 
+        });
+        return response.data;
     } catch (error) {
         return error.response || error;
     }
