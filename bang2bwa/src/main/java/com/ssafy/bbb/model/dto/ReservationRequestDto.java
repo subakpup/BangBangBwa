@@ -20,4 +20,6 @@ public class ReservationRequestDto {
 	private LocalDateTime visitDate;
 	@Schema(description = "중개업자에게 전달할 메세지 (optional)", example = "오후 2시에 방문하겠습니다.")
 	private String message;
+	@Schema(description = "사용자가 결제한 계좌")
+	private Long bankId;
 }

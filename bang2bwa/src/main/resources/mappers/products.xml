@@ -189,6 +189,26 @@
   		where latitude is not null and longitude is not null
   	</select>
   	
+  	<select id="findMyProductList">
+  		SELECT
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent,
+  			p.product_id
+  		FROM products p LEFT JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId} AND (r.status is null OR r.status != 'QUIT')
+  	</select>
+  	
   	<select id="aiSearchProduct" parameterType="com.ssafy.bbb.model.dto.AiSearchDto">
   		SELECT *
   		FROM products

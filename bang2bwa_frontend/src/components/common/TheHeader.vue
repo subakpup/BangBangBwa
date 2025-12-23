@@ -42,6 +42,15 @@
               찜 목록
             </RouterLink>
 
+            <router-link 
+              v-if="userRole === 'ROLE_AGENT'" 
+              :to="{ name: 'my-product-list' }"
+              class="dropdown-item"
+            >
+            <Home class="w-4 h-4" />
+              내 매물 관리
+            </router-link>
+
             <div class="dropdown-divider"></div>
 
             <button @click="handleLogout" class="dropdown-item text-red-500 hover:bg-red-50">
@@ -61,10 +70,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router';
 import { Home, User, ChevronDown, Heart, LogOut } from 'lucide-vue-next';
 import { isLogin, logout, userName } from '@/stores/auth';
+
+const userRole = ref(null)
+const isLoggedIn = ref(false)
 
 const router = useRouter();
 
@@ -86,4 +98,33 @@ const handleLogout = async () => {
   await logout();
   router.push('/');
 };
+
+const parseJwt = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+onMounted(() => {
+  const token = localStorage.getItem('accessToken');
+  
+  if (token) {
+    const payload = parseJwt(token);
+    if (payload) {
+      isLoggedIn.value = true;
+      
+      userRole.value = payload.auth; 
+      
+      
+      console.log("내 역할:", userRole.value); // 콘솔에서 확인해보세요!
+    }
+  }
+})
 </script>

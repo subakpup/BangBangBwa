@@ -15,6 +15,34 @@ export const searchProducts = async (params) => {
 };
 
 /**
+ * 매물 상세 조회
+ * GET /products/{productId}
+ */
+export const getProductDetail = async (productId) => {
+  try {
+    const response = await api.get(`/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    return error.response || error;
+  }
+};
+
+// [중개인] 내가 등록한 전체 매물 조회
+export const getMyProductList = async () => {
+    try {
+        const response = await api.get('/products');
+        return response.data;
+    } catch (error) {
+        return error.response || error;
+    }
+};
+
+export const deleteProduct = async (productId) => {
+    try {
+        const response = await api.delete(`/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        return error.response || error;
  * AI 맞춤 추천 API
  * @param {Object} params - AI 분석 요청 조건
  * @returns - AI 분석 결과 리스트
@@ -94,20 +122,6 @@ export const updateProduct = async (productId, productDto, images) => {
         return error;
     }
 };
-
-/**
- * 매물 삭제 API
- * @param {Long} productId 
- * @returns - 응답 결과
- */
-export const deleteProduct = async (productId) => {
-    try {
-        const response = await api.delete(`/products/${productId}`);
-        return response;
-    } catch (error) {
-        return error;
-    }
-}
 
 /**
  * 매물 단건 조회 API

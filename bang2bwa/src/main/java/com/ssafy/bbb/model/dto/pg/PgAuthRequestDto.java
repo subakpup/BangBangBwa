@@ -14,4 +14,5 @@ public class PgAuthRequestDto {
 	private String orderId; // 주문 번호
 	private Long amount; // 금액
 	private String type; // 결제 타입(DEPOSIT; 부분 결제만 사용)
+	private String accountToken; // 사용자의 계좌 정보
 }

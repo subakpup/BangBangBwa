@@ -1,13 +1,18 @@
 package com.ssafy.bbb.controller.docs;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
+import com.ssafy.bbb.model.dto.ReservationResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -151,7 +156,7 @@ public interface ReservationControllerDocs {
 		)
 	})
 	public ApiResponse<String> acceptReservation(
-			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
+			@RequestBody AcceptRequestDto request
 			, @Parameter(hidden=true) CustomUserDetails user);
 
 	@Operation(summary = "예약 거절", description = "중개인이 예약을 거절합니다.")
@@ -566,4 +571,10 @@ public interface ReservationControllerDocs {
 			@Parameter(description = "예약 ID", required=true, example = "100") @PathVariable Long reservationId
 			, @Parameter(hidden=true) CustomUserDetails user
 			, @RequestBody LocationDto curLocation);
+	
+	@Operation(summary = "예약 단건 조회", description="예약 단건을 조회합니다.")
+	public ApiResponse<ReservationResponseDto> getReservationDetail(Long reservationId
+																	, @Parameter(hidden=true) CustomUserDetails user);
+	
+	public ApiResponse<List<MyProductDto>> getMyReservationProducts(@Parameter(hidden=true) CustomUserDetails user);
 }

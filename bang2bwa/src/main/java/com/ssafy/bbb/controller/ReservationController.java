@@ -1,6 +1,9 @@
 package com.ssafy.bbb.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,9 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ssafy.bbb.controller.docs.ReservationControllerDocs;
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
+import com.ssafy.bbb.model.dto.AcceptRequestDto;
 import com.ssafy.bbb.model.dto.LocationDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.RejectReasonDto;
 import com.ssafy.bbb.model.dto.ReservationRequestDto;
+import com.ssafy.bbb.model.dto.ReservationResponseDto;
 import com.ssafy.bbb.model.service.ReservationService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,12 +43,12 @@ public class ReservationController implements ReservationControllerDocs {
 	}
 
 	// 부동산 업자 예약 승인
-	@PostMapping("/{reservationId}/accept")
+	@PostMapping("/accept")
 	public ApiResponse<String> acceptReservation(
-			@PathVariable Long reservationId
+			@RequestBody AcceptRequestDto request
 			, @AuthenticationPrincipal CustomUserDetails user) {
 		
-		reservationService.acceptReservation(reservationId, user.getUserId());
+		reservationService.acceptReservation(request, user.getUserId());
 
 		return ApiResponse.successWithNoContent("예약을 승인하였습니다.");
 	}
@@ -104,5 +110,22 @@ public class ReservationController implements ReservationControllerDocs {
 		reservationService.defendReport(reservationId, user.getUserId(), curLocation);
 
 		return ApiResponse.successWithNoContent("매물 근처임이 확인되었습니다.");
+	}
+	
+	// 예약 단건 조회
+	@GetMapping("/{reservationId}")
+    public ApiResponse<ReservationResponseDto> getReservationDetail(@PathVariable Long reservationId
+    															, @AuthenticationPrincipal CustomUserDetails user) {
+        
+        ReservationResponseDto result = reservationService.getReservationDetail(reservationId, user.getUserId());
+        
+        return ApiResponse.success(result);
+    }
+	
+	@GetMapping("/products")
+	public ApiResponse<List<MyProductDto>> getMyReservationProducts(@AuthenticationPrincipal CustomUserDetails agent) {
+		List<MyProductDto> myReservationProductList = reservationService.getMyReservationProducts(agent.getUserId());
+		
+		return ApiResponse.success(myReservationProductList);
 	}
 }

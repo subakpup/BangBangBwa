@@ -14,6 +14,10 @@ import BoardView from "@/views/board/BoardView.vue";
 import BoardList from '@/components/board/BoardList.vue'
 import BoardDetail from '@/components/board/BoardDetail.vue';
 import BoardWrite from '@/components/board/BoardWrite.vue';
+import ReservationRequest from '@/views/reservation/ReservationRequest.vue'
+import ReservationPayment from '@/views/reservation/ReservationPayment.vue'
+import ReservationAction from '@/views/reservation/ReservationAction.vue'
+import MyProductListView from '@/views/MyProductListView.vue'
 
 
 
@@ -91,6 +95,34 @@ const router = createRouter({
       name: "password-change",
       component: MyPasswordChangeView,
     },
+    // 1. 예약 요청 페이지 (매물 ID를 받음)
+    {
+      path: "/reservation/request/:propertyId",
+      name: "reservation-request",
+      component: ReservationRequest,
+      props: true, // 매물 정보를 props나 history state로 넘기기 위함
+    },
+    // 2. 결제 페이지
+    {
+      path: "/reservation/payment",
+      name: "reservation-payment",
+      component: ReservationPayment,
+    },
+    // 3. 만남 확인/신고 페이지 (예약 ID를 받음)
+    {
+      path: "/reservation/action/:reservationId",
+      name: "reservation-action",
+      component: ReservationAction,
+    },
+    {
+    // 내 매물 관리 (중개인 전용)
+    path: '/agent/products',
+    name: 'my-product-list',
+    component: MyProductListView,
+    // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
+    meta: { auth: true, role: 'AGENT' } 
+  	},
+  ],
     // {
     //   path: '/product/manage',
     //   name: 'productManage',

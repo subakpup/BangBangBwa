@@ -96,4 +96,51 @@
   		FROM reservations r RIGHT JOIN products p ON (r.product_id = p.product_id)
   		WHERE p.agent_id = #{agentId}
   	</select>
+  	
+  	<select id="selectReservationDetail">
+	    SELECT 
+	        r.reservation_id AS reservationId,
+	        p.name AS productName,
+	        CONCAT(p.sgg_nm, ' ', p.umd_nm, ' ', p.jibun) AS productAddress,
+	        (SELECT save_path FROM product_images WHERE product_id = p.product_id LIMIT 1) AS productImage,
+	        r.visit_date AS visitDate,
+	        u.name AS agentName,
+	        r.status AS status,
+	        
+	        r.user_id AS userId,
+	        r.agent_id AS agentId,
+	
+	        CASE 
+	            WHEN r.user_confirmed = 'N' THEN r.agent_id  WHEN r.agent_confirmed = 'N' THEN r.user_id  ELSE NULL 
+	        END AS reporterId,
+	        
+	        r.user_confirmed AS userConfirmed,
+        	r.agent_confirmed AS agentConfirmed
+	
+	    FROM reservations r
+	    JOIN products p ON r.product_id = p.product_id
+	    JOIN users u ON p.agent_id = u.user_id
+	    WHERE r.reservation_id = #{reservationId}
+	</select>
+	
+	<select id="findMyReservationProducts">
+		SELECT
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent,
+  			p.product_id,
+  			r.reservation_id
+  		FROM products p JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId} AND r.status != 'QUIT'
+	</select>
   </mapper>
