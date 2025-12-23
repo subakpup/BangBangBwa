@@ -176,7 +176,22 @@
   	</select>
   	
   	<select id="findMyProductList">
-  		SELECT * FROM products WHERE agent_id = #{agentId}
+  		SELECT
+  			CONCAT(p.sido_nm, ' ', p.sgg_nm, ' ', p.umd_nm) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.aptDong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthlyRent
+  		FROM products p JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId}
   	</select>
   	
   </mapper>

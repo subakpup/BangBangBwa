@@ -15,6 +15,7 @@ import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
 import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dto.MapResponseDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductImageDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
@@ -213,7 +214,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public List<ProductDto> findProductList(Long agentId) {
+	public List<MyProductDto> findProductList(Long agentId) {
 		return productDao.findMyProductList(agentId);
 	}
 }

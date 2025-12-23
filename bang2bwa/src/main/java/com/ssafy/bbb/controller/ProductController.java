@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.MapResponseDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 import com.ssafy.bbb.model.service.ProductService;
@@ -98,8 +99,8 @@ public class ProductController {
 	
 	// 내 매물 조회
 	@GetMapping
-	public ApiResponse<List<ProductDto>> getMyProductList(@AuthenticationPrincipal CustomUserDetails agent) {
-		List<ProductDto> productList = productService.findProductList(agent.getUserId());
+	public ApiResponse<List<MyProductDto>> getMyProductList(@AuthenticationPrincipal CustomUserDetails agent) {
+		List<MyProductDto> productList = productService.findProductList(agent.getUserId());
 		
 		return ApiResponse.success(productList);
 	}

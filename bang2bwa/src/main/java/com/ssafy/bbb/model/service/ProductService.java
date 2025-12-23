@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.bbb.model.dto.MapResponseDto;
+import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.ProductSearchDto;
 
@@ -21,5 +22,5 @@ public interface ProductService {
 	
 	public ProductDto findProduct(Long productId);
 	
-	public List<ProductDto> findProductList(Long agentId);
+	public List<MyProductDto> findProductList(Long agentId);
 }
