@@ -177,7 +177,7 @@
   	
   	<select id="findMyProductList">
   		SELECT
-  			CONCAT(p.sido_nm, ' ', p.sgg_nm, ' ', p.umd_nm) AS address,
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm) AS address,
   			p.name,
   			p.house_type,
   			p.trade_type,
@@ -186,12 +186,13 @@
   			p.exclu_use_ar,
   			p.build_year,
   			p.floor,
-  			p.aptDong,
+  			p.apt_dong,
   			p.deal_amount,
   			p.deposit,
-  			p.monthlyRent
-  		FROM products p JOIN reservations r ON p.product_id = r.product_id  
-  		WHERE p.agent_id = #{agentId}
+  			p.monthly_rent,
+  			p.product_id
+  		FROM products p LEFT JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId} AND (r.status is null OR r.status != 'QUIT')
   	</select>
   	
   </mapper>
