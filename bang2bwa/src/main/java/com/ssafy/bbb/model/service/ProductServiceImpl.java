@@ -164,7 +164,18 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<ProductDto> search(ProductSearchDto request) {
-		return productDao.search(request);
+		List<ProductDto> products = productDao.search(request);
+		
+		for (ProductDto product : products) {
+			if (product.getThumbnail() != null) {
+				List<ProductImageDto> images = new ArrayList<>();
+				images.add(product.getThumbnail());
+				
+				product.setImages(images);
+			}
+		}
+		
+		return products;
 	}
 
 	// 지번 주소를 이용해 좌표(위도, 경도) 설정하는 메서드
@@ -200,21 +211,23 @@ public class ProductServiceImpl implements ProductService {
 		return markers;
 	}
 
-	
 	@Override
-	public ProductDto findProduct(Long productId) {
+	public ProductDto findById(Long productId) {
 		ProductDto product = productDao.findById(productId);
-		if(product == null) {
+		
+		if (product == null) {
 			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
 		}
 		
-		product.setImages(productDao.findImagesByProductId(productId));
-		
+	    List<ProductImageDto> images = productDao.findImagesByProductId(productId);
+	    product.setImages(images);
+	    
 		return product;
 	}
-	
-	@Override
+  
+  @Override
 	public List<MyProductDto> findProductList(Long agentId) {
 		return productDao.findMyProductList(agentId);
 	}
+
 }

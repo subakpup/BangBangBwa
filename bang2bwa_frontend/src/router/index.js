@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SignupView from '@/views/user/SignupView.vue'
 import LoginView from '@/views/user/LoginView.vue'
+// import ProductManageView from '@/views/product/ProductManageView.vue'
+import ProductFormView from '@/views/product/ProductFormView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
 import MyWishlistView from '@/views/user/MyWishlistView.vue'
 import MyPageEditView from '@/views/user/MyPageEditView.vue'
@@ -121,6 +123,22 @@ const router = createRouter({
     meta: { auth: true, role: 'AGENT' } 
   	},
   ],
+    // {
+    //   path: '/product/manage',
+    //   name: 'productManage',
+    //   component: ProductManageView
+    // },
+    {
+      path: '/product/register',
+      name: 'productRegister',
+      component: ProductFormView
+    },
+    {
+      path: '/product/edit/:id',
+      name: 'productEdit',
+      component: ProductFormView
+    },
+  ]
 });
 
 export default router

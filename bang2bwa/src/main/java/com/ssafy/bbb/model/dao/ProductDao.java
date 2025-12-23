@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.ssafy.bbb.model.dto.AiSearchDto;
 import com.ssafy.bbb.model.dto.LocationDto;
 import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ProductDto;
@@ -49,5 +50,7 @@ public interface ProductDao {
 	public List<ProductDto> findAllMarkers();
 	
 	public List<MyProductDto> findMyProductList(Long agentId);
+	// AI 추천 매물 조회
+	List<ProductDto> aiSearchProduct(AiSearchDto request);
 
 }

@@ -180,6 +180,49 @@
   .dropdown-divider { @apply h-px bg-gray-100 my-1; }
   .dropdown-overlay { @apply fixed inset-0 z-40 cursor-default; }
 
+  /* --- [페이지: 매물 등록/수정 (ProductForm)] --- */
+  .regist-wrapper { @apply max-w-4xl mx-auto p-6 pb-20; }
+  .regist-card { @apply card-base bg-white p-8 border-t-4 border-t-[#AE8B72]; }
+  
+  .regist-header { @apply text-center mb-8 pb-4 border-b border-gray-100; }
+  .regist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  
+  /* 섹션 스타일 */
+  .regist-section { @apply mb-10; }
+  .section-title { @apply text-lg font-bold text-gray-700 mb-4 flex items-center gap-2; }
+  .section-title::before { content: ''; @apply block w-1.5 h-6 bg-[#AE8B72] rounded-full; }
+  
+  /* 하이라이트 박스 (가격 정보 등) */
+  .highlight-box { @apply bg-[#FFFBE8] border border-[#CEAC93] rounded-xl p-6 transition-all hover:shadow-md; }
+
+  /* 입력 폼 공통 */
+  .form-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5; }
+  .form-grid-3 { @apply grid grid-cols-1 md:grid-cols-3 gap-4; }
+  .form-grid-4 { @apply grid grid-cols-2 md:grid-cols-4 gap-4; }
+
+  .form-group { @apply flex flex-col gap-1.5; }
+  .form-label { @apply text-[13px] font-bold text-gray-500 ml-1; }
+  .required-mark { @apply text-red-400 ml-0.5; }
+  
+  .regist-input { @apply input-base w-full px-4 py-3 text-gray-700 transition-all; }
+  .regist-input:focus { @apply ring-2 ring-[#AE8B72]/20 border-[#AE8B72]; }
+  .regist-input.readonly { @apply bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200; }
+  .regist-textarea { @apply regist-input resize-y min-h-[120px]; }
+
+  /* 파일 업로드 영역 */
+  .upload-area { @apply border-2 border-dashed border-[#CEAC93] rounded-xl bg-[#FFFBE8]/50 p-8 text-center cursor-pointer transition-all hover:bg-[#FFFBE8] hover:border-[#AE8B72]; }
+  .upload-icon { @apply w-10 h-10 mx-auto text-[#CEAC93] mb-2 group-hover:text-[#AE8B72] group-hover:scale-110 transition-transform; }
+  .upload-text { @apply text-sm text-gray-500 font-medium; }
+  
+  .preview-grid { @apply grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-4; }
+  .preview-item { @apply relative aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm; }
+  .preview-img { @apply w-full h-full object-cover transition-transform group-hover:scale-105; }
+  .btn-img-delete { @apply absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-500 transition cursor-pointer backdrop-blur-sm; }
+
+  /* 하단 버튼 액션 */
+  .form-actions { @apply flex items-center justify-end gap-3 mt-10 pt-6 border-t border-gray-100; }
+  .btn-cancel { @apply px-6 py-3 rounded-lg text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition; }
+  .btn-save { @apply btn-base py-3 px-8 text-[15px] font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5; }
 
 
   /* --- [페이지: 게시판 (Board)] --- */

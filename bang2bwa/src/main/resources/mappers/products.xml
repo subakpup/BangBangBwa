@@ -41,8 +41,11 @@
   	</delete>
   	
   	<select id="findById">
-  		select * from products
-  		where product_id = #{id};
+  		SELECT p.*, u.name as agentName, a.realtor_agency as agentOfficeName
+        FROM products p
+        LEFT JOIN users u ON p.agent_id = u.user_id
+        LEFT JOIN agents a ON p.agent_id = a.agent_id
+        WHERE p.product_id = #{productId}
   	</select>
   	
   	<select id="findImagesByProductId">
@@ -100,11 +103,15 @@
   		<result column="status" property="status" />
   	</resultMap>
   	
-  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto">
-  		select *
-  		from products
+  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto" resultMap="ProductSearchMap">
+  		SELECT *,
+  			(SELECT save_path 
+  			 FROM product_images 
+  			 WHERE product_id = products.product_id 
+  			 LIMIT 1) AS thumbnail_path
+  		FROM products
   		<where>
-  			<if test="keyword != null and keyword != ''">
+            <if test="keyword != null and keyword != ''">
   				and (
   					name like concat('%', #{keyword}, '%')
   					or jibun like concat('%', #{keyword}, '%')
@@ -166,7 +173,14 @@
                 	</when>
             	</choose>
         	</if>
+
+            <if test="minLat != null and maxLat != null and minLng != null and maxLng != null">
+                AND latitude BETWEEN #{minLat} AND #{maxLat}
+                AND longitude BETWEEN #{minLng} AND #{maxLng}
+            </if>
   		</where>
+
+        LIMIT #{limit} OFFSET #{offset}
   	</select>
   	
   	<select id="findAllMarkers">
@@ -194,5 +208,51 @@
   		FROM products p LEFT JOIN reservations r ON p.product_id = r.product_id  
   		WHERE p.agent_id = #{agentId} AND (r.status is null OR r.status != 'QUIT')
   	</select>
+  	
+  	<select id="aiSearchProduct" parameterType="com.ssafy.bbb.model.dto.AiSearchDto">
+  		SELECT *
+  		FROM products
+  		<where>
+  			AND trade_type = #{tradeType}
+  			AND status = 'AVAILABLE'
+  			AND (
+  				sgg_nm LIKE CONCAT('%', #{location}, '%')
+  				OR
+  				umd_nm LIKE CONCAT('%', #{location}, '%')
+  			)
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'RENT'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  				
+  				<if test="monthlyRent != null and monthlyRent.max > 0">
+  					AND monthly_rent BETWEEN #{monthlyRent.min} AND #{monthlyRent.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'LEASE'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'SALE'">
+  				<if test="dealAmount != null and dealAmount.max > 0">
+  					AND deal_amount BETWEEN #{dealAmount.min} AND #{dealAmount.max}
+  				</if>
+  			</if>
+  		</where>
+  		
+  		LIMIT 10
+  	</select>
+  	
+  	<resultMap id="ProductSearchMap" type="com.ssafy.bbb.model.dto.ProductDto" autoMapping="true">
+        <id column="product_id" property="productId"/>
+        
+        <association property="thumbnail" javaType="com.ssafy.bbb.model.dto.ProductImageDto">
+            <result column="thumbnail_path" property="savePath"/>
+        </association>
+    </resultMap>
   	
   </mapper>

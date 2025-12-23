@@ -90,14 +90,16 @@ public class ProductController {
 		return ApiResponse.success(markerList, "마커 조회가 완료되었습니다.");
 	}
 	
+	/**
+	 * 매물 단건 검색 요청 URL: GET /products/{productId}
+	 */
 	@GetMapping("/{productId}")
-	public ApiResponse<ProductDto> getProduct(@PathVariable Long productId) {
-		ProductDto product = productService.findProduct(productId);
+	public ApiResponse<ProductDto> findById(@PathVariable Long productId) {
+		ProductDto result = productService.findById(productId);
 		
-		return ApiResponse.success(product);
-	}
-	
-	// 내 매물 조회
+		return ApiResponse.success(result, "매물 조회가 완료되었습니다.");
+  
+  // 내 매물 조회
 	@GetMapping
 	public ApiResponse<List<MyProductDto>> getMyProductList(@AuthenticationPrincipal CustomUserDetails agent) {
 		List<MyProductDto> productList = productService.findProductList(agent.getUserId());
