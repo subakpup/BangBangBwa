@@ -20,7 +20,7 @@
                     <h2 class="text-lg text-gray-700 font-medium mt-1">{{ item.name }}</h2>
                     <div class="flex items-center gap-1 text-gray-500 text-sm mt-2">
                         <MapPin class="w-4 h-4" />
-                        <span>{{ fullAddress }}</span>
+                        <span>{{ formatAddress(item) }}</span>
                     </div>
                 </div>
 
@@ -121,23 +121,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info } from 'lucide-vue-next';
-import { formatPrice, typeMap } from '@/utils/productUtil';
+import { formatPrice, typeMap, formatAddress } from '@/utils/productUtil';
 
 const props = defineProps(['item']);
 const emit = defineEmits(['close']);
-
-// [추가] 전체 주소 계산 (sggNm + " " + umdNm + " " + jibun)
-const fullAddress = computed(() => {
-    if (!props.item) return '';
-    const sgg = props.item.sggNm || '';
-    const umd = props.item.umdNm || '';
-    const jibun = props.item.jibun || '';
-    
-    // 공백 중복 방지 및 trim 처리
-    return `${sgg} ${umd} ${jibun}`.replace(/\s+/g, ' ').trim();
-});
 
 // 평수 계산
 const formatPyeong = (m2) => {
@@ -154,9 +142,6 @@ const formatFloor = (item) => {
 </script>
 
 <style scoped>
-/* Scoped CSS가 필요하다면 여기에 작성하지만, 
-   현재는 Tailwind Utility Class로 Template 내에서 직접 해결하여 깨짐을 방지했습니다. */
-
 .detail-container {
     height: 100%;
     display: flex;
