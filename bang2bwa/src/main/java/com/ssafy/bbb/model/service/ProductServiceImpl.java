@@ -207,6 +207,9 @@ public class ProductServiceImpl implements ProductService {
 			throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
 		}
 		
+	    List<ProductImageDto> images = productDao.findImagesByProductId(productId);
+	    product.setImages(images);
+	    
 		return product;
 	}
 

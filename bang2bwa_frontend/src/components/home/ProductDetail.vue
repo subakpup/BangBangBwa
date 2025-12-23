@@ -7,20 +7,24 @@
         </div>
 
         <div class="detail-body">
-            <div class="hero-img-area">
-                <img :src="(item.images && item.images.length > 0) ? item.images[0].url : '/no-image.png'" 
-                     class="w-full h-full object-cover" 
+            <div class="hero-img-area cursor-pointer group" @click="openGallery(0)">
+                <img :src="getMainImageUrl" 
+                     class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" 
                      alt="상세 이미지">
-                <div class="img-badge">사진 더보기</div>
+                
+                <div class="img-badge group-hover:bg-black/80 transition-colors">
+                    <Images class="w-3 h-3 inline mr-1" />
+                    사진 더보기 {{ product.images ? product.images.length : 0 }}장
+                </div>
             </div>
 
             <div class="detail-content">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ formatPrice(item) }}</h1>
-                    <h2 class="text-lg text-gray-700 font-medium mt-1">{{ item.name }}</h2>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ formatPrice(product) }}</h1>
+                    <h2 class="text-lg text-gray-700 font-medium mt-1">{{ product.name }}</h2>
                     <div class="flex items-center gap-1 text-gray-500 text-sm mt-2">
                         <MapPin class="w-4 h-4" />
-                        <span>{{ formatAddress(item) }}</span>
+                        <span>{{ fullAddress }}</span>
                     </div>
                 </div>
 
@@ -32,7 +36,7 @@
                         <div>
                             <p class="info-label">전용면적</p>
                             <p class="info-value">
-                                {{ item.excluUseAr }}㎡ <span class="text-[#AE8B72] text-sm">({{ formatPyeong(item.excluUseAr) }}평)</span>
+                                {{ product.excluUseAr }}㎡ <span class="text-[#AE8B72] text-sm">({{ formatPyeong(product.excluUseAr) }}평)</span>
                             </p>
                         </div>
                     </div>
@@ -40,21 +44,21 @@
                         <div class="icon-box"><Building class="w-6 h-6" /></div>
                         <div>
                             <p class="info-label">동 / 층</p>
-                            <p class="info-value">{{ formatFloor(item) }}</p>
+                            <p class="info-value">{{ formatFloor(product) }}</p>
                         </div>
                     </div>
                     <div class="info-item">
                         <div class="icon-box"><Calendar class="w-6 h-6" /></div>
                         <div>
                             <p class="info-label">사용승인일</p>
-                            <p class="info-value">{{ item.buildYear }}년</p>
+                            <p class="info-value">{{ product.buildYear }}년</p>
                         </div>
                     </div>
                     <div class="info-item">
                         <div class="icon-box"><Info class="w-6 h-6" /></div>
                         <div>
                             <p class="info-label">매물유형</p>
-                            <p class="info-value">{{ typeMap[item.houseType] || item.houseType }}</p>
+                            <p class="info-value">{{ typeMap[product.houseType] || product.houseType }}</p>
                         </div>
                     </div>
                 </div>
@@ -64,7 +68,7 @@
                 <div>
                     <h3 class="font-bold text-lg text-gray-900 mb-3">상세 설명</h3>
                     <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-line min-h-[100px]">
-                        {{ item.desc ? item.desc : '상세 설명이 없습니다.' }}
+                        {{ product.desc ? product.desc : '상세 설명이 없습니다.' }}
                     </p>
                 </div>
 
@@ -72,23 +76,22 @@
 
                 <div>
                     <h3 class="font-bold text-lg text-gray-900 mb-3">매물 상세 정보</h3>
-                    
                     <div class="w-full border-t border-gray-200 text-sm">
                         <div class="grid grid-cols-[100px_1fr] border-b border-gray-100">
                             <div class="bg-gray-50 p-3 text-gray-500 font-medium flex items-center">대지권 면적</div>
-                            <div class="p-3 text-gray-900">{{ item.landAr ? item.landAr + '㎡' : '-' }}</div>
+                            <div class="p-3 text-gray-900">{{ product.landAr ? product.landAr + '㎡' : '-' }}</div>
                         </div>
                         <div class="grid grid-cols-[100px_1fr] border-b border-gray-100">
                             <div class="bg-gray-50 p-3 text-gray-500 font-medium flex items-center">연면적</div>
-                            <div class="p-3 text-gray-900">{{ item.totalFloorAr ? item.totalFloorAr + '㎡' : '-' }}</div>
+                            <div class="p-3 text-gray-900">{{ product.totalFloorAr ? product.totalFloorAr + '㎡' : '-' }}</div>
                         </div>
                         <div class="grid grid-cols-[100px_1fr] border-b border-gray-100">
                             <div class="bg-gray-50 p-3 text-gray-500 font-medium flex items-center">대지면적</div>
-                            <div class="p-3 text-gray-900">{{ item.plottageAr ? item.plottageAr + '㎡' : '-' }}</div>
+                            <div class="p-3 text-gray-900">{{ product.plottageAr ? product.plottageAr + '㎡' : '-' }}</div>
                         </div>
                         <div class="grid grid-cols-[100px_1fr] border-b border-gray-100">
                             <div class="bg-gray-50 p-3 text-gray-500 font-medium flex items-center">법정동</div>
-                            <div class="p-3 text-gray-900">{{ item.umdNm || '-' }}</div>
+                            <div class="p-3 text-gray-900">{{ product.umdNm || '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -117,28 +120,152 @@
                 <Phone class="w-5 h-5" /> 문의하기
             </button>
         </div>
+
+        <div v-if="isGalleryOpen" class="gallery-overlay" @click.self="closeGallery">
+            <button class="gallery-close" @click="closeGallery">
+                <X class="w-8 h-8 text-white" />
+            </button>
+
+            <button class="gallery-nav left" @click.stop="prevImage" v-if="hasMultipleImages">
+                <ChevronLeft class="w-10 h-10 text-white" />
+            </button>
+
+            <div class="gallery-content">
+                <img :src="getCurrentImageUrl" class="gallery-img" alt="갤러리 이미지" />
+                <div class="gallery-counter">
+                    {{ currentImageIndex + 1 }} / {{ product.images.length }}
+                </div>
+            </div>
+
+            <button class="gallery-nav right" @click.stop="nextImage" v-if="hasMultipleImages">
+                <ChevronRight class="w-10 h-10 text-white" />
+            </button>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info } from 'lucide-vue-next';
-import { formatPrice, typeMap, formatAddress } from '@/utils/productUtil';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { 
+    ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info, 
+    Images, X, ChevronLeft, ChevronRight 
+} from 'lucide-vue-next';
+import { formatPrice, typeMap } from '@/utils/productUtil';
+import { api } from '@/api/index';
+import { findById } from '@/api/productApi';
 
 const props = defineProps(['item']);
 const emit = defineEmits(['close']);
 
-// 평수 계산
-const formatPyeong = (m2) => {
-    if (!m2) return '-';
-    return (m2 / 3.3058).toFixed(1);
-}
+const product = ref({ ...props.item }); // 일단 props 데이터로 초기화
 
-// 층수 표시
-const formatFloor = (item) => {
-    let text = item.floor ? `${item.floor}` : '-';
-    if (item.aptDong) text = `${item.aptDong} / ${text}`;
+onMounted(async () => {
+    if (props.item && props.item.productId) {
+        try {
+            const data = await findById(props.item.productId);
+            if (data) {
+                product.value = data;
+            }
+        } catch (error) {
+            console.error("[ERROR] 상세 정보 조회 실패:", error);
+        }
+    }
+});
+
+// --- 갤러리 상태 관리 ---
+const isGalleryOpen = ref(false);
+const currentImageIndex = ref(0);
+
+const hasMultipleImages = computed(() => {
+    return product.value.images && product.value.images.length > 1;
+});
+
+// 메인 이미지 URL 생성 헬퍼
+const getImageUrl = (img) => {
+    if (!img) return '/no-image.png';
+    
+    if (img.url && img.url.startsWith('http')) return img.url;
+    
+    const path = img.savePath || img.url;
+    if (path) {
+        const baseUrl = api.defaults.baseURL || ''; 
+        return `${baseUrl}/images/${path}`;
+    }
+    return '/no-image.png';
+};
+
+// 메인 이미지 URL
+const getMainImageUrl = computed(() => {
+    if (product.value.images && product.value.images.length > 0) {
+        return getImageUrl(product.value.images[0]); 
+    }
+    return '/no-image.png';
+});
+
+// 현재 갤러리 이미지 URL
+const getCurrentImageUrl = computed(() => {
+    if (!product.value.images || product.value.images.length === 0) return '/no-image.png';
+    return getImageUrl(product.value.images[currentImageIndex.value]); 
+});
+
+// 갤러리 열기
+const openGallery = (index = 0) => {
+    if (!product.value.images || product.value.images.length === 0) return;
+    currentImageIndex.value = index;
+    isGalleryOpen.value = true;
+    document.body.style.overflow = 'hidden'; 
+};
+
+// 갤러리 닫기
+const closeGallery = () => {
+    isGalleryOpen.value = false;
+    document.body.style.overflow = ''; 
+};
+
+// 이전/다음 이미지 - product 기준
+const prevImage = () => {
+    if (currentImageIndex.value > 0) {
+        currentImageIndex.value--;
+    } else {
+        currentImageIndex.value = product.value.images.length - 1; 
+    }
+};
+
+const nextImage = () => {
+    if (currentImageIndex.value < product.value.images.length - 1) {
+        currentImageIndex.value++;
+    } else {
+        currentImageIndex.value = 0; 
+    }
+};
+
+// 키보드 이벤트
+const handleKeydown = (e) => {
+    if (!isGalleryOpen.value) return;
+    if (e.key === 'Escape') closeGallery();
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+};
+
+onMounted(() => window.addEventListener('keydown', handleKeydown));
+onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
+
+// --- 유틸 함수 (product 사용) ---
+const fullAddress = computed(() => {
+    const p = product.value;
+    if (!p) return '';
+    const sgg = p.sggNm || '';
+    const umd = p.umdNm || '';
+    const jibun = p.jibun || '';
+    return `${sgg} ${umd} ${jibun}`.replace(/\s+/g, ' ').trim();
+});
+
+const formatPyeong = (m2) => m2 ? (m2 / 3.3058).toFixed(1) : '-';
+const formatFloor = (p) => {
+    let text = p.floor ? `${p.floor}` : '-';
+    if (p.aptDong) text = `${p.aptDong} / ${text}`;
     return text;
-}
+};
 </script>
 
 <style scoped>
@@ -148,7 +275,6 @@ const formatFloor = (item) => {
     flex-direction: column;
     background-color: white;
 }
-
 .detail-header {
     padding: 1rem;
     position: sticky;
@@ -157,64 +283,50 @@ const formatFloor = (item) => {
     z-index: 10;
     border-bottom: 1px solid #f3f4f6;
 }
-
 .detail-body {
     flex: 1;
     overflow-y: auto;
 }
-
 .hero-img-area {
     height: 18rem;
     width: 100%;
     background-color: #e5e7eb;
     position: relative;
+    overflow: hidden;
 }
-
 .img-badge {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
     background-color: rgba(0,0,0,0.6);
     color: white;
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.85rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
 }
-
-.detail-content {
-    padding: 1.5rem;
-}
-
+.detail-content { padding: 1.5rem; }
 .info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
 }
-
 .info-item {
     display: flex;
     align-items: start;
     gap: 0.75rem;
 }
-
 .icon-box {
     padding: 0.5rem;
     background-color: #f3f4f6;
     border-radius: 0.5rem;
     color: #4b5563;
 }
-
-.info-label {
-    font-size: 0.75rem;
-    color: #6b7280;
-}
-
-.info-value {
-    font-weight: 700;
-    color: #1f2937;
-    white-space: nowrap;
-}
-
+.info-label { font-size: 0.75rem; color: #6b7280; }
+.info-value { font-weight: 700; color: #1f2937; white-space: nowrap; }
 .detail-footer {
     padding: 1rem;
     border-top: 1px solid #e5e7eb;
@@ -223,7 +335,6 @@ const formatFloor = (item) => {
     gap: 0.75rem;
     box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
 }
-
 .btn-like {
     flex: 1;
     border: 1px solid rgba(174, 139, 114, 0.2);
@@ -238,7 +349,6 @@ const formatFloor = (item) => {
     gap: 0.5rem;
     transition: background-color 0.2s;
 }
-
 .btn-contact {
     flex: 2;
     background-color: #AE8B72;
@@ -252,7 +362,66 @@ const formatFloor = (item) => {
     gap: 0.5rem;
     transition: background-color 0.2s;
 }
-.btn-contact:hover {
-    background-color: #8c6b54;
+.btn-contact:hover { background-color: #8c6b54; }
+
+.gallery-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+.gallery-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 85%;
+}
+.gallery-img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.gallery-close {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 100;
+}
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 1rem;
+    transition: transform 0.2s;
+}
+.gallery-nav:hover { transform: translateY(-50%) scale(1.1); }
+.gallery-nav.left { left: 1rem; }
+.gallery-nav.right { right: 1rem; }
+.gallery-counter {
+    text-align: center;
+    color: white;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 </style>
