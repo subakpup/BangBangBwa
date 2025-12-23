@@ -65,6 +65,17 @@ export const formatPrice = (item) => {
   }
 };
 
+// 주소 포맷팅 함수
+export const formatAddress = (item) => {
+    if (!item) return '';
+    const sgg = item.sggNm || '';
+    const umd = item.umdNm || '';
+    const jibun = item.jibun || '';
+    
+    // 공백이 여러 개인 경우 하나로 줄이고 앞뒤 공백 제거
+    return `${sgg} ${umd} ${jibun}`.replace(/\s+/g, ' ').trim();
+};
+
 export const infraCategories = [
     { name: '지하철', code: 'SW8', type: 'category', icon: TrainFront },
     { name: '버스', keyword: '버스정류장', type: 'keyword', icon: Bus },
