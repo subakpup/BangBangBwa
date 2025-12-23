@@ -18,9 +18,10 @@
         <div class="flex p-4 gap-4 items-start">
           <div class="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-100">
             <img 
-              :src="item.image || '/src/assets/default_room.png'"
+              :src="getProductMainImage(item)"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
               alt="방 사진"
+              loading="lazy"
             >
           </div>
 
@@ -73,8 +74,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { formatPrice, typeMap, formatAddress } from '@/utils/productUtil';
 import { Sparkles, Bot, SearchX, Loader2 } from 'lucide-vue-next';
+import { formatPrice, typeMap, formatAddress, getProductMainImage } from '@/utils/productUtil';
 
 const props = defineProps({
   items: {
@@ -122,7 +123,7 @@ onUnmounted(() => {
   if (observer) observer.disconnect();
 });
 
-// 아이템이 바뀌면 옵저버 재연결 (안정성 확보)
+// 아이템이 바뀌면 옵저버 재연결
 watch(() => props.items, () => {
     // DOM 업데이트 후 옵저버가 타겟을 놓칠 수 있으므로 재설정
     setTimeout(startObservation, 100);

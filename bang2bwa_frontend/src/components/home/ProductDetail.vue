@@ -8,10 +8,10 @@
 
         <div class="detail-body">
             <div class="hero-img-area cursor-pointer group" @click="openGallery(0)">
-                <img :src="getMainImageUrl" 
-                     class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" 
-                     alt="상세 이미지">
-                
+                <img :src="getProductMainImage(product)"
+                    class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700"
+                    alt="상세 이미지">
+
                 <div class="img-badge group-hover:bg-black/80 transition-colors">
                     <Images class="w-3 h-3 inline mr-1" />
                     사진 더보기 {{ product.images ? product.images.length : 0 }}장
@@ -24,7 +24,7 @@
                     <h2 class="text-lg text-gray-700 font-medium mt-1">{{ product.name }}</h2>
                     <div class="flex items-center gap-1 text-gray-500 text-sm mt-2">
                         <MapPin class="w-4 h-4" />
-                        <span>{{ fullAddress }}</span>
+                        <span>{{ formatAddress(product) }}</span>
                     </div>
                 </div>
 
@@ -104,8 +104,12 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-500">담당 공인중개사</p>
-                        <p class="font-bold text-gray-900 text-lg">김싸피 중개사</p>
-                        <p class="text-xs text-gray-400">대박 공인중개사 사무소</p>
+                        <p class="font-bold text-gray-900 text-lg">
+                            {{ product.agentName || '공인중개사' }}
+                        </p>
+                        <p class="text-xs text-gray-400">
+                            {{ product.agentOfficeName || '사무소 정보 없음' }}
+                        </p>
                     </div>
                 </div>
                 <div class="h-4"></div>
@@ -146,19 +150,25 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { 
-    ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info, 
-    Images, X, ChevronLeft, ChevronRight 
+import {
+    ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info,
+    Images, X, ChevronLeft, ChevronRight
 } from 'lucide-vue-next';
-import { formatPrice, typeMap } from '@/utils/productUtil';
+
+// [수정] 유틸 함수들 import
+import { formatPrice, typeMap, getProductMainImage, formatAddress } from '@/utils/productUtil';
 import { api } from '@/api/index';
 import { findById } from '@/api/productApi';
+
+// [중요] 기본 이미지 import (assets 폴더에 해당 파일이 있어야 합니다!)
+import defaultImg from '@/assets/no-image.jpg';
 
 const props = defineProps(['item']);
 const emit = defineEmits(['close']);
 
-const product = ref({ ...props.item }); // 일단 props 데이터로 초기화
+const product = ref({ ...props.item }); 
 
+// 상세 정보 다시 로드 (이미지 리스트 확보용)
 onMounted(async () => {
     if (props.item && props.item.productId) {
         try {
@@ -172,7 +182,7 @@ onMounted(async () => {
     }
 });
 
-// --- 갤러리 상태 관리 ---
+// --- 갤러리 로직 ---
 const isGalleryOpen = ref(false);
 const currentImageIndex = ref(0);
 
@@ -180,54 +190,44 @@ const hasMultipleImages = computed(() => {
     return product.value.images && product.value.images.length > 1;
 });
 
-// 메인 이미지 URL 생성 헬퍼
-const getImageUrl = (img) => {
-    if (!img) return '/no-image.png';
-    
+// [수정] 갤러리 내부용 이미지 URL 생성 함수
+const getGalleryImageUrl = (img) => {
+    if (!img) return defaultImg; // import한 변수 사용
+
     if (img.url && img.url.startsWith('http')) return img.url;
-    
+
     const path = img.savePath || img.url;
     if (path) {
-        const baseUrl = api.defaults.baseURL || ''; 
+        const baseUrl = api.defaults.baseURL || 'http://localhost:8080';
+        // WebConfig와 일치하는 경로 사용 (/images/)
         return `${baseUrl}/images/${path}`;
     }
-    return '/no-image.png';
+    return defaultImg; // import한 변수 사용
 };
-
-// 메인 이미지 URL
-const getMainImageUrl = computed(() => {
-    if (product.value.images && product.value.images.length > 0) {
-        return getImageUrl(product.value.images[0]); 
-    }
-    return '/no-image.png';
-});
 
 // 현재 갤러리 이미지 URL
 const getCurrentImageUrl = computed(() => {
-    if (!product.value.images || product.value.images.length === 0) return '/no-image.png';
-    return getImageUrl(product.value.images[currentImageIndex.value]); 
+    if (!product.value.images || product.value.images.length === 0) return defaultImg;
+    return getGalleryImageUrl(product.value.images[currentImageIndex.value]);
 });
 
-// 갤러리 열기
 const openGallery = (index = 0) => {
     if (!product.value.images || product.value.images.length === 0) return;
     currentImageIndex.value = index;
     isGalleryOpen.value = true;
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
 };
 
-// 갤러리 닫기
 const closeGallery = () => {
     isGalleryOpen.value = false;
-    document.body.style.overflow = ''; 
+    document.body.style.overflow = '';
 };
 
-// 이전/다음 이미지 - product 기준
 const prevImage = () => {
     if (currentImageIndex.value > 0) {
         currentImageIndex.value--;
     } else {
-        currentImageIndex.value = product.value.images.length - 1; 
+        currentImageIndex.value = product.value.images.length - 1;
     }
 };
 
@@ -235,11 +235,10 @@ const nextImage = () => {
     if (currentImageIndex.value < product.value.images.length - 1) {
         currentImageIndex.value++;
     } else {
-        currentImageIndex.value = 0; 
+        currentImageIndex.value = 0;
     }
 };
 
-// 키보드 이벤트
 const handleKeydown = (e) => {
     if (!isGalleryOpen.value) return;
     if (e.key === 'Escape') closeGallery();
@@ -250,16 +249,6 @@ const handleKeydown = (e) => {
 onMounted(() => window.addEventListener('keydown', handleKeydown));
 onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
-// --- 유틸 함수 (product 사용) ---
-const fullAddress = computed(() => {
-    const p = product.value;
-    if (!p) return '';
-    const sgg = p.sggNm || '';
-    const umd = p.umdNm || '';
-    const jibun = p.jibun || '';
-    return `${sgg} ${umd} ${jibun}`.replace(/\s+/g, ' ').trim();
-});
-
 const formatPyeong = (m2) => m2 ? (m2 / 3.3058).toFixed(1) : '-';
 const formatFloor = (p) => {
     let text = p.floor ? `${p.floor}` : '-';
@@ -269,159 +258,30 @@ const formatFloor = (p) => {
 </script>
 
 <style scoped>
-.detail-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-}
-.detail-header {
-    padding: 1rem;
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-    border-bottom: 1px solid #f3f4f6;
-}
-.detail-body {
-    flex: 1;
-    overflow-y: auto;
-}
-.hero-img-area {
-    height: 18rem;
-    width: 100%;
-    background-color: #e5e7eb;
-    position: relative;
-    overflow: hidden;
-}
-.img-badge {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    background-color: rgba(0,0,0,0.6);
-    color: white;
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-}
+/* 스타일은 기존 유지 */
+.detail-container { height: 100%; display: flex; flex-direction: column; background-color: white; }
+.detail-header { padding: 1rem; position: sticky; top: 0; background: white; z-index: 10; border-bottom: 1px solid #f3f4f6; }
+.detail-body { flex: 1; overflow-y: auto; }
+.hero-img-area { height: 18rem; width: 100%; background-color: #e5e7eb; position: relative; overflow: hidden; }
+.img-badge { position: absolute; bottom: 1rem; right: 1rem; background-color: rgba(0, 0, 0, 0.6); color: white; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(4px); display: flex; align-items: center; }
 .detail-content { padding: 1.5rem; }
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-}
-.info-item {
-    display: flex;
-    align-items: start;
-    gap: 0.75rem;
-}
-.icon-box {
-    padding: 0.5rem;
-    background-color: #f3f4f6;
-    border-radius: 0.5rem;
-    color: #4b5563;
-}
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.info-item { display: flex; align-items: start; gap: 0.75rem; }
+.icon-box { padding: 0.5rem; background-color: #f3f4f6; border-radius: 0.5rem; color: #4b5563; }
 .info-label { font-size: 0.75rem; color: #6b7280; }
 .info-value { font-weight: 700; color: #1f2937; white-space: nowrap; }
-.detail-footer {
-    padding: 1rem;
-    border-top: 1px solid #e5e7eb;
-    background-color: white;
-    display: flex;
-    gap: 0.75rem;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-.btn-like {
-    flex: 1;
-    border: 1px solid rgba(174, 139, 114, 0.2);
-    background-color: rgba(206, 172, 147, 0.1);
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    color: #AE8B72;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: background-color 0.2s;
-}
-.btn-contact {
-    flex: 2;
-    background-color: #AE8B72;
-    color: white;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: background-color 0.2s;
-}
+.detail-footer { padding: 1rem; border-top: 1px solid #e5e7eb; background-color: white; display: flex; gap: 0.75rem; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); }
+.btn-like { flex: 1; border: 1px solid rgba(174, 139, 114, 0.2); background-color: rgba(206, 172, 147, 0.1); padding: 0.75rem; border-radius: 0.75rem; font-weight: 700; color: #AE8B72; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background-color 0.2s; }
+.btn-contact { flex: 2; background-color: #AE8B72; color: white; padding: 0.75rem; border-radius: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background-color 0.2s; }
 .btn-contact:hover { background-color: #8c6b54; }
-
-.gallery-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease-out;
-}
-.gallery-content {
-    position: relative;
-    max-width: 90%;
-    max-height: 85%;
-}
-.gallery-img {
-    max-width: 100%;
-    max-height: 80vh;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.gallery-close {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    z-index: 100;
-}
-.gallery-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 1rem;
-    transition: transform 0.2s;
-}
+.gallery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-out; }
+.gallery-content { position: relative; max-width: 90%; max-height: 85%; }
+.gallery-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.gallery-close { position: absolute; top: 2rem; right: 2rem; background: none; border: none; cursor: pointer; padding: 0.5rem; z-index: 100; }
+.gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 1rem; transition: transform 0.2s; }
 .gallery-nav:hover { transform: translateY(-50%) scale(1.1); }
 .gallery-nav.left { left: 1rem; }
 .gallery-nav.right { right: 1rem; }
-.gallery-counter {
-    text-align: center;
-    color: white;
-    margin-top: 1rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+.gallery-counter { text-align: center; color: white; margin-top: 1rem; font-size: 1.1rem; font-weight: 500; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
