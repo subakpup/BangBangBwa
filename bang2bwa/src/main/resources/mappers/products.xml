@@ -104,7 +104,7 @@
   		select *
   		from products
   		<where>
-  			<if test="keyword != null and keyword != ''">
+            <if test="keyword != null and keyword != ''">
   				and (
   					name like concat('%', #{keyword}, '%')
   					or jibun like concat('%', #{keyword}, '%')
@@ -166,7 +166,14 @@
                 	</when>
             	</choose>
         	</if>
+
+            <if test="minLat != null and maxLat != null and minLng != null and maxLng != null">
+                AND latitude BETWEEN #{minLat} AND #{maxLat}
+                AND longitude BETWEEN #{minLng} AND #{maxLng}
+            </if>
   		</where>
+
+        LIMIT #{limit} OFFSET #{offset}
   	</select>
   	
   	<select id="findAllMarkers">
