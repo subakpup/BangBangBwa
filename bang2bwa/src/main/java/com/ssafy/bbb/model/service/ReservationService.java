@@ -25,5 +25,5 @@ public interface ReservationService {
 
 	public void processAutoPunishment(ReservationDto reservation);
 	
-	public ReservationResponseDto getReservationDetail(Long reservationId);
+	public ReservationResponseDto getReservationDetail(Long reservationId, Long userId);
 }

@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.ssafy.bbb.model.dto.MyProductDto;
 import com.ssafy.bbb.model.dto.ReservationDto;
+import com.ssafy.bbb.model.dto.ReservationResponseDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.enums.ReservationStatus;
 
@@ -37,4 +38,6 @@ public interface ReservationDao {
 	public UserInfoDto.MyReservationDto findMyResrvationInfoByUserId(Long userId);
 	
 	public List<MyProductDto> findProductByAgentId(Long agentId);
+	
+	public ReservationResponseDto selectReservationDetail(Long reservationId);
 }

@@ -17,4 +17,11 @@ public class ReservationResponseDto {
     private LocalDateTime visitDate; // 방문 일시
     private String agentName;      // 담당 중개사 이름
     private ReservationStatus status;         // 예약 상태 (만남 완료 여부 확인용)
-}
+    
+    private Long userId;
+    private Long agentId;
+    private Long reporterId;
+    
+    private String userConfirmed; 
+    private String agentConfirmed;
+}	

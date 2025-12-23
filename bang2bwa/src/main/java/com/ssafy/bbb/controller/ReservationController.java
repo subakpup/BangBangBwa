@@ -40,7 +40,7 @@ public class ReservationController implements ReservationControllerDocs {
 	}
 
 	// 부동산 업자 예약 승인
-	@PostMapping("/{reservationId}/accept")
+	@PostMapping("/accept")
 	public ApiResponse<String> acceptReservation(
 			@RequestBody AcceptRequestDto request
 			, @AuthenticationPrincipal CustomUserDetails user) {
@@ -114,7 +114,7 @@ public class ReservationController implements ReservationControllerDocs {
     public ApiResponse<ReservationResponseDto> getReservationDetail(@PathVariable Long reservationId
     															, @AuthenticationPrincipal CustomUserDetails user) {
         
-        ReservationResponseDto result = reservationService.getReservationDetail(reservationId);
+        ReservationResponseDto result = reservationService.getReservationDetail(reservationId, user.getUserId());
         
         return ApiResponse.success(result);
     }
