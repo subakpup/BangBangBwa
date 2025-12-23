@@ -163,7 +163,18 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<ProductDto> search(ProductSearchDto request) {
-		return productDao.search(request);
+		List<ProductDto> products = productDao.search(request);
+		
+		for (ProductDto product : products) {
+			if (product.getThumbnail() != null) {
+				List<ProductImageDto> images = new ArrayList<>();
+				images.add(product.getThumbnail());
+				
+				product.setImages(images);
+			}
+		}
+		
+		return products;
 	}
 
 	// 지번 주소를 이용해 좌표(위도, 경도) 설정하는 메서드
