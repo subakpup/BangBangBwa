@@ -1,3 +1,5 @@
+import { api } from '@/api';
+import noImage from '@/assets/no-image.jpg'
 import { TrainFront, Bus, Store, School, ShoppingCart, Hospital, Pill, Shirt, Siren, Trees } from 'lucide-vue-next';
 
 // 매물 종류 매핑
@@ -88,3 +90,19 @@ export const infraCategories = [
     { name: '치안센터', code: 'PO3', type: 'category', icon: Siren },
     { name: '공원', keyword: '공원', type: 'keyword', icon: Trees },
 ];
+
+export const getProductMainImage = (item) => {
+  if (!item.images || item.images.length === 0) {
+    return noImage;
+  }
+
+  const img = item.images[0];
+  const path = img.savePath;
+
+  if (path) {
+    const baseUrl = api.defaults.baseURL;
+    return `${baseUrl}/images/${path}`; 
+  }
+
+  return noImage;
+};
