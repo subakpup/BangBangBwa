@@ -98,7 +98,7 @@ public class ProductController {
 		ProductDto result = productService.findById(productId);
 		
 		return ApiResponse.success(result, "매물 조회가 완료되었습니다.");
-  
+	}
   // 내 매물 조회
 	@GetMapping
 	public ApiResponse<List<MyProductDto>> getMyProductList(@AuthenticationPrincipal CustomUserDetails agent) {
