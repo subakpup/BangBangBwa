@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyProductList, deleteProduct } from '@/api/productApi'
-import { getMyReservationProducts, rejectReservation } from '@/api/reservationApi'
+import { getMyReservationProducts, rejectReservation, getMessage } from '@/api/reservationApi'
 import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock } from 'lucide-vue-next'
 import { formatMoney } from '@/utils/productUtil'
 
@@ -97,8 +97,10 @@ const handleDelete = async (product) => {
 // [예약 확인 탭 전용] 승인 / 거절
 // =========================================================
 
-const handleApprove = (product) => {
+const handleApprove = async (product) => {
   if (!confirm(`'${product.name}'의 방문 예약을 승인하시겠습니까?`)) return;
+
+  const message = await getMessage(product.reservationId);
 
   router.push({
     name: 'reservation-payment',
@@ -111,7 +113,7 @@ const handleApprove = (product) => {
         tradeType: product.tradeType,
         priceInfo: formatPriceSimple(product),
         reservationTime: product.visitDate,
-        message: "예약 승인 결제"
+        message: message.data
       }
     }
   });
