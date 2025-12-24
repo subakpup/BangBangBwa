@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 // [변경] 새로운 API 함수 import
 import { getMyWishProductList } from '@/api/myPageApi'
+import { removeWishList } from '@/api/productApi'
+import { Heart } from 'lucide-vue-next'
 
 const router = useRouter()
 const wishItems = ref([])
@@ -21,6 +23,19 @@ onMounted(async () => {
   }
   loading.value = false;
 })
+
+const handleRemoveWish = async (item) => {
+  if( !confirm(`${item.name} 매물을 찜 목록에서 삭제하시겠습니까?`)) return;
+
+  const response = await removeWishList(item.productId);
+
+  if(response && response.success === "SUCCESS") {
+    wishItems.value = wishItems.value.filter(p => p.productId !== item.productId);
+  }
+
+  alert(response.message || "삭제에 실패하였습니다.");
+}
+
 
 // [Helper 1] 숫자 포맷팅 (예: 10000 -> 10,000)
 const formatNumber = (num) => {
@@ -78,12 +93,19 @@ const getImageUrl = (images) => {
         <div 
           v-for="item in wishItems" 
           :key="item.productId" 
-          class="wish-card group"
+          class="wish-card group relative"
           @click="router.push(`/product/${item.productId}`)"
         >
           <div class="card-img-box">
             <img :src="getImageUrl(item.images)" alt="매물 사진" class="card-img" />
           </div>
+
+          <button 
+               class="absolute top-2 right-2 bg-white/90 rounded-full p-2 hover:bg-red-50 transition z-10 shadow-sm group/btn"
+               @click.stop="handleRemoveWish(item)"
+             >
+               <Heart class="w-5 h-5 fill-red-500 text-red-500 group-hover/btn:scale-110 transition-transform" />
+             </button>
           
           <div class="card-info">
             <div class="flex justify-between items-start">
@@ -104,7 +126,7 @@ const getImageUrl = (images) => {
             </p>
 
             <p class="text-xs text-gray-400 mt-2">
-              {{ item.sggNm }} {{ item.umdNm }} | {{ item.floor }}층
+              {{ item.sggNm }} {{ item.umdNm }} | {{ item.floor }}
             </p>
           </div>
         </div>
