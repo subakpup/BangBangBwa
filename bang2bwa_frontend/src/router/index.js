@@ -122,7 +122,6 @@ const router = createRouter({
     // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
     meta: { auth: true, role: 'AGENT' } 
   	},
-  ],
     // {
     //   path: '/product/manage',
     //   name: 'productManage',

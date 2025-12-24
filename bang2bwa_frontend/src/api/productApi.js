@@ -43,6 +43,9 @@ export const deleteProduct = async (productId) => {
         return response.data;
     } catch (error) {
         return error.response || error;
+    }
+  }
+/** 
  * AI 맞춤 추천 API
  * @param {Object} params - AI 분석 요청 조건
  * @returns - AI 분석 결과 리스트
@@ -53,7 +56,7 @@ export const recommendProducts = async (params) => {
         const response = await api.post('/api/ai/recommend', params);
         return response.data;
     } catch (error) {
-        throw error;
+        return error;
     }
 };
 
