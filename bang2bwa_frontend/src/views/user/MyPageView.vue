@@ -49,7 +49,9 @@ const handleWithdraw = async () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.clear();
-    router.push('/');
+    router.push('/').then(() => {
+      router.go();
+    });
   }
 }
 </script>
