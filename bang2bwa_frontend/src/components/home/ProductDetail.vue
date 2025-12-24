@@ -120,9 +120,9 @@
             <button class="btn-like" @click="addWish">
                 <Heart class="w-5 h-5 fill-[#AE8B72] text-[#AE8B72]" /> 찜하기
             </button>
-            <button class="btn-contact">
-                <Phone class="w-5 h-5" /> 문의하기
-            </button>
+            <RouterLink :to="{name: 'reservation-request', params: { propertyId: product.productId}}" class="btn-contact">
+                <CalendarCheck class="w-5 h-5" /> 예약하기
+            </RouterLink>
         </div>
 
         <div v-if="isGalleryOpen" class="gallery-overlay" @click.self="closeGallery">
@@ -152,7 +152,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import {
     ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info,
-    Images, X, ChevronLeft, ChevronRight
+    Images, X, ChevronLeft, ChevronRight, CalendarCheck
 } from 'lucide-vue-next';
 
 // [수정] 유틸 함수들 import
