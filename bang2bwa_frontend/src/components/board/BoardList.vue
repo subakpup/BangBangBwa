@@ -14,12 +14,16 @@
           <div class="flex gap-2 w-full md:w-auto">
             <select v-model="searchParams.sidoNm" class="region-select flex-1 md:flex-none md:w-32">
               <option value="">시/도 전체</option>
-              <option v-for="r in regionOptions" :key="r.sido" :value="r.sido">{{ r.sido }}</option>
+              <option v-for="sido in sidoList" :key="sido.sidoCode" :value="sido.sidoName">
+                {{ sido.sidoName }}
+              </option>
             </select>
 
             <select v-model="searchParams.sggNm" class="region-select flex-1 md:flex-none md:w-32" :disabled="!searchParams.sidoNm">
               <option value="">구/군 전체</option>
-              <option v-for="sgg in filteredSggOptions" :key="sgg" :value="sgg">{{ sgg }}</option>
+              <option v-for="sgg in sggList" :key="sgg.gugunCode" :value="sgg.gugunName">
+                {{ sgg.gugunName }}
+              </option>
             </select>
           </div>
           
@@ -113,39 +117,31 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPostList } from '@/api/boardApi'
+import { getSidoList, getSggList } from '@/api/addressApi' // API 추가
 import { PenTool, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next'
 
 const router = useRouter()
 
 // === [상태 관리] ===
-const regionOptions = [
-  { sido: '서울특별시', sgg: ['강남구', '서초구', '송파구'] },
-  { sido: '광주광역시', sgg: ['광산구', '동구', '서구', '남구', '북구'] },
-  { sido: '전라남도', sgg: ['나주시', '목포시', '여수시'] }
-]
+const sidoList = ref([]) // 시도 목록
+const sggList = ref([])  // 구군 목록
 
 const searchParams = ref({
   sidoNm: '',
   sggNm: '',
   keyword: '',
-  page: 1,  // 현재 페이지 (1부터 시작)
-  size: 10  // 페이지당 개수
+  page: 1,  
+  size: 10  
 })
 
-const posts = ref([])       // 게시글 목록
-const totalPages = ref(0)   // 전체 페이지 수
-const totalCount = ref(0)   // 전체 게시글 수
+const posts = ref([])       
+const totalPages = ref(0)   
+const totalCount = ref(0)   
 const loading = ref(false)
 
-// === [Computed: 구/군 필터] ===
-const filteredSggOptions = computed(() => {
-  const selected = regionOptions.find(r => r.sido === searchParams.value.sidoNm);
-  return selected ? selected.sgg : [];
-})
-
-// === [Computed: 페이지네이션 블록 계산 (1~5, 6~10)] ===
+// === [Computed: 페이지네이션 블록 계산] ===
 const visiblePageNumbers = computed(() => {
-  const blockSize = 5; // 한 번에 보여줄 페이지 버튼 개수
+  const blockSize = 5; 
   const currentBlock = Math.ceil(searchParams.value.page / blockSize);
   
   const startPage = (currentBlock - 1) * blockSize + 1;
@@ -158,30 +154,57 @@ const visiblePageNumbers = computed(() => {
   return pages;
 })
 
-// === [Watch: 시/도 변경 시 초기화] ===
-watch(() => searchParams.value.sidoNm, () => {
+// === [Watch: 시/도 변경 시 구/군 목록 로드 및 검색] ===
+watch(() => searchParams.value.sidoNm, async (newSidoName) => {
+  // 1. 하위 선택 초기화
   searchParams.value.sggNm = '';
   searchParams.value.page = 1;
+  sggList.value = [];
+
+  // 2. 시도가 선택되었을 때만 구군 API 호출
+  if (newSidoName) {
+    // API 호출을 위해 이름에 해당하는 Code 찾기
+    const selectedSido = sidoList.value.find(s => s.sidoName === newSidoName);
+    if (selectedSido) {
+      try {
+        sggList.value = await getSggList(selectedSido.sidoCode);
+      } catch (error) {
+        console.error("구군 로드 실패:", error);
+      }
+    }
+  }
+  
+  // 3. 변경된 조건으로 게시글 검색
   fetchPosts();
 })
 
+// === [Watch: 구/군 변경 시 검색] ===
+watch(() => searchParams.value.sggNm, () => {
+    searchParams.value.page = 1;
+    fetchPosts();
+});
+
 // === [API 호출] ===
+const fetchSidoList = async () => {
+    try {
+        sidoList.value = await getSidoList();
+    } catch (error) {
+        console.error("시도 로드 실패:", error);
+    }
+}
+
 const fetchPosts = async () => {
   loading.value = true;
   try {
-    // boardApi.js에서 page-1 처리를 하므로 여기선 그대로 넘깁니다.
     const res = await getPostList(searchParams.value);
     
-    // 백엔드: ApiResponse<PageResponse<PostListDto>>
     if (res && res.success && res.data) {
-      // PageResponse 구조 해체
       const { content, totalPage, totalCount: count } = res.data;
       
       posts.value = content || [];
       totalPages.value = totalPage || 0;
       totalCount.value = count || 0;
     } else {
-      // 실패 혹은 데이터 없음
       posts.value = [];
       totalPages.value = 0;
       totalCount.value = 0;
@@ -195,22 +218,22 @@ const fetchPosts = async () => {
 }
 
 // === [핸들러] ===
-// 페이지 변경
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   searchParams.value.page = page;
   fetchPosts();
 }
 
-// 검색 (1페이지로 리셋)
 const handleSearch = () => {
   searchParams.value.page = 1;
   fetchPosts();
 }
 
-// 상세 페이지 이동
 const goDetail = (id) => router.push(`/board/${id}`)
 
 // 초기 로딩
-onMounted(() => fetchPosts())
+onMounted(async () => {
+    await fetchSidoList(); // 시도 목록 로드
+    await fetchPosts();    // 게시글 목록 로드
+})
 </script>
