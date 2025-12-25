@@ -14,7 +14,7 @@
 
                 <div class="img-badge group-hover:bg-black/80 transition-colors">
                     <Images class="w-3 h-3 inline mr-1" />
-                    사진 더보기 {{ product.images ? product.images.length : 0 }}장
+                    사진 더보기 {{ product.images ? product.images.length - 1 : 0 }}장
                 </div>
             </div>
 
