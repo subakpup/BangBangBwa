@@ -56,3 +56,12 @@ export const logout = async () => {
         userName.value = '';
     }
 };
+
+
+export const updateState = (accessToken) => {
+    const payload = parseJwt(accessToken);
+
+    if(payload) {
+        userName.value = payload.name;
+    }
+};

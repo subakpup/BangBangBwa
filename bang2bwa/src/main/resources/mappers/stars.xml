@@ -22,7 +22,7 @@
   </delete>
   
   <select id="findAllStarProductByUserId">
-  	SELECT p.*
+  	SELECT DISTINCT p.*
   	FROM star_products s JOIN products p ON s.product_id = p.product_id
   	WHERE s.user_id = #{userId};
   </select>

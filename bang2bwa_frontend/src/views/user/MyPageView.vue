@@ -34,11 +34,12 @@ onMounted(async () => {
     userInfo.value = data; 
     if (!userInfo.value.role) userInfo.value.role = 'ROLE_USER';
 
-    reservationItem.value.tradeType = userInfo.value.reservation.type;
-    reservationItem.value.dealAmount = userInfo.value.reservation.dealAmount;
-    reservationItem.value.deposit = userInfo.value.reservation.deposit;
-    reservationItem.value.montlyRent = userInfo.value.reservation.monthlyRent;
-
+    if(userInfo.value.reservation) {
+      reservationItem.value.tradeType = userInfo.value.reservation.type;
+      reservationItem.value.dealAmount = userInfo.value.reservation.dealAmount;
+      reservationItem.value.deposit = userInfo.value.reservation.deposit;
+      reservationItem.value.montlyRent = userInfo.value.reservation.monthlyRent;
+    }
   }
 })
 

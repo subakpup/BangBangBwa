@@ -15,6 +15,7 @@ import com.ssafy.bbb.controller.docs.MyPageControllerDocs;
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.MyProductDto;
+import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
@@ -40,10 +41,10 @@ public class MyPageController implements MyPageControllerDocs {
 	
 	@Override
 	@PatchMapping
-	public ApiResponse<String> updateUserInfo(@AuthenticationPrincipal CustomUserDetails user, @RequestBody UserUpdateDto request) {
-		userService.updateUserInfo(user.getUserId(), request);
+	public ApiResponse<TokenInfo> updateUserInfo(@AuthenticationPrincipal CustomUserDetails user, @RequestBody UserUpdateDto request) {
+		TokenInfo newToken = userService.updateUserInfo(user.getUserId(), request);
 		
-		return ApiResponse.successWithNoContent("회원 정보가 수정되었습니다.");
+		return ApiResponse.success(newToken, "회원 정보가 수정되었습니다.");
 	}
 	
 	@Override

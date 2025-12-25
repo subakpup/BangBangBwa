@@ -24,4 +24,6 @@ public class ReservationResponseDto {
     
     private String userConfirmed; 
     private String agentConfirmed;
+    
+    private String message;
 }	

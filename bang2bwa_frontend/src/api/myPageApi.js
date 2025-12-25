@@ -1,4 +1,5 @@
 import { api } from "@/api/index";
+import { updateState } from "@/stores/auth";
 
 /**
  * 내 정보 조회
@@ -21,6 +22,18 @@ export const getUserInfo = async () => {
 export const updateUserInfo = async (data) => {
     try {
         const response = await api.patch('/mypage', data);
+
+        if(response.data.success === "SUCCESS") {
+            const tokenInfo = response.data.data
+            
+            if (tokenInfo) {
+                localStorage.setItem("accessToken", tokenInfo.accessToken);
+                localStorage.setItem("refreshToken", tokenInfo.refreshToken);
+
+                updateState(tokenInfo.accessToken);
+            }
+        }
+
         return response;
     } catch (error) {
         return error;
