@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { getMyWishProductList } from '@/api/myPageApi'
 import { removeWishList } from '@/api/productApi'
 import { Heart } from 'lucide-vue-next'
+import { getProductMainImage, typeMap, formatPrice } from '@/utils/productUtil'
 
 const router = useRouter()
 const wishItems = ref([])
@@ -35,47 +36,6 @@ const handleRemoveWish = async (item) => {
 
   alert(response.message || "삭제에 실패하였습니다.");
 }
-
-
-// [Helper 1] 숫자 포맷팅 (예: 10000 -> 10,000)
-const formatNumber = (num) => {
-  if (!num) return '0';
-  return num.toLocaleString();
-}
-
-// [Helper 2] 가격 표시 로직 (ProductDto 필드 활용)
-const getPriceTag = (item) => {
-  const tradeType = item.tradeType; // SALE, LEASE, RENT
-
-  if (tradeType === 'SALE') {
-    return `매매 ${formatNumber(item.dealAmount)}`;
-  } else if (tradeType === 'LEASE') {
-    return `전세 ${formatNumber(item.deposit)}`;
-  } else if (tradeType === 'RENT') {
-    return `월세 ${formatNumber(item.deposit)} / ${formatNumber(item.monthlyRent)}`;
-  }
-  return '';
-}
-
-// [Helper 3] 주택 유형 한글 변환
-const getHouseTypeName = (type) => {
-  const typeMap = {
-    'APART': '아파트',
-    'OFFICETEL': '오피스텔',
-    'ONE_ROOM': '원룸',
-  };
-  return typeMap[type] || type;
-}
-
-// [Helper 4] 이미지 URL 추출 (ProductImageDto 구조에 따라 수정 필요)
-const getImageUrl = (images) => {
-  if (images && images.length > 0) {
-    // ProductImageDto에 savePath, saveName, url 중 어떤 필드가 있는지 확인 필요.
-    // 일단 url이나 savePath로 가정합니다.
-    return images[0].url || images[0].savePath || 'https://via.placeholder.com/300'; 
-  }
-  return 'https://via.placeholder.com/300?text=No+Image';
-}
 </script>
 
 <template>
@@ -97,7 +57,7 @@ const getImageUrl = (images) => {
           @click="router.push(`/product/${item.productId}`)"
         >
           <div class="card-img-box">
-            <img :src="getImageUrl(item.images)" alt="매물 사진" class="card-img" />
+            <img :src="getProductMainImage(item)" alt="매물 사진" class="card-img" />
           </div>
 
           <button 
@@ -109,13 +69,13 @@ const getImageUrl = (images) => {
           
           <div class="card-info">
             <div class="flex justify-between items-start">
-              <span class="card-type">{{ getHouseTypeName(item.houseType) }}</span>
+              <span class="card-type">{{ typeMap[item.houseType] || item.houseType }}</span>
               
               <i class="fa-solid fa-heart text-red-500 hover:scale-110 transition cursor-pointer"></i>
             </div>
             
             <h3 class="card-price mt-1 text-[#AE8B72]">
-                {{ getPriceTag(item) }}
+                {{ formatPrice(item) }}
             </h3>
             
             <p class="card-title mt-1 text-lg">

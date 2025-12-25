@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.bbb.global.exception.CustomException;
 import com.ssafy.bbb.global.exception.ErrorCode;
+import com.ssafy.bbb.model.dao.ProductDao;
 import com.ssafy.bbb.model.dao.StarDao;
 import com.ssafy.bbb.model.dto.ProductDto;
 import com.ssafy.bbb.model.dto.StarDongDto;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class StarServiceImpl implements StarService {
 	private final StarDao starDao;
+	private final ProductDao productDao;
 	
 	// === 매물 관련 ===
 	@Override
@@ -40,7 +42,12 @@ public class StarServiceImpl implements StarService {
 	
 	@Override
 	public List<ProductDto> getAllStarProducts(Long userId) {
-		return starDao.findAllStarProductByUserId(userId);
+		List<ProductDto> list = starDao.findAllStarProductByUserId(userId);
+		for(ProductDto dto : list) {
+			dto.setImages(productDao.findImagesByProductId(dto.getProductId()));
+		}
+		
+		return list;
 	}
 	
 	
