@@ -67,6 +67,7 @@ watch(activeTab, () => {
 // 초기 로드
 onMounted(() => {
   fetchData();
+  checkPendingStatus();
 })
 
 // =========================================================
@@ -130,8 +131,27 @@ const handleReject = async (product) => {
     alert("예약이 거절되었습니다.");
     // [절대 규칙] 예약 탭 리스트에서 해당 카드를 '제거'합니다.
     productList.value = productList.value.filter(p => p.reservationId !== product.reservationId);
+    checkPendingStatus();
   } else {
     alert(res.message || "오류 발생");
+  }
+}
+
+// [추가] 붉은 점(알림) 표시 여부 상태
+const hasPending = ref(false); 
+
+// [추가] 백그라운드에서 PENDING 상태가 있는지 확인하는 함수
+const checkPendingStatus = async () => {
+  try {
+    // 탭과 상관없이 예약 데이터를 가져와서 확인해봅니다.
+    const res = await getMyReservationProducts();
+    if (res && res.success) {
+      // 'PENDING' 상태인 항목이 하나라도 있으면 true
+      const pendingItems = res.data.filter(p => p.status === 'PENDING');
+      hasPending.value = pendingItems.length > 0;
+    }
+  } catch (e) {
+    console.error("알림 상태 확인 실패", e);
   }
 }
 
@@ -191,7 +211,7 @@ const getStatusClass = (status) => {
             :class="activeTab === 'RESERVED' ? 'bg-[#AE8B72] text-white shadow' : 'text-gray-500 hover:bg-gray-50'"
           >
             예약 확인
-            <span v-if="activeTab !== 'RESERVED'" class="w-2 h-2 bg-red-500 rounded-full"></span>
+            <span v-if="activeTab !== 'RESERVED' && hasPending" class="w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
       </div>
