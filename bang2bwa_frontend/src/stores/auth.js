@@ -3,6 +3,7 @@ import { logout as logoutApi } from '@/api/userApi';
 
 export const isLogin = ref(false); // 로그인 상태
 export const userName = ref(''); // 로그인 유저 이름
+export const userId = ref('');
 
 // 토큰 디코딩 함수
 const parseJwt = (token) => {
@@ -24,7 +25,10 @@ const initAuth = () => {
     if (token) {
         isLogin.value = true;
         const payload = parseJwt(token);
-        if (payload) userName.value = payload.name;
+        if (payload) {
+            userName.value = payload.name;
+            userId.value = payload.userId;
+        }
     }
 }
 initAuth();
@@ -38,6 +42,7 @@ export const loginSuccess = (accessToken, refreshToken) => {
     const payload = parseJwt(accessToken);
     if (payload) {
         userName.value = payload.name;
+        userId.value = payload.userId;
     }
 };
 
@@ -54,6 +59,7 @@ export const logout = async () => {
         
         isLogin.value = false;
         userName.value = '';
+        userId.value = '';
     }
 };
 
@@ -63,5 +69,6 @@ export const updateState = (accessToken) => {
 
     if(payload) {
         userName.value = payload.name;
+        userId.value = payload.userId;
     }
 };
