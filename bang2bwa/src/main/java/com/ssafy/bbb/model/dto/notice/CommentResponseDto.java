@@ -28,6 +28,8 @@ public class CommentResponseDto {
 	private Long userId;
 	private Long parentId;
 	
+	private String writerName;
+	
 	// 대댓글 리스트
 	@Builder.Default
 	private List<CommentResponseDto> children = new ArrayList<>();

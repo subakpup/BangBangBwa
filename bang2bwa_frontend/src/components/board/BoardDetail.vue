@@ -17,10 +17,10 @@
         <div class="flex items-center justify-between mt-4">
         <div class="post-meta">
             <span class="flex items-center gap-1">
-            <User :size="14"/> {{ post.writerName }}
+            <User :size="14"/> {{ post.name }}
             </span>
-            <span v-if="post.hit" class="flex items-center gap-1">
-            <Eye :size="14"/> {{ post.hit }}
+            <span v-if="post.viewCnt" class="flex items-center gap-1">
+            <Eye :size="14"/> {{ post.viewCnt }}
             </span>
         </div>
         
@@ -39,6 +39,8 @@
         {{ post.content }}
     </div>
 
+    <CommentSection :postId="postId" />
+
     <div class="mt-10 pt-6 border-t border-gray-100 flex justify-center">
         <button @click="router.push('/board')" class="btn-base bg-white text-[#AE8B72] border border-[#AE8B72] hover:bg-gray-50">
         목록으로
@@ -52,8 +54,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostDetail, removePost } from '@/api/boardApi'
-import { userName } from '@/stores/auth'
+import { userId } from '@/stores/auth'
 import { User, Eye, MapPin } from 'lucide-vue-next'
+import CommentSection from './CommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -66,11 +69,13 @@ onMounted(async () => {
   const res = await getPostDetail(postId);
   if (res && res.data) {
     post.value = res.data;
+
+    console.log(post.value);
     
     // [중요] 내 글인지 확인 (스토어의 userId와 게시글의 userId 비교)
     // 백엔드 PostDetailDto에 userId가 포함되어 있어야 합니다.
     // authStore.userInfo가 없다면 로그인 안 한 상태
-    if (userName.value && userName.value === post.value.writerName) {
+    if (post.value.userId === userId.value) {
         isMyPost.value = true;
     }
   }
@@ -81,7 +86,7 @@ const handleDelete = async () => {
   
   const res = await removePost(postId);
   // 204 No Content는 res.data가 없을 수 있음
-  if (res && (res.status === 200 || res.success)) {
+  if (res && (res.status === 200 || res.success === "SUCCESS")) {
     alert("삭제되었습니다.");
     router.push('/board');
   }

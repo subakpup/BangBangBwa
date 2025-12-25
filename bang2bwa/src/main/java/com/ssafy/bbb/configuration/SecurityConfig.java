@@ -44,6 +44,7 @@ public class SecurityConfig {
 					.requestMatchers("/users/signup", "users/login", "users/refresh").permitAll() // 회원가입, 로그인, 토큰 재발급은 모두에게 허용
 					.requestMatchers("/users/email-verification/**").permitAll() // 이메일 체크 관련 모두에게 허용
 					.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Swagger 관련 설정도 모두에게 허용
+					.requestMatchers("/auth/**").permitAll() // 비밀번호 찾기 로직(모두에게 열려야함)
 					.requestMatchers("/reservations/**").permitAll() // 개발중에 잠시 열어둠.
 					.requestMatchers("/house/**").permitAll() // 개발 중에 잠시 열어둠.
 					.requestMatchers("/api/**").permitAll() // 개발 중에 잠시 열어둠.

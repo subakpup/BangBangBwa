@@ -10,7 +10,7 @@
   	</insert>
   	
   	<select id="commentList" resultType="com.ssafy.bbb.model.dto.notice.CommentResponseDto">
-  		SELECT c.*, u.name
+  		SELECT c.*, u.name AS writerName
   		FROM comments c
   		JOIN users u ON c.user_id = u.user_id
   		WHERE c.post_id = #{postId}

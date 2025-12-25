@@ -18,6 +18,8 @@ import ReservationRequest from '@/views/reservation/ReservationRequest.vue'
 import ReservationPayment from '@/views/reservation/ReservationPayment.vue'
 import ReservationAction from '@/views/reservation/ReservationAction.vue'
 import MyProductListView from '@/views/MyProductListView.vue'
+import ResetPasswordView from '@/views/user/ResetPasswordView.vue'
+import FindPasswordView from '@/views/user/FindPasswordView.vue'
 
 
 
@@ -115,29 +117,48 @@ const router = createRouter({
       component: ReservationAction,
     },
     {
-    // 내 매물 관리 (중개인 전용)
-    path: '/agent/products',
-    name: 'my-product-list',
-    component: MyProductListView,
-    // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
-    meta: { auth: true, role: 'AGENT' } 
-  	},
+      // 내 매물 관리 (중개인 전용)
+      path: "/agent/products",
+      name: "my-product-list",
+      component: MyProductListView,
+      // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
+      meta: { auth: true, role: "AGENT" },
+    },
     // {
     //   path: '/product/manage',
     //   name: 'productManage',
     //   component: ProductManageView
     // },
     {
-      path: '/product/register',
-      name: 'productRegister',
-      component: ProductFormView
+      path: "/product/register",
+      name: "productRegister",
+      component: ProductFormView,
     },
     {
-      path: '/product/edit/:id',
-      name: 'productEdit',
-      component: ProductFormView
+      path: "/product/edit/:id",
+      name: "productEdit",
+      component: ProductFormView,
     },
-  ]
+    {
+      path: "/find-password",
+      name: "find-password",
+      component: FindPasswordView,
+    },
+    {
+      path: "/reset-password",
+      name: "reset-password",
+      component: ResetPasswordView,
+      // (선택사항) 라우터 가드로 토큰 없으면 진입 막기 가능
+      beforeEnter: (to, from, next) => {
+        if (!to.query.token) {
+          alert("이메일의 링크를 통해서만 접근 가능합니다.");
+          next("/login");
+        } else {
+          next();
+        }
+      },
+    },
+  ],
 });
 
 export default router

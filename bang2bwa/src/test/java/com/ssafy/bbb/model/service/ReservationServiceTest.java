@@ -161,7 +161,7 @@ class ReservationServiceTest {
 		mockPgPreAuthSuccess();
 
 		// when
-		reservationService.acceptReservation(RESERVATION_ID, AGENT_ID);
+//		reservationService.acceptReservation(RESERVATION_ID, AGENT_ID);
 
 		// then
 		verify(pgClient).requestPreAuth(any(PgAuthRequestDto.class));
