@@ -97,93 +97,98 @@
   		select latitude, longitude from products
   		where product_id = #{productId};
   	</select>
-  	
-  	<resultMap type="map" id="selectProductMap">
-  		<id column="product_id" property="productId" />
-  		<result column="agent_id" property="agentId" />
-  		<result column="status" property="status" />
-  	</resultMap>
-  	
-  	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto" resultMap="ProductSearchMap">
-  		SELECT *,
-  			(SELECT save_path 
-  			 FROM product_images 
-  			 WHERE product_id = products.product_id 
-  			 LIMIT 1) AS thumbnail_path
-  		FROM products
-  		<where>
-            <if test="keyword != null and keyword != ''">
-  				and (
-  					name like concat('%', #{keyword}, '%')
-  					or jibun like concat('%', #{keyword}, '%')
-  					or sgg_nm like concat('%', #{sggNm}, '%')
-  					or umd_nm like concat('%', #{umdNm}, '%')
-  				)
-  			</if>
-  			
-  			<if test="houseType != null and houseType != ''">
-  				and house_type = #{houseType}
-  			</if>
-  			
-  			<if test="tradeType != null and tradeType != '' and tradeType != '전체'">
-  				and trade_type = #{tradeType}
-  			</if>
-  			
-  			<if test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체 면적'">
-  				<choose>
-  					<when test="excluUseAr == '33㎡ 이하 (약 10평)'">
-  						and exclu_use_ar &lt;= 33
-  					</when>
-  					
-  					<when test="excluUseAr == '33㎡ ~ 66㎡ (10~20평)'">
-  						AND exclu_use_ar &gt; 33 AND exclu_use_ar &lt;= 66
-  					</when>
-  					
-  					<when test="excluUseAr == '66㎡ ~ 99㎡ (20~30평)'">
-  						AND exclu_use_ar &gt; 66 AND exclu_use_ar &lt;= 99
-  					</when>
-  					
-  					<when test="excluUseAr == '99㎡ 이상 (30평대~)'">
-  						and exclu_use_ar &gt; 99
-  					</when>
-  				</choose>
-  			</if>
-  			
+
+	<resultMap type="map" id="selectProductMap">
+		<id column="product_id" property="productId" />
+		<result column="agent_id" property="agentId" />
+		<result column="status" property="status" />
+	</resultMap>
+
+	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto" resultMap="ProductSearchMap">
+		SELECT *,
+		<choose>
+			<when test="userLat != null and userLng != null">
+				(6371 * acos(cos(radians(#{userLat})) * cos(radians(latitude))
+				* cos(radians(longitude) - radians(#{userLng}))
+				+ sin(radians(#{userLat})) * sin(radians(latitude))))
+			</when>
+			<otherwise>
+				0
+			</otherwise>
+		</choose>
+		AS distance,
+
+		(SELECT save_path
+		FROM product_images
+		WHERE product_id = products.product_id
+		LIMIT 1) AS thumbnail_path
+		FROM products
+
+		<where>
+			<if test="keyword != null and keyword != ''">
+				AND (
+				name LIKE CONCAT('%', #{keyword}, '%')
+				OR jibun LIKE CONCAT('%', #{keyword}, '%')
+				OR sgg_nm LIKE CONCAT('%', #{sggNm}, '%')
+				OR umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+				)
+			</if>
+
+			<if test="houseType != null and houseType != '' and houseType != '전체'">
+				AND house_type = #{houseType}
+			</if>
+
+			<if test="tradeType != null and tradeType != '' and tradeType != '전체'">
+				AND trade_type = #{tradeType}
+			</if>
+
+			<if
+				test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체 면적'">
+				<choose>
+					<when test="excluUseAr == '33㎡ 이하 (약 10평)'"> AND exclu_use_ar &lt;= 33 </when>
+					<when test="excluUseAr == '33㎡ ~ 66㎡ (10~20평)'"> AND exclu_use_ar &gt; 33 AND exclu_use_ar &lt;= 66
+					</when>
+					<when test="excluUseAr == '66㎡ ~ 99㎡ (20~30평)'"> AND exclu_use_ar &gt; 66 AND exclu_use_ar &lt;= 99
+					</when>
+					<when test="excluUseAr == '99㎡ 이상 (30평대~)'"> AND exclu_use_ar &gt; 99 </when>
+				</choose>
+			</if>
+
 			<if test="floor != null and floor != '' and floor != '전체'">
-            	<choose>
-                	<when test="floor == '1층'">
-                    	AND (floor = '1층' OR floor = '1') 
-                	</when>
-                
-                	<when test="floor == '2층'">
-                    	AND (floor = '2층' OR floor = '2')
-                	</when>
-                
-                	<when test="floor == '지하'">
-                    	AND floor LIKE '-%'
-                	</when>
-                
-                	<when test="floor == '옥탑'">
-                    	AND floor LIKE '%옥탑%'
-                	</when>
-                
-                	<when test="floor == '3층 이상'">
-                    	AND floor != '1층' AND floor != '1'
-	                    AND floor != '2층' AND floor != '2'
-        	            AND floor NOT LIKE '-%'
-            	        AND floor NOT LIKE '%옥탑%'
-                	</when>
-            	</choose>
-        	</if>
+				<choose>
+					<when test="floor == '1층'"> AND (floor = '1층' OR floor = '1') </when>
+					<when test="floor == '2층'"> AND (floor = '2층' OR floor = '2') </when>
+					<when test="floor == '지하'"> AND floor LIKE '-%' </when>
+					<when test="floor == '옥탑'"> AND floor LIKE '%옥탑%' </when>
+					<when test="floor == '3층 이상'">
+						AND floor NOT IN ('1층', '1', '2층', '2')
+						AND floor NOT LIKE '-%'
+						AND floor NOT LIKE '%옥탑%'
+					</when>
+				</choose>
+			</if>
 
-            <if test="minLat != null and maxLat != null and minLng != null and maxLng != null">
-                AND latitude BETWEEN #{minLat} AND #{maxLat}
-                AND longitude BETWEEN #{minLng} AND #{maxLng}
-            </if>
-  		</where>
+			<if test="userLat == null and minLat != null and maxLat != null and minLng != null and maxLng != null">
+				AND latitude BETWEEN #{minLat} AND #{maxLat}
+				AND longitude BETWEEN #{minLng} AND #{maxLng}
+			</if>
+		</where>
 
-        LIMIT #{limit} OFFSET #{offset}
-  	</select>
+		<if test="userLat != null and userLng != null and radius != null">
+			HAVING distance &lt;= #{radius}
+		</if>
+
+		<choose>
+			<when test="userLat != null and userLng != null">
+				ORDER BY distance ASC
+			</when>
+			<otherwise>
+				ORDER BY product_id DESC
+			</otherwise>
+		</choose>
+
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
   	
   	<select id="findAllMarkers">
   		select product_id, house_type, trade_type, deal_amount, deposit, monthly_rent, latitude, longitude
