@@ -48,7 +48,7 @@ const isFirstLoad = ref(true);
 const initMap = () => {
     const container = mapContainer.value;
     const options = {
-        center: new window.kakao.maps.LatLng(37.566826, 126.9786567), // 서울시청
+        center: new window.kakao.maps.LatLng(35.20534846907905, 126.8115574909565),
         level: 5 // 확대 레벨
     };
 

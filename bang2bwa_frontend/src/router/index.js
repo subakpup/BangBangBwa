@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SignupView from '@/views/user/SignupView.vue'
 import LoginView from '@/views/user/LoginView.vue'
-// import ProductManageView from '@/views/product/ProductManageView.vue'
 import ProductFormView from '@/views/product/ProductFormView.vue'
 import MyPageView from '@/views/user/MyPageView.vue'
 import MyWishlistView from '@/views/user/MyWishlistView.vue'
@@ -122,11 +121,6 @@ const router = createRouter({
     // (선택사항) 중개인만 접근 가능하도록 메타 데이터 설정
     meta: { auth: true, role: 'AGENT' } 
   	},
-    // {
-    //   path: '/product/manage',
-    //   name: 'productManage',
-    //   component: ProductManageView
-    // },
     {
       path: '/product/register',
       name: 'productRegister',
