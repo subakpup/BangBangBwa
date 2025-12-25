@@ -5,6 +5,7 @@ import java.util.List;
 import com.ssafy.bbb.global.response.ApiResponse;
 import com.ssafy.bbb.global.security.CustomUserDetails;
 import com.ssafy.bbb.model.dto.MyProductDto;
+import com.ssafy.bbb.model.dto.TokenInfo;
 import com.ssafy.bbb.model.dto.user.PasswordUpdateDto;
 import com.ssafy.bbb.model.dto.user.UserInfoDto;
 import com.ssafy.bbb.model.dto.user.UserUpdateDto;
@@ -17,7 +18,7 @@ public interface MyPageControllerDocs {
     public ApiResponse<UserInfoDto> getUserInfo(@Parameter(hidden=true) CustomUserDetails user);
 
     @Operation(summary = "내 정보 수정", description = "이름, 전화번호, 생년월일 등을 수정합니다.")
-    public ApiResponse<String> updateUserInfo(@Parameter(hidden=true) CustomUserDetails user, UserUpdateDto request);
+    public ApiResponse<TokenInfo> updateUserInfo(@Parameter(hidden=true) CustomUserDetails user, UserUpdateDto request);
     
     @Operation(summary = "비밀번호 수정", description = "비밀번호를 수정합니다.")
     public ApiResponse<String> updatePassword(@Parameter(hidden=true) CustomUserDetails user, PasswordUpdateDto newPassword);
