@@ -41,7 +41,7 @@ import { formatPrice, infraCategories } from '@/utils/productUtil';
 import { X, Crosshair } from 'lucide-vue-next';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
-const emit = defineEmits(['marker-click', 'bounds-changed']); // 마커 클릭 이벤트
+const emit = defineEmits(['marker-click', 'bounds-changed', 'reset-selection']); // 마커 클릭 이벤트
 
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
@@ -300,7 +300,9 @@ const resetSelection = () => {
     }
 
     clearInfraMarkers();
-}
+
+    emit('reset-selection');
+};
 
 // 마커 생성 함수
 const createMarkerImage = (color) => {

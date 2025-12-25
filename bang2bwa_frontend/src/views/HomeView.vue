@@ -5,10 +5,11 @@
 
     <div class="content-wrapper">
 
-      <aside class="sidebar custom-scrollbar">
+      <aside class="sidebar">
         
         <div v-if="selectProperty" class="h-full w-full">
           <ProductDetail 
+            :key="selectProperty.productId"
             :item="selectProperty" 
             @close="closeDetail" 
           />
@@ -23,7 +24,7 @@
             </h2>
           </div>
 
-          <div class="list-wrapper">
+          <div class="list-wrapper" ref="sidebarRef">
             
             <MainHome
               v-if="!isSearchMode"
@@ -31,6 +32,7 @@
             />
 
             <ProductList 
+              ref="productListRef"
               v-else
               :items="productList" 
               :loading="loading"
@@ -48,6 +50,7 @@
           :items="productList" 
           @marker-click="handleItemClick"
           @bounds-changed="handleMapBoundsChanged"
+          @reset-selection="selectProperty = null"
         />
       </div>
 
@@ -83,6 +86,7 @@ const showAiModal = ref(false);
 const filterBar = ref(null);      
 const selectProperty = ref(null); 
 const kakaoMapRef = ref(null);
+const productListRef = ref(null);
 
 const isSearchMode = computed(() => {
   return Object.keys(route.query).length > 0;
@@ -180,6 +184,10 @@ const handleMapBoundsChanged = (bounds) => {
     return;
   }
 
+  if (productListRef.value) {
+    productListRef.value.scrollToTop();
+  }
+
   currentSearchParams.value.minLat = bounds.minLat;
   currentSearchParams.value.maxLat = bounds.maxLat;
   currentSearchParams.value.minLng = bounds.minLng;
@@ -241,7 +249,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 화면 레이아웃 고정 스타일 (필수) */
 .home-container {
   display: flex;
   flex-direction: column;
@@ -285,25 +292,9 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.list-wrapper {
-  flex: 1;
-  overflow-y: hidden;
-}
-
 .map-container {
   flex: 1;
   position: relative;
   background-color: #f3f4f6;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background-color: transparent;
 }
 </style>
