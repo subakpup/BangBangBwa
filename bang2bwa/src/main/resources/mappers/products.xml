@@ -5,8 +5,8 @@
   
   <mapper namespace="com.ssafy.bbb.model.dao.ProductDao">
   	<insert id="save" useGeneratedKeys="true" keyProperty="productId">
-  		insert into products(jibun, house_type, trade_type, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_nm, umd_nm, agent_id, latitude, longitude)
-  		values(#{jibun}, #{houseType}, #{tradeType}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggNm}, #{umdNm}, #{agentId}, #{latitude}, #{longitude});
+  		insert into products(jibun, house_type, trade_type, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_nm, umd_nm, agent_id, latitude, longitude, `desc`)
+  		values(#{jibun}, #{houseType}, #{tradeType}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggNm}, #{umdNm}, #{agentId}, #{latitude}, #{longitude}, #{desc});
   	</insert>
   	
   	<update id="update">
@@ -30,7 +30,8 @@
 	  		umd_nm=#{product.umdNm}, 
 	  		agent_id=#{product.agentId},
 	  		latitude=#{product.latitude},
-	  		longitude=#{product.longitude}
+	  		longitude=#{product.longitude},
+	  		`desc`=#{product.desc}
   		</set>
   		where product_id = #{id};
   	</update>
@@ -115,7 +116,8 @@
   				and (
   					name like concat('%', #{keyword}, '%')
   					or jibun like concat('%', #{keyword}, '%')
-  					or apt_dong like concat('%', #{keyword}, '%')
+  					or sgg_nm like concat('%', #{sggNm}, '%')
+  					or umd_nm like concat('%', #{umdNm}, '%')
   				)
   			</if>
   			
@@ -157,8 +159,8 @@
                     	AND (floor = '2층' OR floor = '2')
                 	</when>
                 
-                	<when test="floor == '반지하'">
-                    	AND floor LIKE '%지하%'
+                	<when test="floor == '지하'">
+                    	AND floor LIKE '-%'
                 	</when>
                 
                 	<when test="floor == '옥탑'">
@@ -168,7 +170,7 @@
                 	<when test="floor == '3층 이상'">
                     	AND floor != '1층' AND floor != '1'
 	                    AND floor != '2층' AND floor != '2'
-        	            AND floor NOT LIKE '%지하%'
+        	            AND floor NOT LIKE '-%'
             	        AND floor NOT LIKE '%옥탑%'
                 	</when>
             	</choose>
