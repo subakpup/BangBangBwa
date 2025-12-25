@@ -69,4 +69,10 @@
   		DELETE FROM users WHERE user_id = #{userId}
   	</delete>
   	
+  	<update id="updatePasswordByEmail">
+  		UPDATE users
+  		SET password=#{encodedPassword}
+  		WHERE email = #{email}
+  	</update>
+  	
   </mapper>
