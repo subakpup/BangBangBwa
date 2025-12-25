@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { getMyProductList, deleteProduct } from '@/api/productApi'
 import { getMyReservationProducts, rejectReservation, getMessage } from '@/api/reservationApi'
 import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock, Plus } from 'lucide-vue-next'
-import { formatMoney } from '@/utils/productUtil'
+import { formatMoney, getProductMainImage } from '@/utils/productUtil'
 
 const router = useRouter()
 
@@ -237,7 +237,7 @@ const getStatusClass = (status) => {
           class="bg-white rounded-xl shadow-sm border border-[#E5D0C2] overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
         >
           <div class="h-48 bg-gray-200 relative flex-shrink-0">
-             <img src="https://placehold.co/600x400/E5D0C2/AE8B72?text=House" class="w-full h-full object-cover"/>
+             <img :src="getProductMainImage(product)" class="w-full h-full object-cover"/>
              
              <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold border shadow-sm"
                   :class="getStatusClass(product.status)">

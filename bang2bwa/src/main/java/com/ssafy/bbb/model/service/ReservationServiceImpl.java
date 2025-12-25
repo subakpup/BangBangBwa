@@ -466,7 +466,13 @@ public class ReservationServiceImpl implements ReservationService {
 	
 	@Override
 	public List<MyProductDto> getMyReservationProducts(Long agentId) {
-		return reservationDao.findMyReservationProducts(agentId);
+		List<MyProductDto> list = reservationDao.findMyReservationProducts(agentId);
+		
+		for(MyProductDto dto : list) {
+			dto.setImages(productDao.findImagesByProductId(dto.getProductId()));
+		}
+  
+		return list;
 	}
 
 	@Override
