@@ -194,15 +194,13 @@ const hasMultipleImages = computed(() => {
 const getGalleryImageUrl = (img) => {
     if (!img) return defaultImg; // import한 변수 사용
 
-    if (img.url && img.url.startsWith('http')) return img.url;
-
-    const path = img.savePath || img.url;
+    const path = img.savePath;
     if (path) {
-        const baseUrl = api.defaults.baseURL || 'http://localhost:8080';
-        // WebConfig와 일치하는 경로 사용 (/images/)
+        const baseUrl = api.defaults.baseURL;
         return `${baseUrl}/images/${path}`;
     }
-    return defaultImg; // import한 변수 사용
+
+    return defaultImg;
 };
 
 // 현재 갤러리 이미지 URL
