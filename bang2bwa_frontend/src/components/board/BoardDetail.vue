@@ -39,6 +39,8 @@
         {{ post.content }}
     </div>
 
+    <CommentSection :postId="postId" />
+
     <div class="mt-10 pt-6 border-t border-gray-100 flex justify-center">
         <button @click="router.push('/board')" class="btn-base bg-white text-[#AE8B72] border border-[#AE8B72] hover:bg-gray-50">
         목록으로
@@ -54,6 +56,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getPostDetail, removePost } from '@/api/boardApi'
 import { userId } from '@/stores/auth'
 import { User, Eye, MapPin } from 'lucide-vue-next'
+import CommentSection from './CommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()
