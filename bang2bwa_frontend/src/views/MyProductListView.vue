@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyProductList, deleteProduct } from '@/api/productApi'
 import { getMyReservationProducts, rejectReservation, getMessage } from '@/api/reservationApi'
-import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock } from 'lucide-vue-next'
+import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock, Plus } from 'lucide-vue-next'
 import { formatMoney } from '@/utils/productUtil'
 
 const router = useRouter()
@@ -196,6 +196,14 @@ const getStatusClass = (status) => {
         <h1 class="text-2xl font-bold text-[#AE8B72] flex items-center gap-2">
           <Building2 /> 내 매물 관리
         </h1>
+
+        <div class="flex items-center gap-3">
+        <button 
+            @click="router.push({ name: 'productRegister' })"
+            class="px-5 py-2 bg-[#AE8B72] text-white rounded-lg text-sm font-bold shadow-md hover:bg-[#9C7A61] transition-all flex items-center gap-1"
+          >
+            <Plus :size="18" /> 매물 등록
+          </button>
         
         <div class="flex bg-white rounded-lg p-1 shadow-sm border border-[#CEAC93] mt-4 md:mt-0">
           <button 
@@ -213,6 +221,7 @@ const getStatusClass = (status) => {
             예약 확인
             <span v-if="activeTab !== 'RESERVED' && hasPending" class="w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+        </div>
         </div>
       </div>
 
