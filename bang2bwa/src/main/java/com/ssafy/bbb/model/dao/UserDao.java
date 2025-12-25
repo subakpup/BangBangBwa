@@ -41,4 +41,6 @@ public interface UserDao {
 	
 	// 회원 탈퇴 (사업자 회원은 on delete cascade 로 DB 단에서 삭제)
 	public void deleteUser(Long userId);
+	
+	public void updatePasswordByEmail(String email, String encodedPassword);
 }

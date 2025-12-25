@@ -27,7 +27,7 @@ public interface UserService {
 	public UserInfoDto getUserInfo(Long userId);
 	
 	// 내 정보 수정
-	public void updateUserInfo(Long userId, UserUpdateDto request);
+	public TokenInfo updateUserInfo(Long userId, UserUpdateDto request);
 	
 	// 비밀번호 수정
 	public void updatePassword(Long userId, PasswordUpdateDto request);

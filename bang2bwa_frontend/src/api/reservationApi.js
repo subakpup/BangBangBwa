@@ -10,7 +10,7 @@ export const requestReservation = async (data) => {
         const response = await api.post('/reservations', data);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -24,7 +24,7 @@ export const confirmReservation = async (reservationId, location) => {
         const response = await api.post(`/reservations/${reservationId}/confirm`, location);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -38,7 +38,7 @@ export const reportNoShow = async (reservationId, location) => {
         const response = await api.post(`/reservations/${reservationId}/noshow`, location);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -52,7 +52,7 @@ export const defendNoShow = async (reservationId, location) => {
         const response = await api.post(`/reservations/${reservationId}/defend`, location);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -65,7 +65,7 @@ export const cancelReservation = async (reservationId) => {
         const response = await api.post(`/reservations/${reservationId}/cancel`);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -82,7 +82,7 @@ export const acceptReservation = async (reservationId, bankId) => {
         });
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -95,7 +95,7 @@ export const getReservationDetail = async (reservationId) => {
         const response = await api.get(`/reservations/${reservationId}`);
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 }
 
@@ -108,7 +108,7 @@ export const getBankList = async () => {
         const response = await api.get('/api/banks');
         return response.data; // ApiResponse<List<VirtualBankDto>>
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -118,7 +118,7 @@ export const getMyReservationProducts = async () => {
         const response = await api.get('/reservations/products');
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 
@@ -130,7 +130,7 @@ export const rejectReservation = async (reservationId, reason) => {
         });
         return response.data;
     } catch (error) {
-        return error.response || error;
+        return error.response.data || error;
     }
 };
 

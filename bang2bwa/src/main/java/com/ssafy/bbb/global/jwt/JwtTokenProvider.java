@@ -80,6 +80,35 @@ public class JwtTokenProvider {
 						.build();
 	}
 	
+	public TokenInfo createToken(Long userId, String email, String name, String role) {
+		long now = (new Date()).getTime();
+
+		// Access Token 생성
+		Date accessTokenExpiresIn = new Date(now + accessExpiration);
+		String accessToken = Jwts.builder()
+									.subject(email)
+									.claim("userId", userId)
+									.claim("name", name)
+									.claim("auth", role)
+									.expiration(accessTokenExpiresIn)
+									.signWith(key)
+									.compact();
+
+		// Refresh Token 생성
+		Date refreshTokenExpiresIn = new Date(now + refreshExpiration);
+		String refreshToken = Jwts.builder()
+									.subject(email)
+									.expiration(refreshTokenExpiresIn)
+									.signWith(key)
+									.compact();
+
+		return TokenInfo.builder()
+						.grantType("Bearer")
+						.accessToken(accessToken)
+						.refreshToken(refreshToken)
+						.build();
+	}
+	
 	// 인증 정보 조회
 	public Authentication getAuthentication(String accessToken) {
 		Claims claims = parseClaims(accessToken);

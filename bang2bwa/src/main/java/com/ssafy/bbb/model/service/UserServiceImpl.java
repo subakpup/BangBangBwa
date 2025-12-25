@@ -153,13 +153,23 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void updateUserInfo(Long userId, UserUpdateDto request) {
+	public TokenInfo updateUserInfo(Long userId, UserUpdateDto request) {
 		Role role = userDao.findRoleById(userId);
 		
 		userDao.updateUser(userId, request);
 		if(role == Role.ROLE_AGENT) {
 			userDao.updateAgent(userId, request);
 		}
+		
+		UserInfoDto updateUser = userDao.findUserInfoById(userId)
+									.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		
+		TokenInfo newTokens = jwtTokenProvider.createToken(userId, updateUser.getEmail(), updateUser.getName(), updateUser.getRole().name());
+		
+		redisUtil.deleteData(REFRESH_PREFIX + updateUser.getEmail());
+		redisUtil.setDataExpire(REFRESH_PREFIX + updateUser.getEmail(), newTokens.getRefreshToken(), REFRESH_EXPIRE_TIME);
+		
+		return newTokens;
 	}
 	
 	@Override
