@@ -121,9 +121,6 @@ onMounted(() => {
       isLoggedIn.value = true;
       
       userRole.value = payload.auth; 
-      
-      
-      console.log("내 역할:", userRole.value); // 콘솔에서 확인해보세요!
     }
   }
 })
