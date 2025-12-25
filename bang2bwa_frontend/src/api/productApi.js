@@ -139,3 +139,25 @@ export const findById = async (productId) => {
         return error;
     }
 };
+
+// 찜 하기
+export const addWishList = async (productId) => {
+    try {
+        const response = await api.post(`/wishlist/products/${productId}`);
+
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+};
+
+// 찜 해제 하기
+export const removeWishList = async (productId) => {
+    try {
+        const response = await api.delete(`/wishlist/products/${productId}`);
+
+        return response.data;
+    } catch(error) {
+        return error.response.data;
+    }
+};

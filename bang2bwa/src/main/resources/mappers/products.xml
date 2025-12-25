@@ -206,7 +206,7 @@
   			p.monthly_rent,
   			p.product_id
   		FROM products p LEFT JOIN reservations r ON p.product_id = r.product_id  
-  		WHERE p.agent_id = #{agentId} AND (r.status is null OR r.status != 'QUIT')
+  		WHERE p.agent_id = #{agentId} AND (r.status is null OR (r.status NOT IN ('QUIT', 'NO_SHOW')))
   	</select>
   	
   	<select id="aiSearchProduct" parameterType="com.ssafy.bbb.model.dto.AiSearchDto">

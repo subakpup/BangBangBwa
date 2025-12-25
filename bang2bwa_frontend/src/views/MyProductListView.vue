@@ -2,9 +2,9 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyProductList, deleteProduct } from '@/api/productApi'
-import { getMyReservationProducts, rejectReservation } from '@/api/reservationApi'
-import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock } from 'lucide-vue-next'
-import { formatMoney } from '@/utils/productUtil'
+import { getMyReservationProducts, rejectReservation, getMessage } from '@/api/reservationApi'
+import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign,  Home, Edit, Trash2, Loader2, Clock, Plus } from 'lucide-vue-next'
+import { formatMoney, getProductMainImage, statusMap, typeMap, formatPrice } from '@/utils/productUtil'
 
 const router = useRouter()
 
@@ -67,6 +67,7 @@ watch(activeTab, () => {
 // 초기 로드
 onMounted(() => {
   fetchData();
+  checkPendingStatus();
 })
 
 // =========================================================
@@ -97,8 +98,10 @@ const handleDelete = async (product) => {
 // [예약 확인 탭 전용] 승인 / 거절
 // =========================================================
 
-const handleApprove = (product) => {
+const handleApprove = async (product) => {
   if (!confirm(`'${product.name}'의 방문 예약을 승인하시겠습니까?`)) return;
+
+  const message = await getMessage(product.reservationId);
 
   router.push({
     name: 'reservation-payment',
@@ -111,7 +114,7 @@ const handleApprove = (product) => {
         tradeType: product.tradeType,
         priceInfo: formatPriceSimple(product),
         reservationTime: product.visitDate,
-        message: "예약 승인 결제"
+        message: message.data
       }
     }
   });
@@ -128,20 +131,33 @@ const handleReject = async (product) => {
     alert("예약이 거절되었습니다.");
     // [절대 규칙] 예약 탭 리스트에서 해당 카드를 '제거'합니다.
     productList.value = productList.value.filter(p => p.reservationId !== product.reservationId);
+    checkPendingStatus();
   } else {
     alert(res.message || "오류 발생");
+  }
+}
+
+// [추가] 붉은 점(알림) 표시 여부 상태
+const hasPending = ref(false); 
+
+// [추가] 백그라운드에서 PENDING 상태가 있는지 확인하는 함수
+const checkPendingStatus = async () => {
+  try {
+    // 탭과 상관없이 예약 데이터를 가져와서 확인해봅니다.
+    const res = await getMyReservationProducts();
+    if (res && res.success) {
+      // 'PENDING' 상태인 항목이 하나라도 있으면 true
+      const pendingItems = res.data.filter(p => p.status === 'PENDING');
+      hasPending.value = pendingItems.length > 0;
+    }
+  } catch (e) {
+    console.error("알림 상태 확인 실패", e);
   }
 }
 
 // =========================================================
 // 유틸리티 (가격, 날짜 포맷)
 // =========================================================
-const formatPrice = (p) => {
-  if (p.tradeType === 'SALE') return `매매 ${formatMoney(p.dealAmount)}`;
-  if (p.tradeType === 'LEASE') return `전세 ${formatMoney(p.deposit)}`;
-  if (p.tradeType === 'RENT') return `월세 ${formatMoney(p.deposit)} / ${p.monthlyRent}`;
-  return '';
-}
 
 const formatPriceSimple = (p) => {
    if (p.tradeType === 'SALE') return formatMoney(p.dealAmount);
@@ -174,6 +190,14 @@ const getStatusClass = (status) => {
         <h1 class="text-2xl font-bold text-[#AE8B72] flex items-center gap-2">
           <Building2 /> 내 매물 관리
         </h1>
+
+        <div class="flex items-center gap-3">
+        <button 
+            @click="router.push({ name: 'productRegister' })"
+            class="px-5 py-2 bg-[#AE8B72] text-white rounded-lg text-sm font-bold shadow-md hover:bg-[#9C7A61] transition-all flex items-center gap-1"
+          >
+            <Plus :size="18" /> 매물 등록
+          </button>
         
         <div class="flex bg-white rounded-lg p-1 shadow-sm border border-[#CEAC93] mt-4 md:mt-0">
           <button 
@@ -189,8 +213,9 @@ const getStatusClass = (status) => {
             :class="activeTab === 'RESERVED' ? 'bg-[#AE8B72] text-white shadow' : 'text-gray-500 hover:bg-gray-50'"
           >
             예약 확인
-            <span v-if="activeTab !== 'RESERVED'" class="w-2 h-2 bg-red-500 rounded-full"></span>
+            <span v-if="activeTab !== 'RESERVED' && hasPending" class="w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+        </div>
         </div>
       </div>
 
@@ -206,15 +231,15 @@ const getStatusClass = (status) => {
           class="bg-white rounded-xl shadow-sm border border-[#E5D0C2] overflow-hidden hover:shadow-md transition-shadow group flex flex-col"
         >
           <div class="h-48 bg-gray-200 relative flex-shrink-0">
-             <img src="https://placehold.co/600x400/E5D0C2/AE8B72?text=House" class="w-full h-full object-cover"/>
+             <img :src="getProductMainImage(product)" class="w-full h-full object-cover"/>
              
              <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold border shadow-sm"
                   :class="getStatusClass(product.status)">
-               {{ product.status }}
+               {{ statusMap[product.status] || product.status }}
              </div>
              
              <div class="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded text-xs font-bold text-gray-600">
-               {{ product.houseType }}
+               {{ typeMap[product.houseType] || product.houseType }}
              </div>
           </div>
 

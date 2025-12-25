@@ -466,7 +466,13 @@ public class ReservationServiceImpl implements ReservationService {
 	
 	@Override
 	public List<MyProductDto> getMyReservationProducts(Long agentId) {
-		return reservationDao.findMyReservationProducts(agentId);
+		List<MyProductDto> list = reservationDao.findMyReservationProducts(agentId);
+		
+		for(MyProductDto dto : list) {
+			dto.setImages(productDao.findImagesByProductId(dto.getProductId()));
+		}
+  
+		return list;
 	}
 
 	@Override
@@ -522,6 +528,17 @@ public class ReservationServiceImpl implements ReservationService {
 		// 4. 알림 발송 (가해자에게 통보)
 		String offenderEmail = userDao.findEmailById(offenderId);
 		notificationService.sendEmail(offenderEmail, "[방방봐] 노쇼 처벌이 집행되었습니다.", "이의제기 시간이 경과하여 보증금이 몰수되었습니다.");
+	}
+	
+	@Override
+	public String getReservationMessage(Long reservationId, Long agentId) {
+		ReservationDto reservation = reservationDao.findById(reservationId);
+		
+		if(reservation.getAgentId() != agentId) {
+			throw new CustomException(ErrorCode.FORBIDDEN_USER);
+		}
+		
+		return reservation.getMessage();
 	}
 
 	private String connPgServerPreAuth(String orderId, Long amount, String accountToken) {

@@ -1,6 +1,7 @@
 package com.ssafy.bbb.model.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.ssafy.bbb.model.enums.HouseType;
 import com.ssafy.bbb.model.enums.ReservationStatus;
@@ -35,4 +36,12 @@ public class MyProductDto {
 	
 	private Long productId;
 	private Long reservationId;
+	
+	private List<ProductImageDto> images; // 매물 사진 리스트
+	
+	// 이미지를 설정할 setter 메서드
+	public void setImages(List<ProductImageDto> images) {
+		this.images = images;
+	}
+
 }

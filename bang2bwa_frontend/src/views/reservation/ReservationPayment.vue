@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { requestReservation, getBankList, acceptReservation } from '@/api/reservationApi'
 import { Calendar, MessageCircle, CreditCard, CheckCircle, Info } from 'lucide-vue-next'
+import { tradeTypeMapen2ko } from '@/utils/productUtil';
 
 const router = useRouter()
 
@@ -150,7 +151,7 @@ const infoMessage = computed(() => {
           />
           <div>
             <div class="text-sm font-bold text-[#AE8B72] mb-1">
-                {{ reservationData.tradeType || '부동산' }}
+                {{ tradeTypeMapen2ko[reservationData.tradeType] || '부동산' }}
             </div>
             <div class="text-gray-800 font-bold text-lg mb-1 line-clamp-1">
                 {{ reservationData.propertyTitle || '매물 정보 없음' }}

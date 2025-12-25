@@ -73,7 +73,7 @@
   			p.deposit,
   			p.monthly_rent
   		FROM reservations r JOIN products p ON r.product_id = p.product_id
-  		WHERE r.user_id = #{userId}
+  		WHERE r.user_id = #{userId} AND (r.status IN ('PENDING', 'RESERVED', 'REPORTED')) AND (r.visit_date <![CDATA[ > ]]> NOW())
   		ORDER BY visit_date DESC
 		LIMIT 1
   	</select>

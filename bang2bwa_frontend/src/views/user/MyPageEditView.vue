@@ -26,6 +26,7 @@
                     </div>
 
                     <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 w-16 whitespace-nowrap">이름</span>
                         <input type="text" 
                                v-model="form.name" 
                                class="form-input" 
@@ -44,11 +45,12 @@
                     </div>
 
                     <div class="input-row border-b-0">
+                        <span class="text-[#CEAC93] text-sm mr-4 w-16 whitespace-nowrap">전화번호</span>
                         <input type="tel" 
                                v-model="form.phone" 
                                class="form-input" 
-                               placeholder="휴대전화번호 (- 없이 입력)" 
-                               @input="errors.phone = false"
+                               placeholder="(- 없이 입력)" 
+                               @input=handlePhoneInput
                                required />
                     </div>
                 </div>
@@ -69,6 +71,7 @@
                     </h3>
                     <div class="input-group">
                         <div class="input-row">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">대표자명</span>
                             <input type="text" 
                                    v-model="form.ceoName" 
                                    class="form-input" 
@@ -76,6 +79,7 @@
                                    @input="errors.agent = false">
                         </div>
                         <div class="input-row">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">사무소명</span>
                             <input type="text" 
                                    v-model="form.realtorAgency" 
                                    class="form-input" 
@@ -83,6 +87,7 @@
                                    @input="errors.agent = false">
                         </div>
                         <div class="input-row border-b-0">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">사업자 번호</span>
                             <input type="text" 
                                    v-model="form.businessNumber" 
                                    class="form-input" 
@@ -222,4 +227,17 @@ const handleUpdate = async () => {
         alert('서버 오류가 발생했습니다.');
     }
 };
+
+const handlePhoneInput = (e) => {
+  // 1. 입력된 값에서 숫자가 아닌 것은 모두 제거
+  const value = e.target.value.replace(/[^0-9]/g, '');
+  
+  // 2. form 데이터 업데이트
+  form.value.phone = value;
+  
+  // 3. 에러 메시지 초기화 (기존 로직)
+  if (errors.value) {
+      errors.value.phone = false;
+  }
+}
 </script>

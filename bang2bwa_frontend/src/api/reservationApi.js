@@ -133,3 +133,15 @@ export const rejectReservation = async (reservationId, reason) => {
         return error.response || error;
     }
 };
+
+
+
+export const getMessage = async (reservationId) => {
+    try {
+        const response = await api.get(`/reservations/${reservationId}/message`);
+
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+}

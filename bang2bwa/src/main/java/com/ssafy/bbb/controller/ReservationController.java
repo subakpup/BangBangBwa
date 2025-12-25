@@ -128,4 +128,12 @@ public class ReservationController implements ReservationControllerDocs {
 		
 		return ApiResponse.success(myReservationProductList);
 	}
+	
+	@GetMapping("/{reservationId}/message")
+	public ApiResponse<String> getReservationMessage(@PathVariable Long reservationId
+													, @AuthenticationPrincipal CustomUserDetails agent) {
+		String message = reservationService.getReservationMessage(reservationId, agent.getUserId());
+		
+		return ApiResponse.success(message);
+	}
 }

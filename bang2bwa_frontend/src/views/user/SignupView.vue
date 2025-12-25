@@ -7,6 +7,7 @@
                 
                 <div class="input-group">
                     <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">이메일(아이디)</span>
                         <input type="email" 
                                v-model="form.email" 
                                class="form-input" 
@@ -17,6 +18,7 @@
                     </div>
                     
                     <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">비밀번호</span>
                         <input type="password" 
                                v-model="form.password" 
                                class="form-input" 
@@ -25,6 +27,7 @@
                                required />
                     </div>
                     <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">비밀번호 확인</span>
                         <input type="password" 
                                v-model="form.passwordConfirm" 
                                class="form-input" 
@@ -51,6 +54,7 @@
 
                 <div class="input-group mg-top">
                     <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">이름</span>
                         <input type="text" 
                                v-model="form.name" 
                                class="form-input" 
@@ -59,7 +63,7 @@
                                required />
                     </div>
                     <div class="input-row">
-                         <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">생년월일</span>
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">생년월일</span>
                         <input type="date" 
                                v-model="form.birth" 
                                class="form-input date-input" 
@@ -76,11 +80,12 @@
 
                 <div class="input-group mg-top">
                       <div class="input-row">
+                        <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">전화번호</span>
                         <input type="tel" 
                                v-model="form.phone" 
                                class="form-input" 
                                placeholder="휴대전화번호 (- 없이 입력)" 
-                               @input="errors.phone = false"
+                               @input="handlePhoneInput"
                                required />
                     </div>
                 </div>
@@ -103,12 +108,15 @@
                     <h3 class="text-[#AE8B72] text-base mb-2 pl-1">중개사 정보 입력</h3>
                     <div class="input-group">
                         <div class="input-row">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">대표자명</span>
                             <input type="text" v-model="form.ceoName" class="form-input" placeholder="대표자명" @input="errors.agent = false">
                         </div>
                         <div class="input-row">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">사무소명</span>
                             <input type="text" v-model="form.realtorAgency" class="form-input" placeholder="부동산 상호명" @input="errors.agent = false">
                         </div>
                         <div class="input-row">
+                            <span class="text-[#CEAC93] text-sm mr-4 whitespace-nowrap">등록번호</span>
                             <input type="text" v-model="form.businessNumber" class="form-input" placeholder="사업자 등록번호" @input="errors.agent = false">
                         </div>
                     </div>
@@ -316,6 +324,19 @@ const processSignup = async () => {
         console.error(error);
     }
 };
+
+const handlePhoneInput = (e) => {
+  // 1. 입력된 값에서 숫자가 아닌 것은 모두 제거
+  const value = e.target.value.replace(/[^0-9]/g, '');
+  
+  // 2. form 데이터 업데이트
+  form.value.phone = value;
+  
+  // 3. 에러 메시지 초기화 (기존 로직)
+  if (errors.value) {
+      errors.value.phone = false;
+  }
+}
 
 // === Main Handler ===
 // 버튼 클릭 시 현재 단계에 맞는 함수를 호출 (Dispatcher 패턴)

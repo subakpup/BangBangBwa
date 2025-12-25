@@ -31,4 +31,6 @@ public interface ReservationService {
 	public ReservationResponseDto getReservationDetail(Long reservationId, Long userId);
 	
 	public List<MyProductDto> getMyReservationProducts(Long agentId);
+	
+	public String getReservationMessage(Long reservationId, Long agentId);
 }

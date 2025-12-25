@@ -117,12 +117,12 @@
         </div>
 
         <div class="detail-footer">
-            <button class="btn-like">
+            <button class="btn-like" @click="addWish">
                 <Heart class="w-5 h-5 fill-[#AE8B72] text-[#AE8B72]" /> 찜하기
             </button>
-            <button class="btn-contact">
-                <Phone class="w-5 h-5" /> 문의하기
-            </button>
+            <RouterLink :to="{name: 'reservation-request', params: { propertyId: product.productId}}" class="btn-contact">
+                <CalendarCheck class="w-5 h-5" /> 예약하기
+            </RouterLink>
         </div>
 
         <div v-if="isGalleryOpen" class="gallery-overlay" @click.self="closeGallery">
@@ -152,13 +152,13 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import {
     ArrowLeft, MapPin, Building, Ruler, Calendar, Phone, Heart, UserCircle2, Info,
-    Images, X, ChevronLeft, ChevronRight
+    Images, X, ChevronLeft, ChevronRight, CalendarCheck
 } from 'lucide-vue-next';
 
 // [수정] 유틸 함수들 import
 import { formatPrice, typeMap, getProductMainImage, formatAddress } from '@/utils/productUtil';
 import { api } from '@/api/index';
-import { findById } from '@/api/productApi';
+import { findById, addWishList, removeWishList } from '@/api/productApi';
 
 // [중요] 기본 이미지 import (assets 폴더에 해당 파일이 있어야 합니다!)
 import defaultImg from '@/assets/no-image.jpg';
@@ -255,6 +255,13 @@ const formatFloor = (p) => {
     if (p.aptDong) text = `${p.aptDong} / ${text}`;
     return text;
 };
+
+const addWish = async () => {
+    let response = await addWishList(props.item.productId);
+    
+    alert(response.message);
+};
+
 </script>
 
 <style scoped>

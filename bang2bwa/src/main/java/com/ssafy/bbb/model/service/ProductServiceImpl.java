@@ -227,7 +227,12 @@ public class ProductServiceImpl implements ProductService {
   
   @Override
 	public List<MyProductDto> findProductList(Long agentId) {
-		return productDao.findMyProductList(agentId);
+	  List<MyProductDto> list = productDao.findMyProductList(agentId);
+	  for(MyProductDto dto : list) {
+		  dto.setImages(productDao.findImagesByProductId(dto.getProductId()));
+	  }
+	  
+	  return list;
 	}
 
 }

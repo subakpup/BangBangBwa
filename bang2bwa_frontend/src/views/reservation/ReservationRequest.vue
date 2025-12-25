@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getProductDetail } from '@/api/productApi'
 import { Calendar, Clock, MessageCircle, MapPin, Building } from 'lucide-vue-next'
+import { formatPrice, typeMap, tradeTypeMapen2ko, getProductMainImage, formatAddress } from '@/utils/productUtil';
 
 const route = useRoute()
 const router = useRouter()
@@ -17,6 +18,20 @@ const form = ref({
   time: '',   
   message: '' 
 })
+
+// 1. 오늘 날짜와 최대 날짜를 저장할 변수
+const minDate = ref('');
+const maxDate = ref('');
+
+// 2. 날짜를 'YYYY-MM-DD' 형식으로 변환하는 헬퍼 함수
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  // 월은 0부터 시작하므로 +1, 10보다 작으면 앞에 '0' 붙이기
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
 
 // [초기화] 매물 정보 불러오기
 onMounted(async () => {
@@ -33,46 +48,19 @@ onMounted(async () => {
     }
 
     property.value = data;
+
+    const today = new Date();
+    const twoWeeksLater = new Date();
+    twoWeeksLater.setDate(today.getDate() + 14);
+
+    minDate.value = formatDate(today);
+    maxDate.value = formatDate(twoWeeksLater);
   } else {
     alert("매물 정보를 불러올 수 없습니다.");
     router.back();
   }
   loading.value = false;
 })
-
-// [유틸] 거래 종류에 따른 가격 텍스트 변환
-const priceText = computed(() => {
-  const p = property.value;
-  if (!p.tradeType) return '';
-
-  switch (p.tradeType) {
-    case 'WALSE': // 월세
-      return `보증금 ${p.deposit} / 월세 ${p.monthlyRent}`;
-    case 'JEONSE': // 전세
-      return `전세 ${p.deposit}`;
-    case 'DEAL': // 매매
-      return `매매 ${p.dealAmount}`;
-    default:
-      return '';
-  }
-})
-
-// [유틸] 매물 종류 한글 변환 (Enum -> 한글)
-const houseTypeMap = {
-  'APT': '아파트',
-  'ONE_ROOM': '원룸',
-  'TWO_ROOM': '투룸',
-  'OFFICETEL': '오피스텔'
-};
-
-// [유틸] 이미지 URL 처리 (없으면 placeholder)
-const getImageUrl = (images) => {
-  if (images && images.length > 0) {
-    // ProductImageDto에 saveFile이나 url 필드가 있다고 가정
-    return images[0].saveFile || images[0].url; 
-  }
-  return 'https://placehold.co/150x150/E5D0C2/AE8B72?text=No+Image';
-}
 
 // 결제 페이지로 이동
 const goToPayment = () => {
@@ -98,9 +86,9 @@ const goToPayment = () => {
         // [화면 표시용 데이터]
         propertyTitle: property.value.name || property.value.jibun, // 건물명 혹은 지번
         tradeType: property.value.tradeType,
-        priceInfo: priceText.value,
+        priceInfo: formatPrice(property.value),
         deposit: property.value.deposit || 0, // 예약금 계산용 (필요시)
-        image: getImageUrl(property.value.images)
+        image: getProductMainImage(property.value),
       }
     }
   });
@@ -111,11 +99,11 @@ const goToPayment = () => {
   <div class="app-main bg-[#FFFBE8] min-h-screen py-10">
     <div class="w-full max-w-xl mx-auto px-4" v-if="!loading">
       
-      <h1 class="text-2xl font-bold text-[#AE8B72] mb-6 text-center">방 방문 예약하기</h1>
+      <h1 class="text-2xl font-bold text-[#AE8B72] mb-6 text-center">방문 예약하기</h1>
 
       <div class="bg-white rounded-lg shadow-sm border border-[#CEAC93] p-5 mb-6 flex gap-4 items-center">
         <img 
-          :src="getImageUrl(property.images)" 
+          :src="getProductMainImage(property)" 
           alt="매물 이미지" 
           class="w-28 h-28 object-cover rounded bg-gray-100 flex-shrink-0 border border-gray-100"
         >
@@ -123,17 +111,17 @@ const goToPayment = () => {
         <div class="flex flex-col justify-center flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-1">
             <span class="text-xs font-bold bg-[#AE8B72] text-white px-2 py-0.5 rounded">
-              {{ houseTypeMap[property.houseType] || property.houseType }}
+              {{ typeMap[property.houseType] || property.houseType }}
             </span>
             <span class="text-xs font-bold border border-[#AE8B72] text-[#AE8B72] px-2 py-0.5 rounded">
-              {{ property.tradeType }}
+              {{ tradeTypeMapen2ko[property.tradeType] || property.tradeType }}
             </span>
           </div>
 
           <h3 class="font-bold text-gray-800 text-lg truncate">
             {{ property.name || property.jibun }} 
             <span v-if="property.aptDong" class="text-sm font-normal text-gray-500 ml-1">
-              {{ property.aptDong }}동 {{ property.floor }}층
+              {{ property.aptDong }} {{ property.floor }}
             </span>
           </h3>
           
@@ -142,7 +130,7 @@ const goToPayment = () => {
           </div>
 
           <div class="text-[#AE8B72] font-bold text-lg">
-            {{ priceText }} <span class="text-sm font-normal text-gray-500">만원</span>
+              {{ formatPrice(property) }}
           </div>
         </div>
       </div>
@@ -157,6 +145,8 @@ const goToPayment = () => {
             <input 
               type="date" 
               v-model="form.date"
+              :min="minDate"
+              :max="maxDate"
               class="flex-1 input-base px-4 py-3 cursor-pointer"
               required
             />
