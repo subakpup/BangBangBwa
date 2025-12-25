@@ -60,7 +60,7 @@
     </div>
 
     <div ref="observerTarget" class="py-6 flex justify-center items-center w-full">
-      <div v-if="loading" class="flex items-center gap-2 text-violet-600 text-sm font-medium">
+      <div v-if="loading" class="flex items-center gap-2 text-[#ae8b72] text-sm font-medium">
         <Loader2 class="w-5 h-5 animate-spin" />
         <span>매물 불러오는 중...</span>
       </div>
