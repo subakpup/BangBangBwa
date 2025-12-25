@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { getUserInfo, withdrawUser } from '@/api/myPageApi'
 import { useRouter } from 'vue-router'
-import { statusMap } from '@/utils/productUtil'
+import { statusMap, tradeTypeMapen2ko, formatPrice } from '@/utils/productUtil'
 import { User } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -20,12 +20,25 @@ const userInfo = ref({
   reservation: null 
 })
 
+const reservationItem = ref({
+  "tradeType" : null,
+  "dealAmount": null,
+  "deposit": null,
+  "montlyRent": null,
+});
+
 onMounted(async () => {
   const response = await getUserInfo();
   if (response && response.data) { 
     const data = response.data;
     userInfo.value = data; 
     if (!userInfo.value.role) userInfo.value.role = 'ROLE_USER';
+
+    reservationItem.value.tradeType = userInfo.value.reservation.type;
+    reservationItem.value.dealAmount = userInfo.value.reservation.dealAmount;
+    reservationItem.value.deposit = userInfo.value.reservation.deposit;
+    reservationItem.value.montlyRent = userInfo.value.reservation.monthlyRent;
+
   }
 })
 
@@ -35,11 +48,6 @@ const roleName = computed(() => {
   if (r === 'ROLE_ADMIN') return '관리자';
   return '일반 회원';
 })
-
-const formatPrice = (price) => {
-  if (!price) return '0';
-  return price.toLocaleString();
-}
 
 const handleWithdraw = async () => {
   if(!confirm("정말로 탈퇴하시겠습니까?")) return;
@@ -141,7 +149,7 @@ const handleWithdraw = async () => {
           <div>
             <p class="reservation-sub-title">예약 매물</p>
             <p class="font-bold text-gray-800">{{ userInfo.reservation.name }}</p>
-            <p class="text-sm text-gray-500">{{ userInfo.reservation.address }} {{ userInfo.reservation.floor }}층</p>
+            <p class="text-sm text-gray-500">{{ userInfo.reservation.address }} {{ userInfo.reservation.floor }}</p>
           </div>
 
           <div class="flex gap-4">
@@ -154,21 +162,13 @@ const handleWithdraw = async () => {
             <div class="reservation-time-box">
               <p class="reservation-sub-title">거래 유형</p>
               <p class="text-sm font-bold text-[#AE8B72]">
-                {{ userInfo.reservation.type }}
+                {{ tradeTypeMapen2ko[userInfo.reservation.type] || userInfo.reservation.type }}
               </p>
             </div>
           </div>
 
           <div class="reservation-price-box">
-            <span v-if="userInfo.reservation.dealAmount > 0" class="mr-3">
-              매매 <b class="text-[#AE8B72]">{{ formatPrice(userInfo.reservation.dealAmount) }}</b>만원
-            </span>
-            <span v-if="userInfo.reservation.deposit > 0" class="mr-3">
-              보증금 <b class="text-[#AE8B72]">{{ formatPrice(userInfo.reservation.deposit) }}</b>만원
-            </span>
-            <span v-if="userInfo.reservation.monthlyRent > 0">
-              월세 <b class="text-[#AE8B72]">{{ formatPrice(userInfo.reservation.monthlyRent) }}</b>만원
-            </span>
+            <b class="text-[#AE8B72]">{{ formatPrice(reservationItem) }}</b> 만원
           </div>
 
           <div v-if="userInfo.reservation.description" class="reservation-desc-box">
