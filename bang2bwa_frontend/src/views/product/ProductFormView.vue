@@ -131,7 +131,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">층수</label>
-                            <input type="text" v-model="product.floor" placeholder="예: 5" class="regist-input" />
+                            <input type="text" v-model="product.floor" placeholder="예: 5층" class="regist-input" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">건축년도</label>
@@ -186,17 +186,6 @@
                         <p class="text-xs text-[#AE8B72] mt-1 font-bold" v-if="selectedFiles.length > 0">
                             현재 {{ selectedFiles.length }}개의 새 파일 선택됨
                         </p>
-                    </div>
-
-                    <div v-if="product.images && product.images.length > 0" class="preview-grid">
-                        <div v-for="(img, index) in product.images" :key="img.imageId || index"
-                            class="preview-item group">
-                            <img :src="img.url" alt="매물 사진" class="preview-img" />
-                            <button type="button" class="btn-img-delete"
-                                @click="removeExistingImage(img.imageId, index)">
-                                ✕
-                            </button>
-                        </div>
                     </div>
                 </section>
 
@@ -314,7 +303,7 @@ const submitForm = async () => {
 
         if (response && response.message) alert(response.message);
 
-        router.push({ name: 'productManage' });
+        router.push({ name: 'my-product-list' });
     } catch (error) {
         const errorMsg = error.response?.data?.message || '처리 중 오류가 발생했습니다.';
         alert(errorMsg);

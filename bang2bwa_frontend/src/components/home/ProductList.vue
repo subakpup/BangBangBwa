@@ -1,5 +1,5 @@
 <template>
-  <div class="list-container h-full overflow-y-auto custom-scrollbar p-2">
+  <div class="list-container h-full overflow-y-auto p-2" ref="listContainerRef">
     
     <div v-if="items && items.length > 0" class="space-y-4">
       <div 
@@ -60,7 +60,7 @@
     </div>
 
     <div ref="observerTarget" class="py-6 flex justify-center items-center w-full">
-      <div v-if="loading" class="flex items-center gap-2 text-violet-600 text-sm font-medium">
+      <div v-if="loading" class="flex items-center gap-2 text-[#ae8b72] text-sm font-medium">
         <Loader2 class="w-5 h-5 animate-spin" />
         <span>매물 불러오는 중...</span>
       </div>
@@ -95,6 +95,8 @@ const props = defineProps({
 const emit = defineEmits(['item-click', 'load-more']);
 
 const observerTarget = ref(null);
+const listContainerRef = ref(null);
+
 let observer = null;
 
 const startObservation = () => {
@@ -115,6 +117,12 @@ const startObservation = () => {
   }
 };
 
+const scrollToTop = () => {
+  if (listContainerRef.value) {
+    listContainerRef.value.scrollTop = 0;
+  }
+}
+
 onMounted(() => {
   startObservation();
 });
@@ -127,6 +135,10 @@ onUnmounted(() => {
 watch(() => props.items, () => {
     // DOM 업데이트 후 옵저버가 타겟을 놓칠 수 있으므로 재설정
     setTimeout(startObservation, 100);
+});
+
+defineExpose({
+  scrollToTop
 });
 </script>
 

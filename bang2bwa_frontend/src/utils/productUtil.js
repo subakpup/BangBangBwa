@@ -86,7 +86,7 @@ export const formatAddress = (item) => {
 
 export const infraCategories = [
     { name: '지하철', code: 'SW8', type: 'category', icon: TrainFront },
-    { name: '버스', keyword: '버스정류장', type: 'keyword', icon: Bus },
+    { name: '버스', keyword: 'BS1', type: 'keyword', icon: Bus },
     { name: '편의점', code: 'CS2', type: 'category', icon: Store },
     { name: '학교', code: 'SC4', type: 'category', icon: School },
     { name: '대형마트', code: 'MT1', type: 'category', icon: ShoppingCart },

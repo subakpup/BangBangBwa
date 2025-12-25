@@ -6,17 +6,17 @@
         <form @submit.prevent="handleSubmit">
             <div class="flex flex-col gap-4 mb-4">
                 <div class="flex gap-2">
-                    <select v-model="form.sidoNm" @change="handleSidoChange" class="region-select w-1/2">
+                    <select v-model="form.sidoNm" @change="handleSidoChange" class="region-select w-1/2" required>
                         <option value="" disabled>시/도 선택</option>
-                        <option v-for="r in regionOptions" :key="r.sido" :value="r.sido">
-                            {{ r.sido }}
+                        <option v-for="sido in sidoList" :key="sido.sidoCode" :value="sido.sidoName">
+                            {{ sido.sidoName }}
                         </option>
                     </select>
                     
-                    <select v-model="form.sggNm" class="region-select w-1/2" :disabled="!form.sidoNm">
+                    <select v-model="form.sggNm" class="region-select w-1/2" :disabled="!form.sidoNm" required>
                         <option value="" disabled>구/군 선택</option>
-                        <option v-for="sgg in filteredSggOptions" :key="sgg" :value="sgg">
-                            {{ sgg }}
+                        <option v-for="sgg in sggList" :key="sgg.gugunCode" :value="sgg.gugunName">
+                            {{ sgg.gugunName }}
                         </option>
                     </select>
                 </div>
@@ -51,9 +51,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { writePost, getPostDetail, modifyPost } from '@/api/boardApi'
+import { getSidoList, getSggList } from '@/api/addressApi' // 주소 API 추가
 
 const router = useRouter()
 const route = useRoute()
@@ -61,14 +62,11 @@ const route = useRoute()
 const isEditMode = ref(false)
 const postId = route.params.id
 
-// 지역 데이터 (List와 동일하게 사용)
-const regionOptions = [
-  { sido: '서울특별시', sgg: ['강남구', '서초구', '송파구'] },
-  { sido: '광주광역시', sgg: ['광산구', '동구', '서구', '남구', '북구'] },
-  { sido: '전라남도', sgg: ['나주시', '목포시', '여수시'] }
-]
+// === [상태 관리] ===
+const sidoList = ref([]) // 시도 목록
+const sggList = ref([])  // 구군 목록
 
-// 폼 데이터 (PostRequestDto 매핑)
+// 폼 데이터
 const form = ref({
   sidoNm: '',
   sggNm: '',
@@ -76,35 +74,75 @@ const form = ref({
   content: ''
 })
 
-// 구/군 옵션 계산
-const filteredSggOptions = computed(() => {
-  const selected = regionOptions.find(r => r.sido === form.value.sidoNm);
-  return selected ? selected.sgg : [];
-})
+// === [로직] ===
 
-// 시/도 변경 시 구/군 초기화 (단, 수정 모드에서 데이터 로딩 중일 땐 초기화 방지 로직 필요할 수 있음)
-// 여기선 간단하게 사용자가 직접 바꿀 때만 초기화되도록 watch 대신 @change 이벤트 사용 권장
-const handleSidoChange = () => {
-  form.value.sggNm = '';
+// 1. 시/도 목록 불러오기
+const fetchSidoList = async () => {
+    try {
+        sidoList.value = await getSidoList();
+    } catch (error) {
+        console.error("시도 로드 실패:", error);
+    }
 }
 
+// 2. 시/도 변경 시 구/군 목록 갱신 핸들러 (사용자가 직접 변경 시)
+const handleSidoChange = async () => {
+  // 구/군 선택 초기화
+  form.value.sggNm = '';
+  sggList.value = [];
+  
+  await loadSggData(form.value.sidoNm);
+}
+
+// 3. 구/군 데이터 로딩 헬퍼 함수
+const loadSggData = async (sidoName) => {
+    if (!sidoName) return;
+
+    // 이름으로 코드 찾기
+    const selectedSido = sidoList.value.find(s => s.sidoName === sidoName);
+    if (selectedSido) {
+        try {
+            sggList.value = await getSggList(selectedSido.sidoCode);
+        } catch (error) {
+            console.error("구군 로드 실패:", error);
+        }
+    }
+}
+
+// === [라이프사이클] ===
 onMounted(async () => {
-  // 수정 모드 진입 시 데이터 채우기
+  // 1. 먼저 시도 목록을 불러옵니다.
+  await fetchSidoList();
+
+  // 2. 수정 모드라면 상세 데이터를 불러옵니다.
   if (postId) {
     isEditMode.value = true;
-    const res = await getPostDetail(postId);
-    if (res && res.data) {
-      const data = res.data;
-      form.value = {
-        sidoNm: data.sidoNm,
-        sggNm: data.sggNm,
-        title: data.title,
-        content: data.content
-      }
+    try {
+        const res = await getPostDetail(postId);
+        if (res && res.data) {
+            const data = res.data;
+            
+            // 3. 기존 데이터의 시도에 맞는 구군 목록을 먼저 로드합니다.
+            // (이 과정이 없으면 구군 드롭다운이 비어있게 됩니다)
+            await loadSggData(data.sidoNm);
+
+            // 4. 폼 데이터 채우기
+            form.value = {
+                sidoNm: data.sidoNm,
+                sggNm: data.sggNm,
+                title: data.title,
+                content: data.content
+            }
+        }
+    } catch (error) {
+        console.error("게시글 로드 실패:", error);
+        alert("게시글 정보를 불러오는데 실패했습니다.");
+        router.back();
     }
   }
 })
 
+// === [제출 핸들러] ===
 const handleSubmit = async () => {
   // 유효성 검사
   if (!form.value.sidoNm || !form.value.sggNm) {
@@ -116,20 +154,24 @@ const handleSubmit = async () => {
     return;
   }
 
-  let res;
-  if (isEditMode.value) {
-    // 수정 API
-    res = await modifyPost(postId, form.value);
-  } else {
-    // 작성 API
-    res = await writePost(form.value);
-  }
+  try {
+      let res;
+      if (isEditMode.value) {
+        // 수정 API
+        res = await modifyPost(postId, form.value);
+      } else {
+        // 작성 API
+        res = await writePost(form.value);
+      }
 
-  if (res && (res.status === 200 || res.success)) {
-    alert(isEditMode.value ? "수정되었습니다." : "등록되었습니다.");
-    router.push('/board');
-  } else {
-    alert("오류가 발생했습니다.");
+      // 성공 체크 (백엔드 응답 구조에 따라 조정)
+      if (res) {
+        alert(isEditMode.value ? "수정되었습니다." : "등록되었습니다.");
+        router.push('/board');
+      }
+  } catch (error) {
+      console.error(error);
+      alert("오류가 발생했습니다.");
   }
 }
 </script>

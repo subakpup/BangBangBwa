@@ -5,18 +5,35 @@
 
     <div class="content-wrapper">
 
-      <aside class="sidebar custom-scrollbar">
-        <div v-if="!selectProperty" class="flex flex-col h-full w-full">
+      <aside class="sidebar">
+        
+        <div v-if="selectProperty" class="h-full w-full">
+          <ProductDetail 
+            :key="selectProperty.productId"
+            :item="selectProperty" 
+            @close="closeDetail" 
+          />
+        </div>
+
+        <div v-else class="flex flex-col h-full w-full">
           
-          <div class="sidebar-header">
+          <div class="sidebar-header" v-if="isSearchMode">
             <h2 class="sidebar-title">
               <span>{{ currentType }}</span>
               <span class="sidebar-count">({{ productList.length }}개)</span>
             </h2>
           </div>
 
-          <div class="list-wrapper">
+          <div class="list-wrapper" ref="sidebarRef">
+            
+            <MainHome
+              v-if="!isSearchMode"
+              @open-ai="handleOpenAi"
+            />
+
             <ProductList 
+              ref="productListRef"
+              v-else
               :items="productList" 
               :loading="loading"
               :is-last-page="isLastPage"
@@ -24,13 +41,6 @@
               @load-more="handleLoadMore"
             />
           </div>
-        </div>
-
-        <div v-else class="h-full w-full">
-          <ProductDetail 
-            :item="selectProperty" 
-            @close="closeDetail" 
-          />
         </div>
       </aside>
 
@@ -40,11 +50,11 @@
           :items="productList" 
           @marker-click="handleItemClick"
           @bounds-changed="handleMapBoundsChanged"
+          @reset-selection="selectProperty = null"
         />
       </div>
 
-    </div>
-
+    </div> 
     <Teleport to="body">
       <AiModal
         :show="showAiModal" 
@@ -52,11 +62,12 @@
         @search="handleAiSearchResult" 
       />
     </Teleport>
+
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue';
+import { ref, watch, onMounted, nextTick, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { searchProducts } from '@/api/productApi';              
@@ -65,7 +76,8 @@ import KakaoMap from '@/components/map/KakaoMap.vue';
 import FilterBar from '@/components/home/FilterBar.vue';          
 import AiModal from '@/components/modal/AiModal.vue';             
 import ProductList from '@/components/home/ProductList.vue';      
-import ProductDetail from '@/components/home/ProductDetail.vue';  
+import ProductDetail from '@/components/home/ProductDetail.vue';
+import MainHome from '@/components/home/MainHome.vue';
 
 const route = useRoute();        
 const currentType = ref('');      
@@ -74,14 +86,16 @@ const showAiModal = ref(false);
 const filterBar = ref(null);      
 const selectProperty = ref(null); 
 const kakaoMapRef = ref(null);
-
-// 무한 스크롤 및 검색 상태 관리
+const productListRef = ref(null);
 const loading = ref(false);
 const isLastPage = ref(false);
-
 const isMovingToTarget = ref(false);
+const isAiMode = ref(false);
 
-// 현재 검색 조건을 저장하는 객체
+const isSearchMode = computed(() => {
+  return Object.keys(route.query).length > 0;
+})
+
 const currentSearchParams = ref({
   keyword: '',
   houseType: '',
@@ -94,24 +108,17 @@ const currentSearchParams = ref({
   limit: 20
 });
 
-/**
- * 통합 검색 함수
- * @param {Object} filterData - 필터바에서 넘어온 데이터
- * @param {Boolean} isReset - 리스트 초기화 여부 (true: 새로 검색, false: 더보기)
- */
 const executeSearch = async (filterData = {}, isReset = true) => {
   if (loading.value || (!isReset && isLastPage.value)) return;
 
   loading.value = true;
 
   try {
-    // 1. 검색 조건 업데이트
     if (filterData) {
       if (filterData.keyword !== undefined) currentSearchParams.value.keyword = filterData.keyword;
       if (filterData.excluUseAr !== undefined) currentSearchParams.value.excluUseAr = filterData.excluUseAr;
       if (filterData.floor !== undefined) currentSearchParams.value.floor = filterData.floor;
       
-      // 라우트 쿼리 or 필터값 적용
       const houseType = route.query.type || '';
       const tradeType = tradeTypeMap[filterData.tradeType] || '전체';
       
@@ -119,14 +126,11 @@ const executeSearch = async (filterData = {}, isReset = true) => {
       currentSearchParams.value.tradeType = tradeType;
     }
 
-    // 2. 리셋이면 페이지 1로 초기화
     if (isReset) {
       currentSearchParams.value.page = 1;
       isLastPage.value = false;
-      // productList.value = []; // 깜빡임 방지
     }
 
-    // 3. API 호출
     const response = await searchProducts(currentSearchParams.value);
 
     if (response.success === 'SUCCESS') {
@@ -137,13 +141,12 @@ const executeSearch = async (filterData = {}, isReset = true) => {
       }
 
       if (isReset) {
-        productList.value = newItems; // 교체
-        updateTitle(filterData);      // 타이틀 업데이트
+        productList.value = newItems; 
+        updateTitle(filterData);      
       } else {
-        productList.value = [...productList.value, ...newItems]; // 추가
+        productList.value = [...productList.value, ...newItems]; 
       }
 
-      // 다음 페이지 준비
       currentSearchParams.value.page++;
 
     } else {
@@ -156,37 +159,34 @@ const executeSearch = async (filterData = {}, isReset = true) => {
   }
 };
 
-// 타이틀 업데이트 로직 분리
 const updateTitle = (filterData) => {
   if (filterData && filterData.keyword) {
     currentType.value = `'${filterData.keyword}' 검색 결과`;
   } else {
-    const typeKey = route.query.type || 'APART';
-    currentType.value = typeMap[typeKey];
+    const typeKey = route.query.type || '';
+    currentType.value = typeMap[typeKey] || '검색 결과';
   }
 };
 
-// ====================================================
-// 핸들러 함수
-// ====================================================
-
-// 1. 필터 바 변경 감지 -> 재검색 (Reset)
 const handleFilterChange = (filterData) => {
+  isAiMode.value = false;
   executeSearch(filterData, true);
 };
 
-// 2. 무한 스크롤 요청 -> 이어보기 (No Reset)
 const handleLoadMore = () => {
-  console.log("스크롤 바닥 감지! 더 불러옵니다...");
-  executeSearch(null, false); // 기존 조건 유지, 페이지만 증가
+  executeSearch(null, false); 
 };
 
-// 3. 지도 영역 변경 감지 -> 재검색 (Reset)
 const handleMapBoundsChanged = (bounds) => {
-  
+  if (!isSearchMode.value) return;
+
   if (isMovingToTarget.value) {
-    isMovingToTarget.value = false; // 다음 이동을 위해 플래그 초기화
+    isMovingToTarget.value = false; 
     return;
+  }
+
+  if (productListRef.value) {
+    productListRef.value.scrollToTop();
   }
 
   currentSearchParams.value.minLat = bounds.minLat;
@@ -194,21 +194,24 @@ const handleMapBoundsChanged = (bounds) => {
   currentSearchParams.value.minLng = bounds.minLng;
   currentSearchParams.value.maxLng = bounds.maxLng;
 
+  if (isAiMode.value) {
+    return;
+  }
+
   executeSearch(null, true);
 };
 
-// 4. AI 모달 요청
 const handleOpenAi = () => {
   showAiModal.value = true;
 };
 
-// 5. AI 분석 결과 처리
 const handleAiSearchResult = async (aiResultList) => {
   showAiModal.value = false;
+  isAiMode.value = true;
   productList.value = aiResultList;
   currentType.value = `AI 맞춤 추천 결과`;
   selectProperty.value = null;
-  isLastPage.value = true; // AI 결과는 페이징 안 함
+  isLastPage.value = true; 
 
   await nextTick();
 
@@ -218,7 +221,6 @@ const handleAiSearchResult = async (aiResultList) => {
   }
 };
 
-// 6. 매물 클릭
 const handleItemClick = (item) => {
   selectProperty.value = item;
   if (kakaoMapRef.value) {
@@ -227,7 +229,6 @@ const handleItemClick = (item) => {
   }
 };
 
-// 7. 상세 페이지 닫기
 const closeDetail = () => {
   selectProperty.value = null;
   if (kakaoMapRef.value) {
@@ -235,7 +236,6 @@ const closeDetail = () => {
   }
 };
 
-// URL 변경 감지
 watch(
   () => route.query.type,
   (newType) => {
@@ -243,13 +243,64 @@ watch(
       filterBar.value.resetFilter();
     }
     selectProperty.value = null;
-    // 타입 변경 시에도 필터 초기화 후 검색 실행
     handleFilterChange({ houseType: newType });
   }
 );
 
-// 초기 진입 시
 onMounted(() => {
-  handleFilterChange({});
+  if (isSearchMode.value) {
+    handleFilterChange({});
+  }
 });
 </script>
+
+<style scoped>
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 400px;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.sidebar-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: white;
+}
+
+.sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-count {
+  font-size: 0.875rem;
+  color: #ae8b72;
+  font-weight: 600;
+}
+
+.map-container {
+  flex: 1;
+  position: relative;
+  background-color: #f3f4f6;
+}
+</style>

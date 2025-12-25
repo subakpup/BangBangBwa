@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +84,7 @@ public class AiService {
                 1. 매물 리스트를 분석하여 고객의 '선호 옵션'에 가장 부합하는 상위 5개를 선정해.
                 2. 상세설명(Description)이나 위치 정보를 보고 인프라가 언급된 곳을 찾아서 가산점을 줘.
                 3. 결과는 반드시 JSON 리스트 포맷으로, 필드는 'productId', 'reason'만 포함해.
-                4. 'reason'은 해당 매물을 추천한 구체적인 이유를 한 문장으로 작성해.
+                4. 'reason'은 해당 매물을 추천한 **구체적인 이유**를 성의있게 한 문장으로 작성해.
                 5. 모든 인프라는 500m 이내에 존재해야해.
                 """,
                 request.getLocation(),
@@ -93,6 +94,9 @@ public class AiService {
         // 5. AI 호출
         List<AiRecommendDto> aiResults = chatClient.prompt()
                                             .user(prompt)
+                                            .options(OpenAiChatOptions.builder()
+                                                    .temperature(1.0) 
+                                                    .build())
                                             .call()
                                             .entity(converter);
 

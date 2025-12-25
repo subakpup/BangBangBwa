@@ -104,7 +104,7 @@ public class HouseServiceImpl implements HouseService {
             urlBuilder.append("?serviceKey=" + serviceKey);
             urlBuilder.append("&LAWD_CD=" + lawdCd);
             urlBuilder.append("&DEAL_YMD=" + dealYmd);
-            urlBuilder.append("&numOfRows=100");
+            urlBuilder.append("&numOfRows=10");
             urlBuilder.append("&_type=json");
 
             URL url = new URL(urlBuilder.toString());

@@ -48,12 +48,8 @@ export const verifyEmail = async (email, code) => {
 
 // POST /login (body: LoginRequestDto)
 export const login = async (request) => {
-    try {
-        const response = await api.post('/users/login', request);
-        return response.data;
-    } catch (error) {
-        return error;
-    }
+    const response = await api.post('/users/login', request);
+    return response.data;
 };
 
 // POST /logout

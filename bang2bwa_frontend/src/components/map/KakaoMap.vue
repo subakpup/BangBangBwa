@@ -2,6 +2,14 @@
     <div class="relative w-full h-full">
         <div ref="mapContainer" class="w-full h-full bg-gray-100"></div>
 
+        <button 
+            @click="moveToCurrentLocation"
+            class="absolute bottom-6 right-6 z-20 bg-white p-3 rounded-full shadow-md border border-gray-200 hover:bg-gray-50 text-gray-600 hover:text-[#AE8B72] transition-colors"
+            title="내 위치로 이동"
+        >
+            <Crosshair class="w-6 h-6" />
+        </button>
+
         <div v-if="selectedItem" class="map-overlay">
             
             <div class="infra-box">
@@ -30,10 +38,10 @@
 <script setup>
 import { onMounted, ref, watch, toRaw, defineExpose, defineEmits } from 'vue';
 import { formatPrice, infraCategories } from '@/utils/productUtil';
-import { X } from 'lucide-vue-next';
+import { X, Crosshair } from 'lucide-vue-next';
 
 const props = defineProps(['items']); // 부모가 던진 데이터
-const emit = defineEmits(['marker-click', 'bounds-changed']); // 마커 클릭 이벤트
+const emit = defineEmits(['marker-click', 'bounds-changed', 'reset-selection']); // 마커 클릭 이벤트
 
 const mapContainer = ref(null); // 지도를 담을 div
 const mapInstance = ref(null);
@@ -47,19 +55,43 @@ const isFirstLoad = ref(true);
 // 지도 초기화
 const initMap = () => {
     const container = mapContainer.value;
-    const options = {
-        center: new window.kakao.maps.LatLng(37.566826, 126.9786567), // 서울시청
-        level: 5 // 확대 레벨
+    
+    const defaultLat = 35.20534846907905;
+    const defaultLng = 126.8115574909565;
+
+    // 지도를 실제로 그리는 내부 함수
+    const loadKakaoMap = (lat, lng) => {
+        const options = {
+            center: new window.kakao.maps.LatLng(lat, lng),
+            level: 5 // 확대 레벨
+        };
+
+        // 지도 객체 생성
+        const map = new window.kakao.maps.Map(container, options);
+        mapInstance.value = map;
+
+        window.kakao.maps.event.addListener(map, 'idle', onMapIdle);
+
+        if (props.items && props.items.length > 0) {
+            updateMarkers(props.items);
+        }
     };
 
-    // 지도 객체 요청
-    const map = new window.kakao.maps.Map(container, options);
-    mapInstance.value = map;
-
-    window.kakao.maps.event.addListener(map, 'idle', onMapIdle);
-
-    if (props.items && props.items.length > 0) {
-        updateMarkers(props.items);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // 1. 성공 시 접속자 위치 사용
+                loadKakaoMap(position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+                // 2. 에러(거부 등) 시 기본 좌표 사용
+                console.warn("위치 정보를 가져올 수 없어 기본 좌표를 사용합니다.", error);
+                loadKakaoMap(defaultLat, defaultLng);
+            }
+        );
+    } else {
+        // 3. 브라우저가 지원하지 않을 경우 기본 좌표 사용
+        loadKakaoMap(defaultLat, defaultLng);
     }
 };
 
@@ -268,7 +300,9 @@ const resetSelection = () => {
     }
 
     clearInfraMarkers();
-}
+
+    emit('reset-selection');
+};
 
 // 마커 생성 함수
 const createMarkerImage = (color) => {
@@ -288,6 +322,31 @@ const createMarkerImage = (color) => {
         svgUrl,
         new window.kakao.maps.Size(24, 35), // 마커 크기
         { offset: new window.kakao.maps.Point(12, 35) } // 마커 기준점
+    );
+};
+
+// 현재 위치로 이동하는 함수
+const moveToCurrentLocation = () => {
+    if (!navigator.geolocation) {
+        alert("위치 정보를 사용할 수 없습니다.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
+
+            if (mapInstance.value) {
+                // setCenter 대신 panTo를 쓰면 부드럽게 이동합니다.
+                mapInstance.value.panTo(moveLatLon); 
+            }
+        },
+        (err) => {
+            console.warn("위치 정보를 가져올 수 없습니다.", err);
+            alert("현재 위치를 확인할 수 없습니다.");
+        }
     );
 };
 
