@@ -16,6 +16,12 @@ export const tradeTypeMap = {
   월세: "RENT",
 };
 
+export const tradeTypeMapen2ko = {
+  SALE: "매매",
+  LEASE: "전세",
+  RENT: "월세",
+};
+
 // 예약 상태 매핑
 export const statusMap = {
    SOLD_OUT: "계약 확정",
