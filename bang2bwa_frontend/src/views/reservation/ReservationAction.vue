@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { confirmReservation, reportNoShow, getReservationDetail, defendNoShow } from '@/api/reservationApi'
-import { MapPin, UserCheck, AlertTriangle, Calendar, Loader2, ShieldAlert, Ban, CheckCircle, Clock } from 'lucide-vue-next'
+import { MapPin, UserCheck, AlertTriangle, Calendar, Loader2, ShieldAlert, Ban, CheckCircle, Clock, NotepadText } from 'lucide-vue-next'
+import { getProductMainImageForReservation } from '@/utils/productUtil';
 
 const route = useRoute()
 const router = useRouter()
@@ -42,7 +43,7 @@ onMounted(async () => {
 const refreshData = async () => {
   pageLoading.value = true;
   const res = await getReservationDetail(reservationId);
-  if (res && res.success) {
+  if (res && res.success === "SUCCESS") {
     reservationInfo.value = res.data;
   } else {
     alert("정보를 불러올 수 없습니다.");
@@ -124,7 +125,7 @@ const handleConfirmOrDefend = async () => {
       res = await confirmReservation(reservationId, location);
     }
     
-    if (res && (res.status === 200 || res.success)) {
+    if (res && (res.status === 200 || res.success === "SUCCESS")) {
       alert("처리가 완료되었습니다.");
       await refreshData();
     } else {
@@ -143,7 +144,7 @@ const handleNoShow = async () => {
   try {
     const location = await getCurrentLocation();
     const res = await reportNoShow(reservationId, location);
-    if (res && (res.status === 200 || res.success)) {
+    if (res && (res.status === 200 || res.success === "SUCCESS")) {
       alert("노쇼 신고가 접수되었습니다.");
       await refreshData();
     } else {
@@ -241,7 +242,7 @@ const formattedTime = computed(() => {
           
           <h3 class="text-lg font-bold text-gray-800 mb-4">방문 예약 정보</h3>
           <div class="flex gap-4 mb-4 items-center">
-             <img :src="reservationInfo.productImage || 'https://placehold.co/150x150/E5D0C2/AE8B72?text=No+Image'" class="w-20 h-20 rounded object-cover bg-gray-100 border border-gray-100" />
+             <img :src="getProductMainImageForReservation(reservationInfo) || 'https://placehold.co/150x150/E5D0C2/AE8B72?text=No+Image'" class="w-20 h-20 rounded object-cover bg-gray-100 border border-gray-100" />
              <div>
                <div class="text-xl font-bold text-gray-800 line-clamp-1">{{ reservationInfo.productName }}</div>
                <div class="text-sm text-gray-500 line-clamp-1">{{ reservationInfo.productAddress }}</div>
@@ -251,6 +252,10 @@ const formattedTime = computed(() => {
              <div class="flex items-center gap-2 text-sm text-gray-700">
               <Calendar :size="16" class="text-[#AE8B72]"/>
               <span class="font-bold">예약 일시:</span> {{ formattedTime }}
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-700">
+              <NotepadText :size="16" class="text-[#AE8B72]"/>
+              <span class="font-bold">예약 메시지:</span> {{ reservationInfo.message }}
             </div>
              <div class="flex items-center gap-2 text-sm text-gray-700">
                <span class="font-bold">현재 상태:</span> 

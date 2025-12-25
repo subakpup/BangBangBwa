@@ -115,8 +115,9 @@
 	        END AS reporterId,
 	        
 	        r.user_confirmed AS userConfirmed,
-        	r.agent_confirmed AS agentConfirmed
-	
+        	r.agent_confirmed AS agentConfirmed,
+			
+			r.message
 	    FROM reservations r
 	    JOIN products p ON r.product_id = p.product_id
 	    JOIN users u ON p.agent_id = u.user_id

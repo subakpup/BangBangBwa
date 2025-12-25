@@ -112,3 +112,17 @@ export const getProductMainImage = (item) => {
 
   return noImage;
 };
+
+export const getProductMainImageForReservation = (item) => {
+  if (!item.productImage) {
+    return noImage;
+  }
+  const path = item.productImage;
+
+  if (path) {
+    const baseUrl = api.defaults.baseURL;
+    return `${baseUrl}/images/${path}`;
+  }
+
+  return noImage;
+};
