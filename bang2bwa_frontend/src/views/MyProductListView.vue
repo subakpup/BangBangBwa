@@ -3,8 +3,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyProductList, deleteProduct } from '@/api/productApi'
 import { getMyReservationProducts, rejectReservation, getMessage } from '@/api/reservationApi'
-import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign, Home, Edit, Trash2, Loader2, Clock, Plus } from 'lucide-vue-next'
-import { formatMoney, getProductMainImage } from '@/utils/productUtil'
+import { Building2, Calendar, MapPin, CheckCircle, XCircle, DollarSign,  Home, Edit, Trash2, Loader2, Clock, Plus } from 'lucide-vue-next'
+import { formatMoney, getProductMainImage, statusMap, typeMap, formatPrice } from '@/utils/productUtil'
 
 const router = useRouter()
 
@@ -158,12 +158,6 @@ const checkPendingStatus = async () => {
 // =========================================================
 // 유틸리티 (가격, 날짜 포맷)
 // =========================================================
-const formatPrice = (p) => {
-  if (p.tradeType === 'SALE') return `매매 ${formatMoney(p.dealAmount)}`;
-  if (p.tradeType === 'LEASE') return `전세 ${formatMoney(p.deposit)}`;
-  if (p.tradeType === 'RENT') return `월세 ${formatMoney(p.deposit)} / ${p.monthlyRent}`;
-  return '';
-}
 
 const formatPriceSimple = (p) => {
    if (p.tradeType === 'SALE') return formatMoney(p.dealAmount);
@@ -241,11 +235,11 @@ const getStatusClass = (status) => {
              
              <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold border shadow-sm"
                   :class="getStatusClass(product.status)">
-               {{ product.status }}
+               {{ statusMap[product.status] || product.status }}
              </div>
              
              <div class="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded text-xs font-bold text-gray-600">
-               {{ product.houseType }}
+               {{ typeMap[product.houseType] || product.houseType }}
              </div>
           </div>
 
