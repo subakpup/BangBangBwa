@@ -168,7 +168,7 @@ const handleWithdraw = async () => {
           </div>
 
           <div class="reservation-price-box">
-            <b class="text-[#AE8B72]">{{ formatPrice(reservationItem) }}</b> 만원
+            <b class="text-[#AE8B72]">{{ formatPrice(reservationItem) }}</b>
           </div>
 
           <div v-if="userInfo.reservation.description" class="reservation-desc-box">

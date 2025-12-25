@@ -130,7 +130,7 @@ const goToPayment = () => {
           </div>
 
           <div class="text-[#AE8B72] font-bold text-lg">
-              {{ formatPrice(property) }} <span class="text-sm font-normal text-gray-500">만원</span>
+              {{ formatPrice(property) }}
           </div>
         </div>
       </div>
