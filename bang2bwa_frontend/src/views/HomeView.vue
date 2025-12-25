@@ -87,14 +87,14 @@ const filterBar = ref(null);
 const selectProperty = ref(null); 
 const kakaoMapRef = ref(null);
 const productListRef = ref(null);
+const loading = ref(false);
+const isLastPage = ref(false);
+const isMovingToTarget = ref(false);
+const isAiMode = ref(false);
 
 const isSearchMode = computed(() => {
   return Object.keys(route.query).length > 0;
 })
-
-const loading = ref(false);
-const isLastPage = ref(false);
-const isMovingToTarget = ref(false);
 
 const currentSearchParams = ref({
   keyword: '',
@@ -169,6 +169,7 @@ const updateTitle = (filterData) => {
 };
 
 const handleFilterChange = (filterData) => {
+  isAiMode.value = false;
   executeSearch(filterData, true);
 };
 
@@ -193,6 +194,10 @@ const handleMapBoundsChanged = (bounds) => {
   currentSearchParams.value.minLng = bounds.minLng;
   currentSearchParams.value.maxLng = bounds.maxLng;
 
+  if (isAiMode.value) {
+    return;
+  }
+
   executeSearch(null, true);
 };
 
@@ -202,6 +207,7 @@ const handleOpenAi = () => {
 
 const handleAiSearchResult = async (aiResultList) => {
   showAiModal.value = false;
+  isAiMode.value = true;
   productList.value = aiResultList;
   currentType.value = `AI 맞춤 추천 결과`;
   selectProperty.value = null;
