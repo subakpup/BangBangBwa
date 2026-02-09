@@ -1,0 +1,421 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================
+   1. 전역 스타일 & 변수
+   ========================================= */
+@layer base {
+  /* 커스텀 스크롤바 (Webkit) */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #ceac93; border-radius: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ae8b72; }
+}
+
+/* =========================================
+   2. 유틸리티 (Map, Overlay)
+   ========================================= */
+.custom-infowindow { @apply p-2.5 bg-white rounded-lg border border-[#ae8b72] text-xs text-center shadow-md; }
+.custom-overlay { @apply relative cursor-pointer transition-all duration-200 ease-in-out hover:scale-110 hover:z-[1000]; }
+
+/* 말풍선 공통 */
+.bubble-base { @apply px-3 py-1.5 rounded-[20px] shadow-md font-bold text-[13px] whitespace-nowrap flex items-center justify-center; }
+.overlay-content { @apply bubble-base bg-[#ae8b72] text-white border-2 border-white; }
+.infra-tooltip { @apply bubble-base bg-white text-[#ae8b72] border-2 border-[#ae8b72]; }
+
+/* =========================================
+   3. 컴포넌트 레이어
+   ========================================= */
+@layer components {
+  
+  /* 기본 버튼 스타일 */
+  .btn-base { @apply bg-[#AE8B72] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition shadow-sm cursor-pointer; }
+  
+  /* 기본 입력창/선택창 스타일 */
+  .input-base { @apply border border-[#CEAC93] rounded-md text-sm bg-white outline-none focus:border-[#AE8B72] placeholder-gray-400 transition-colors; }
+
+  /* 카드/박스 공통 스타일 */
+  .card-base { @apply bg-white border border-gray-200 rounded-lg shadow-sm; }
+
+  /* --- 레이아웃 --- */
+  .app-layout, .layout-container { @apply h-screen flex flex-col overflow-hidden font-sans bg-[#FFFBE8]; }
+  .app-main, .main-content { @apply flex-1 flex flex-col overflow-y-auto custom-scrollbar relative; }
+  .mg-top { @apply mt-4; }
+  .mg-top-lg { @apply mt-8; }
+
+  
+  /* --- [페이지: 인증 (로그인/회원가입)] --- */
+  .signup-wrapper, .login-wrapper { 
+    @apply flex flex-col items-center min-h-full flex-1 bg-[#FFFBE8] px-5 py-10; 
+  }
+  
+  .signup-container { @apply w-full max-w-[460px] py-5; }
+  .login-container { @apply w-full max-w-[460px] py-5 my-auto; }
+  .signup-title { @apply text-center text-[#AE8B72] mb-8 font-bold text-2xl; }
+
+  .input-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm; }
+  .input-row { @apply relative flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+
+  .btn-submit { @apply w-full py-4 text-lg font-bold text-white bg-[#AE8B72] rounded-lg shadow-md transition-all duration-200; }
+  .btn-submit:hover { @apply bg-[#8c6b54] shadow-lg transform -translate-y-0.5; }
+  .btn-submit:active { @apply transform translate-y-0 shadow-sm; }
+  
+  /* 비밀번호 찾기 | 회원가입 */
+  .auth-links { @apply flex justify-center items-center gap-4 mt-8 text-sm text-[#CEAC93]; }
+  .auth-links a { @apply hover:text-[#AE8B72] hover:underline transition-colors; }
+  
+  .form-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent py-2 placeholder-[#E3C9A5]; }
+  
+  .form-input:-webkit-autofill,
+  .form-input:-webkit-autofill:hover, 
+  .form-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #AE8B72;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5) sepia(1) saturate(1) hue-rotate(340deg);
+    @apply cursor-pointer;
+  }
+
+  .role-group { @apply flex border border-[#CEAC93] rounded-lg overflow-hidden mt-4; }
+  .role-label { @apply flex-1 text-center cursor-pointer relative; }
+  .role-text { @apply block py-3.5 text-[15px] text-[#CEAC93] bg-white transition-all border-r border-[#CEAC93]; }
+  .role-label:last-child .role-text { @apply border-r-0; }
+  .role-input:checked + .role-text { @apply bg-[#E3C9A5] text-[#AE8B72] font-bold; }
+  .error-msg { @apply p-2 text-[13px] text-red-500; }
+
+  /* --- [페이지: 홈 (HomeView)] --- */
+  .home-container { @apply flex flex-col h-full w-full relative; }
+  .content-wrapper { @apply flex flex-1 overflow-hidden relative; }
+  .map-container { @apply flex-1 bg-gray-100 relative z-0; }
+  
+  .sidebar { @apply w-[400px] bg-white border-r border-[#CEAC93] p-4 flex-shrink-0 z-10 overflow-y-auto; }
+  .sidebar-header { @apply p-4 border-b border-gray-100 flex-shrink-0 mb-2; }
+  .sidebar-title { @apply text-xl font-bold text-[#AE8B72]; }
+  .sidebar-count { @apply text-sm text-gray-500 font-normal ml-1; }
+  .list-wrapper { @apply flex-1 overflow-y-auto custom-scrollbar relative; }
+
+  /* --- [컴포넌트: 헤더 (TheHeader)] --- */
+  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-50; }
+  .header-logo { @apply text-2xl font-bold text-[#AE8B72] flex items-center gap-2; }
+  .header-nav { @apply hidden md:flex items-center gap-6 text-gray-600 font-medium; }
+  .nav-link { @apply hover:text-[#AE8B72] transition; }
+  .header-auth { @apply flex items-center gap-4; }
+  .btn-login { @apply text-gray-600 hover:text-[#AE8B72] font-medium; }
+  .btn-signup { @apply btn-base; }
+
+  /* --- [컴포넌트: 필터바 (FilterBar)] --- */
+  .filter-bar { @apply bg-[#FFFBE8] border-b border-[#CEAC93] px-6 py-3 flex flex-wrap items-center gap-3 shadow-sm z-10; }
+  .search-wrapper { @apply relative; }
+  .search-input { @apply input-base pl-4 pr-10 py-2 w-64; }
+  .search-btn { @apply absolute right-2 top-1.5 p-1 text-gray-400 hover:text-[#AE8B72] hover:bg-gray-100 rounded-full transition; }
+  .filter-divider { @apply w-px h-6 bg-[#CEAC93] mx-2; }
+  .filter-select { @apply input-base px-3 py-2 hover:border-[#AE8B72] cursor-pointer text-gray-700; }
+  .dropdown-btn { @apply input-base px-3 py-2 hover:border-[#AE8B72] cursor-pointer text-gray-700 flex items-center justify-between min-w-[190px]; }
+  .dropdown-box { @apply absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 animate-fade-in-up; }
+  .range-slider { @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#AE8B72]; }
+  .btn-ai { @apply ml-auto flex items-center gap-2 bg-gradient-to-r from-[#AE8B72] to-[#CEAC93] text-white px-4 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition; }
+
+  /* --- [컴포넌트: 리스트 (ProductList)] --- */
+  .list-container { @apply overflow-y-auto custom-scrollbar p-4 h-full; }
+  .product-card { @apply flex gap-3 card-base p-3 hover:border-[#AE8B72] hover:shadow-md cursor-pointer transition; }
+  .card-img-box { @apply w-24 h-24 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden; }
+  .card-img { @apply w-full h-full object-cover group-hover:scale-105 transition duration-500; }
+  .card-info { @apply flex flex-col justify-center flex-1 min-w-0; }
+  .card-type { @apply text-xs text-[#AE8B72] font-bold; }
+  .card-price { @apply font-bold text-lg truncate text-gray-900; }
+  .card-title { @apply text-sm text-gray-600 font-bold truncate; }
+  .empty-state { @apply h-64 flex flex-col items-center justify-center text-gray-400; }
+
+  /* --- [컴포넌트: 상세 (ProductDetail)] --- */
+  .detail-container { @apply h-full flex flex-col bg-white; }
+  .detail-header { @apply p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10 sticky top-0; }
+  .btn-back { @apply hover:bg-gray-100 p-2 rounded-full transition text-gray-700; }
+  .detail-body { @apply flex-1 overflow-y-auto custom-scrollbar; }
+  
+  .hero-img-area { @apply h-72 w-full bg-gray-200 relative; }
+  .img-badge { @apply absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm; }
+  .detail-content { @apply p-6 space-y-8; }
+  
+  .info-grid { @apply grid grid-cols-2 gap-y-6 gap-x-4; }
+  .info-item { @apply flex items-start gap-3; }
+  .icon-box { @apply p-2 bg-gray-100 rounded-lg text-gray-600; }
+  .info-label { @apply text-xs text-gray-500; }
+  .info-value { @apply font-bold text-gray-800 whitespace-nowrap; }
+
+  .detail-table { @apply bg-gray-50 rounded-lg border border-gray-100 overflow-hidden text-sm; }
+  .table-row { @apply grid grid-cols-2 border-b border-gray-200 last:border-0; }
+  .table-head { @apply p-3 text-gray-500 bg-gray-100 border-r border-gray-200; }
+  .table-data { @apply p-3 text-gray-800; }
+
+  .agent-card { @apply card-base border-[#CEAC93] p-4 flex items-center gap-4; }
+  .agent-avatar { @apply w-12 h-12 bg-[#CEAC93]/20 rounded-full flex items-center justify-center text-[#AE8B72]; }
+
+  .detail-footer { @apply p-4 border-t border-gray-200 bg-white flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20; }
+  .btn-like { @apply flex-1 border border-[#AE8B72]/20 bg-[#CEAC93]/10 py-3 rounded-xl font-bold text-[#AE8B72] hover:bg-[#CEAC93]/20 transition flex items-center justify-center gap-2; }
+  .btn-contact { @apply flex-[2] btn-base py-3 flex items-center justify-center gap-2 hover:bg-[#8c6b54]; }
+
+  /* --- [컴포넌트: 지도 오버레이 (KakaoMap)] --- */
+  .map-overlay { @apply absolute top-4 right-4 z-20 w-36 flex flex-col gap-2 max-h-[90%]; }
+  .infra-box { @apply bg-white/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 flex flex-col overflow-y-auto custom-scrollbar; }
+  .infra-btn { @apply flex items-center gap-3 p-2 hover:bg-[#AE8B72]/10 rounded-md transition-all duration-200 text-left; }
+  .infra-icon { @apply w-5 h-5 text-gray-400 group-hover:text-[#AE8B72] group-hover:scale-110 transition-transform; }
+  .btn-reset { @apply bg-white/90 text-red-500 text-xs font-bold py-2 px-3 rounded-lg shadow border border-red-100 hover:bg-red-50 transition flex items-center justify-center gap-1; }
+
+  /* --- [컴포넌트: 헤더 (TheHeader)] --- */
+  .header-container { @apply bg-white border-b border-[#CEAC93] h-16 flex items-center justify-between px-6 shadow-sm z-20; }
+  .header-logo { @apply text-2xl font-bold text-[#AE8B72] flex items-center gap-2; }
+  .header-nav { @apply hidden md:flex items-center gap-6 text-gray-600 font-medium; }
+  .nav-link { @apply hover:text-[#AE8B72] transition; }
+  .header-auth { @apply flex items-center gap-4; }
+  .btn-login { @apply text-gray-600 hover:text-[#AE8B72] font-medium; }
+  .btn-signup { @apply btn-base; }
+
+  .header-user-btn { @apply flex items-center gap-2 border border-gray-200 rounded-full pl-1 pr-3 py-1 hover:shadow-md hover:border-[#AE8B72] transition bg-white cursor-pointer; }
+  .header-user-avatar { @apply w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500; }
+  .header-dropdown-menu { @apply absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-xl py-2 z-[100] animate-fade-in-up; }
+  .dropdown-item { @apply flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-[#FFFBE8] hover:text-[#AE8B72] transition-colors w-full text-left font-medium; }
+  .dropdown-divider { @apply h-px bg-gray-100 my-1; }
+  .dropdown-overlay { @apply fixed inset-0 z-40 cursor-default; }
+
+  /* --- [페이지: 매물 등록/수정 (ProductForm)] --- */
+  .regist-wrapper { @apply max-w-4xl mx-auto p-6 pb-20; }
+  .regist-card { @apply card-base bg-white p-8 border-t-4 border-t-[#AE8B72]; }
+  
+  .regist-header { @apply text-center mb-8 pb-4 border-b border-gray-100; }
+  .regist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  
+  /* 섹션 스타일 */
+  .regist-section { @apply mb-10; }
+  .section-title { @apply text-lg font-bold text-gray-700 mb-4 flex items-center gap-2; }
+  .section-title::before { content: ''; @apply block w-1.5 h-6 bg-[#AE8B72] rounded-full; }
+  
+  /* 하이라이트 박스 (가격 정보 등) */
+  .highlight-box { @apply bg-[#FFFBE8] border border-[#CEAC93] rounded-xl p-6 transition-all hover:shadow-md; }
+
+  /* 입력 폼 공통 */
+  .form-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5; }
+  .form-grid-3 { @apply grid grid-cols-1 md:grid-cols-3 gap-4; }
+  .form-grid-4 { @apply grid grid-cols-2 md:grid-cols-4 gap-4; }
+
+  .form-group { @apply flex flex-col gap-1.5; }
+  .form-label { @apply text-[13px] font-bold text-gray-500 ml-1; }
+  .required-mark { @apply text-red-400 ml-0.5; }
+  
+  .regist-input { @apply input-base w-full px-4 py-3 text-gray-700 transition-all; }
+  .regist-input:focus { @apply ring-2 ring-[#AE8B72]/20 border-[#AE8B72]; }
+  .regist-input.readonly { @apply bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200; }
+  .regist-textarea { @apply regist-input resize-y min-h-[120px]; }
+
+  /* 파일 업로드 영역 */
+  .upload-area { @apply border-2 border-dashed border-[#CEAC93] rounded-xl bg-[#FFFBE8]/50 p-8 text-center cursor-pointer transition-all hover:bg-[#FFFBE8] hover:border-[#AE8B72]; }
+  .upload-icon { @apply w-10 h-10 mx-auto text-[#CEAC93] mb-2 group-hover:text-[#AE8B72] group-hover:scale-110 transition-transform; }
+  .upload-text { @apply text-sm text-gray-500 font-medium; }
+  
+  .preview-grid { @apply grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-4; }
+  .preview-item { @apply relative aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm; }
+  .preview-img { @apply w-full h-full object-cover transition-transform group-hover:scale-105; }
+  .btn-img-delete { @apply absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-500 transition cursor-pointer backdrop-blur-sm; }
+
+  /* 하단 버튼 액션 */
+  .form-actions { @apply flex items-center justify-end gap-3 mt-10 pt-6 border-t border-gray-100; }
+  .btn-cancel { @apply px-6 py-3 rounded-lg text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition; }
+  .btn-save { @apply btn-base py-3 px-8 text-[15px] font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5; }
+
+
+  /* --- [페이지: 게시판 (Board)] --- */
+  /* .board-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto; } */
+  .board-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto; }
+  
+  /* 게시판 헤더 (제목 + 필터 + 글쓰기버튼) */
+  /* .board-header-row { @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6; } */
+  .board-header-row { @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 w-full; }
+  .board-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .board-table-container { @apply bg-white border border-[#CEAC93] rounded-lg shadow-sm w-full overflow-x-auto; }
+
+  /* [검색 영역 수정] */
+  .search-box { @apply flex items-center gap-2; /* 입력창과 버튼을 가로로 배치 */}
+  .search-box { @apply flex items-center gap-2 w-full md:w-auto; }
+
+  /* 검색 버튼 (입력창 밖으로 꺼냄) */
+  .btn-search { @apply h-[42px] px-4 rounded-lg bg-[#AE8B72] text-white flex items-center justify-center border border-[#AE8B72] hover:bg-[#9C7A61] transition-colors cursor-pointer; }
+  
+  /* 지역 선택 드롭다운 */
+  .region-select { @apply input-base px-4 py-2 min-w-[200px] cursor-pointer; }
+
+  /* 게시판 리스트 (테이블) */
+  .board-table-container { @apply bg-white border border-[#CEAC93] rounded-lg overflow-hidden shadow-sm; }
+  .board-table { @apply w-full text-sm text-left; }
+  .board-th { @apply bg-[#FFFBE8] text-[#AE8B72] font-bold px-4 py-3 border-b border-[#CEAC93]; }
+  .board-td { @apply px-4 py-3 border-b border-gray-100 text-gray-700; }
+  .board-tr { @apply hover:bg-gray-50 transition cursor-pointer; }
+  
+  /* 게시글 상세 */
+  .post-container { @apply bg-white p-8 rounded-lg shadow-sm border border-[#CEAC93]; }
+  .post-header { @apply border-b border-gray-200 pb-4 mb-6; }
+  .post-title-text { @apply text-2xl font-bold text-gray-800 mb-2; }
+  .post-meta { @apply flex items-center gap-4 text-xs text-gray-500; }
+  .post-badge { @apply px-2 py-0.5 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .post-content { @apply min-h-[300px] text-gray-800 leading-relaxed whitespace-pre-line; }
+
+  /* 글쓰기 폼 */
+  .write-editor { @apply w-full p-4 min-h-[400px] border border-[#CEAC93] rounded-lg outline-none resize-none focus:ring-1 focus:ring-[#AE8B72]; }
+
+  /* --- [페이지네이션 (Pagination)] --- */
+  .pagination-container { @apply flex justify-center items-center gap-2 mt-10 mb-8; }
+  
+  /* 페이지 버튼 기본 스타일 (통일감: 흰배경 + 연한 브라운 테두리) */
+  .page-btn { @apply min-w-[36px] h-[36px] px-2 flex items-center justify-center rounded-lg 
+              bg-white border border-[#CEAC93] 
+              text-gray-600 text-sm font-medium
+                transition-all duration-200 ease-in-out
+              hover:bg-[#FFFBE8] hover:text-[#AE8B72] hover:border-[#AE8B72]
+                disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-[#CEAC93] disabled:cursor-not-allowed; 
+  }
+  
+  /* 현재 페이지 활성화 (Active) 스타일 */
+  .page-btn.active { @apply bg-[#AE8B72] border-[#AE8B72] text-white font-bold shadow-sm scale-105; }
+
+  /* 화살표 아이콘 미세 조정 */
+  .page-btn svg { @apply w-4 h-4; }
+
+  /* --- [댓글 영역 (Comment)] --- */
+  .comment-section { @apply mt-10 border-t border-[#CEAC93] pt-8; }
+  
+  .comment-title { @apply text-lg font-bold text-[#AE8B72] mb-4 flex items-center gap-2; }
+
+  /* 댓글 리스트 아이템 */
+  .comment-item { @apply flex gap-4 p-5 mb-3 bg-white border border-gray-100 rounded-lg shadow-sm transition-all hover:border-[#CEAC93]; }
+  
+  /* 프로필 아이콘 (원형) */
+  .comment-avatar { @apply w-10 h-10 rounded-full bg-[#E5D0C2] text-white flex items-center justify-center text-sm font-bold flex-shrink-0; }
+  
+  .comment-content-box { @apply flex-1; }
+  .comment-meta { @apply flex items-center gap-2 text-xs text-gray-400 mb-1; }
+  .comment-writer { @apply font-bold text-gray-700 text-sm; }
+  .comment-text { @apply text-gray-700 text-sm leading-relaxed whitespace-pre-wrap; }
+
+  /* 댓글 작성 영역 */
+  .comment-form-box { @apply mt-6 flex gap-2 items-start bg-[#FFFBE8] p-4 rounded-lg border border-[#CEAC93]; }
+  
+  .comment-input { @apply flex-1 bg-white border border-[#CEAC93] rounded-md p-3 text-sm outline-none 
+                    focus:ring-1 focus:ring-[#AE8B72] resize-none h-[50px] transition-all focus:h-[80px]; 
+    }
+  
+  .btn-comment-submit { @apply h-[50px] px-6 rounded-md bg-[#AE8B72] text-white text-sm font-bold 
+                        hover:bg-[#9C7A61] transition-colors disabled:opacity-50 disabled:cursor-not-allowed; 
+  }
+  /* --- [페이지: 마이페이지 (MyPage)] --- */
+  .mypage-wrapper { @apply w-full max-w-2xl px-4; }
+  
+  /* 프로필 영역 */
+  .profile-card { @apply card-base p-8 flex flex-col items-center bg-white mb-6; }
+  /* .profile-avatar-box { @apply w-24 h-24 bg-[#FFFBE8] rounded-full flex items-center justify-center text-[#AE8B72] mb-4 border border-[#CEAC93]; } */
+  .profile-avatar-box { @apply w-24 h-24 bg-[#F3F4F6] rounded-full flex items-center justify-center text-[#6B7280] mb-3; }
+
+  .profile-name-row { @apply flex items-center gap-2 mb-1; }
+  .profile-name { @apply text-xl font-bold text-gray-800; }
+  .profile-email { @apply text-sm text-gray-500 mb-6; }
+
+  /* 역할 뱃지 */
+  .role-badge { @apply px-2 py-0.5 rounded text-xs font-bold text-white transition-colors; }
+  .role-badge-agent { @apply bg-[#AE8B72]; }
+  .role-badge-user { @apply bg-gray-400; }
+
+  /* 정보 리스트 (공통: 라벨 + 값) */
+  .info-list-container { @apply w-full border-t border-gray-100 py-4 space-y-3; }
+  .info-row { @apply flex justify-between items-center; }
+  .info-label { @apply text-gray-500 text-sm; }
+  .info-value { @apply text-gray-800 text-sm font-medium; }
+
+  /* 공인중개사 전용 박스 */
+  .agent-info-box { @apply w-full bg-gray-50 p-4 rounded-lg mt-2 border border-[#AE8B72]; }
+  .agent-info-header { @apply text-[#AE8B72] font-bold text-sm mb-3 border-b border-[#CEAC93]/30 pb-2 flex items-center; }
+
+  /* 마이페이지 버튼 그룹 */
+  .mypage-btn-group { @apply w-full flex gap-3 mt-6; }
+  .btn-outline-brown { @apply btn-base flex-1 py-3 bg-white text-[#AE8B72] border border-[#AE8B72] hover:bg-[#FFFBE8] flex items-center justify-center; }
+  .btn-fill-brown { @apply btn-base flex-1 py-3 flex items-center justify-center; }
+  .btn-text-withdraw { @apply text-xs text-gray-400 underline hover:text-red-500 mt-4 cursor-pointer; }
+
+  /* 예약 내역 카드 */
+  .reservation-card { @apply card-base p-6 bg-white relative overflow-hidden; }
+  .reservation-deco-bar { @apply absolute top-0 left-0 w-1 h-full bg-[#AE8B72]; }
+  
+  .reservation-header { @apply flex justify-between items-center mb-4 pl-2; }
+  .reservation-title { @apply font-bold text-gray-800 text-lg flex items-center; }
+  .reservation-status-badge { @apply text-xs px-2 py-1 rounded bg-[#FFFBE8] text-[#AE8B72] font-bold border border-[#CEAC93]; }
+  
+  .reservation-content { @apply pl-2 space-y-4; }
+  .reservation-sub-title { @apply text-xs text-gray-400 mb-1; }
+  
+  .reservation-time-box { @apply flex-1 p-3 bg-gray-50 rounded-lg; }
+  .reservation-price-box { @apply text-sm bg-[#FFFBE8] p-3 rounded text-center text-gray-700 border border-[#AE8B72]; }
+  .reservation-desc-box { @apply text-sm text-gray-500 bg-gray-50 p-3 rounded; }
+
+  /* --- [페이지: 찜 목록 (Wishlist)] --- */
+  .wishlist-wrapper { @apply w-full max-w-5xl px-4 py-10 mx-auto h-full flex flex-col; }
+  
+  .wishlist-header { @apply flex items-center justify-between mb-6; }
+  .wishlist-title { @apply text-2xl font-bold text-[#AE8B72]; }
+  .wishlist-count { @apply text-sm text-gray-500; }
+
+  /* 반응형 그리드: 모바일 1열, 태블릿 이상 2열 */
+  .wishlist-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4 pb-10; }
+  
+  /* 찜 카드 (기존 product-card 확장) */
+  .wish-card { @apply product-card bg-white h-32; } 
+
+  /* 빈 화면 상태 */
+  .wish-empty-state { @apply flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300; }
+  .btn-go-home { @apply mt-4 text-[#AE8B72] font-bold hover:underline cursor-pointer; }
+
+  /* --- [페이지: 정보 수정 (MyEdit)] --- */
+  .edit-wrapper { @apply w-full max-w-[460px] px-4 pb-10 mx-auto; }
+  .edit-card { @apply bg-white p-6 rounded-lg shadow-sm border border-[#CEAC93]; }
+  
+  /* 입력 폼 그룹 (테두리 있는 박스) */
+  .edit-form-group { @apply border border-[#CEAC93] bg-white rounded-lg overflow-hidden shadow-sm mb-6; }
+  
+  /* 입력 행 (아이콘 + 인풋) */
+  .edit-input-row { @apply flex items-center px-4 h-[50px] border-b border-gray-100 last:border-b-0; }
+  .edit-icon { @apply text-[#CEAC93] w-6 flex justify-center; }
+  .edit-input { @apply flex-1 border-none outline-none h-full text-[15px] text-[#AE8B72] bg-transparent ml-3 placeholder-[#E3C9A5]; }
+
+  /* 버튼 그룹 */
+  .edit-btn-group { @apply flex gap-3 mt-8; }
+  .btn-cancel { @apply btn-base flex-1 bg-gray-400 hover:bg-gray-500 py-3 text-center flex items-center justify-center; }
+  .btn-save { @apply btn-submit flex-1 text-base py-3 flex items-center justify-center; }
+
+  /* --- [페이지: 결제] --- */
+  .payment-card {
+  @apply border border-gray-200 rounded-lg p-4 cursor-pointer relative transition-all 
+         hover:bg-gray-50 flex flex-col items-center justify-center h-28;
+  }
+  .payment-card.selected { @apply border-2 border-[#AE8B72] bg-[#FFFBE8] text-[#AE8B72]; }
+  .payment-card.selected .text-gray-400 { @apply text-[#AE8B72]; }
+  .check-icon { @apply absolute top-2 right-2 text-[#AE8B72]; }
+}
+
+/* =========================================
+   4. 커스텀 애니메이션
+   ========================================= */
+@layer utilities {
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.2s ease-out forwards;
+  }
+}

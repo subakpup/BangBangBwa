@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.ReservationDao">
+  	<select id="findById">
+  		SELECT * FROM reservations
+  		WHERE reservation_id=#{reservationId}
+  	</select>
+  
+  	<insert id="reservationUser" useGeneratedKeys="true" keyProperty="reservationId">
+  		INSERT INTO reservations(agent_id, product_id, user_id, visit_date, message, status, deposit_amount, user_payment_key)
+  		VALUES(#{agentId}, #{productId}, #{userId}, #{visitDate}, #{message}, #{status}, #{depositAmount}, #{userPaymentKey})
+  	</insert>
+  	
+  	<update id="reservationAccept">
+  		UPDATE reservations
+  		SET
+  			agent_payment_key=#{agentPaymentKey},
+  			status=#{status}
+  		WHERE reservation_id=#{reservationId}
+  	</update>
+  	
+  	<update id="updateConfirmation">
+  		UPDATE reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = #{status}, </if>
+  			<if test="type == 'AGENT'">agent_confirmed = #{status},</if>
+  		</set>
+  		WHERE reservation_id = #{reservationId}
+  	</update>
+  	
+  	<update id="updateStatus">
+  		UPDATE reservations
+  		SET status=#{status}
+  		WHERE reservation_id=#{reservationId}
+  	</update>
+  	
+  	<update id="report">
+  		UPDATE reservations
+  		<set>
+  			<if test="type == 'USER'">user_confirmed = 'N', </if>
+  			<if test="type == 'AGENT'">agent_confirmed = 'N',</if>
+  			status=#{status},
+  			reported_at=#{reportedAt},
+  		</set>
+  		WHERE reservation_id=#{reservationId}
+  	</update>
+  	
+  	<select id="findExpiredPendingReservations">
+  		SELECT * FROM reservations
+  		WHERE status = 'PENDING'
+  				AND	created_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 1 HOUR)
+  	</select>
+  	
+  	<select id="findExpiredReportedReservations">
+  		SELECT * FROM reservations
+  		WHERE status = 'REPORTED'
+  				AND	reported_at <![CDATA[ < ]]> DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+  	</select>
+  	
+  	<select id="findMyResrvationInfoByUserId">
+  		SELECT
+  			p.trade_type,
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm, ' ', p.jibun) AS address,
+  			p.name,
+  			p.floor,
+  			p.exclu_use_ar,
+  			p.desc,
+  			r.visit_date,
+  			r.status,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent
+  		FROM reservations r JOIN products p ON r.product_id = p.product_id
+  		WHERE r.user_id = #{userId} AND (r.status IN ('PENDING', 'RESERVED', 'REPORTED')) AND (r.visit_date <![CDATA[ > ]]> NOW())
+  		ORDER BY visit_date DESC
+		LIMIT 1
+  	</select>
+  	
+  	<select id="findProductByAgentId">
+  		SELECT 
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm, ' ', p.jibun) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent
+  		FROM reservations r RIGHT JOIN products p ON (r.product_id = p.product_id)
+  		WHERE p.agent_id = #{agentId}
+  	</select>
+  	
+  	<select id="selectReservationDetail">
+	    SELECT 
+	        r.reservation_id AS reservationId,
+	        p.name AS productName,
+	        CONCAT(p.sgg_nm, ' ', p.umd_nm, ' ', p.jibun) AS productAddress,
+	        (SELECT save_path FROM product_images WHERE product_id = p.product_id LIMIT 1) AS productImage,
+	        r.visit_date AS visitDate,
+	        u.name AS agentName,
+	        r.status AS status,
+	        
+	        r.user_id AS userId,
+	        r.agent_id AS agentId,
+	
+	        CASE 
+	            WHEN r.user_confirmed = 'N' THEN r.agent_id  WHEN r.agent_confirmed = 'N' THEN r.user_id  ELSE NULL 
+	        END AS reporterId,
+	        
+	        r.user_confirmed AS userConfirmed,
+        	r.agent_confirmed AS agentConfirmed,
+			
+			r.message
+	    FROM reservations r
+	    JOIN products p ON r.product_id = p.product_id
+	    JOIN users u ON p.agent_id = u.user_id
+	    WHERE r.reservation_id = #{reservationId}
+	</select>
+	
+	<select id="findMyReservationProducts">
+		SELECT
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent,
+  			p.product_id,
+  			r.reservation_id
+  		FROM products p JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId} AND r.status != 'QUIT'
+	</select>
+  </mapper>

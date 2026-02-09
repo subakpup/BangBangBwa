@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.StarDao">
+  
+  <!-- 관심 매물 -->
+  
+  <select id="existsStarProdct">
+  	SELECT COUNT(*) FROM star_products
+  	WHERE user_id = #{userId} AND product_id = #{productId}
+  </select>
+  
+  <insert id="saveStarProduct">
+  	INSERT INTO star_products (user_id, product_id)
+  	VALUES (#{userId}, #{productId})
+  </insert>
+  
+  <delete id="deleteStarProduct">
+  	DELETE FROM star_products
+  	WHERE user_id = #{userId} AND product_id = #{productId}
+  </delete>
+  
+  <select id="findAllStarProductByUserId">
+  	SELECT DISTINCT p.*
+  	FROM star_products s JOIN products p ON s.product_id = p.product_id
+  	WHERE s.user_id = #{userId};
+  </select>
+  
+  <!-- 관심 동네 -->
+  
+  <select id="existsStarDong">
+  	SELECT COUNT(*) FROM star_dongs
+  	WHERE user_id = #{userId} AND sgg_nm = #{sggNm} AND umd_nm = #{umdNm}
+  </select>
+  
+  <insert id="saveStarDong">
+  	INSERT INTO star_dongs(user_id, sgg_nm, umd_nm)
+  	VALUES (#{userId}, #{sggNm}, #{umdNm})
+  </insert>
+  
+  <delete id="deleteStarDong">
+  	DELETE FROM star_dongs
+  	WHERE user_id = #{userId} AND sgg_nm = #{sggNm} AND umd_nm = #{umdNm} 
+  </delete>
+  
+  <select id="findAllStarDongByUserId">
+  	SELECT sgg_nm, umd_nm FROM star_dongs
+  	WHERE user_id = #{userId}
+  </select>
+  </mapper>

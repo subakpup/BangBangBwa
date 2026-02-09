@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.ssafy.bbb.model.dao.ProductDao">
+  	<insert id="save" useGeneratedKeys="true" keyProperty="productId">
+  		insert into products(jibun, house_type, trade_type, name, build_year, exclu_use_ar, apt_dong, floor, land_ar, total_floor_ar, plottage_ar, deal_amount, deposit, monthly_rent, sgg_nm, umd_nm, agent_id, latitude, longitude, `desc`)
+  		values(#{jibun}, #{houseType}, #{tradeType}, #{name}, #{buildYear}, #{excluUseAr}, #{aptDong}, #{floor}, #{landAr}, #{totalFloorAr}, #{plottageAr}, #{dealAmount}, #{deposit}, #{monthlyRent}, #{sggNm}, #{umdNm}, #{agentId}, #{latitude}, #{longitude}, #{desc});
+  	</insert>
+  	
+  	<update id="update">
+  		update products
+  		<set> 
+	  		jibun=#{product.jibun},
+	  		house_type=#{product.houseType}, 
+	  		trade_type=#{product.tradeType}, 
+	  		name=#{product.name}, 
+	  		build_year=#{product.buildYear}, 
+	  		exclu_use_ar=#{product.excluUseAr}, 
+	  		apt_dong=#{product.aptDong}, 
+	  		floor=#{product.floor}, 
+	  		land_ar=#{product.landAr}, 
+	  		total_floor_ar=#{product.totalFloorAr}, 
+	  		plottage_ar=#{product.plottageAr}, 
+	  		deal_amount=#{product.dealAmount}, 
+	  		deposit=#{product.deposit}, 
+	  		monthly_rent=#{product.monthlyRent}, 
+	  		sgg_nm=#{product.sggNm}, 
+	  		umd_nm=#{product.umdNm}, 
+	  		agent_id=#{product.agentId},
+	  		latitude=#{product.latitude},
+	  		longitude=#{product.longitude},
+	  		`desc`=#{product.desc}
+  		</set>
+  		where product_id = #{id};
+  	</update>
+  	
+  	<delete id="delete">
+  		DELETE FROM products
+  		WHERE product_id = #{productId}
+  	</delete>
+  	
+  	<select id="findById">
+  		SELECT p.*, u.name as agentName, a.realtor_agency as agentOfficeName
+        FROM products p
+        LEFT JOIN users u ON p.agent_id = u.user_id
+        LEFT JOIN agents a ON p.agent_id = a.agent_id
+        WHERE p.product_id = #{productId}
+  	</select>
+  	
+  	<select id="findImagesByProductId">
+  		select * from product_images
+  		where product_id = #{productId};
+  	</select>
+  	
+  	<insert id="saveImages">
+  		insert into product_images (product_id, original_name, save_name, save_path)
+  		values
+  		<foreach collection="imageDtos" item="image" separator=",">
+  			(#{image.productId}, #{image.originalName}, #{image.saveName}, #{image.savePath})
+  		</foreach>
+  		;
+  	</insert>
+  	
+  	<delete id="deleteImages">
+  		delete from product_images
+  		where image_id in
+  		<foreach collection="imageIds" item="id" open="(" close=")" separator=",">
+  			#{id}
+  		</foreach>
+  		;
+  	</delete>
+  	
+  	<select id="findSavePathByIds">
+  		select save_path from product_images
+  		where image_id in
+  		<foreach collection="imageIds" item="id" open="(" close=")" separator=",">
+  			#{id}
+  		</foreach>
+  		;
+  	</select>
+  	
+  	<select id="selectProductForUpdate" resultMap="selectProductMap">
+  		select agent_id, status from products
+  		where product_id = #{productId}
+  		for update;
+  	</select>
+  	
+  	<update id="updateProductStatus">
+  		update products
+  		set status = #{status}
+  		where product_id = #{productId}
+  	</update>
+  	
+  	<select id="findLocationById">
+  		select latitude, longitude from products
+  		where product_id = #{productId};
+  	</select>
+
+	<resultMap type="map" id="selectProductMap">
+		<id column="product_id" property="productId" />
+		<result column="agent_id" property="agentId" />
+		<result column="status" property="status" />
+	</resultMap>
+
+	<select id="search" parameterType="com.ssafy.bbb.model.dto.ProductSearchDto" resultMap="ProductSearchMap">
+		SELECT *,
+		<choose>
+			<when test="userLat != null and userLng != null">
+				(6371 * acos(cos(radians(#{userLat})) * cos(radians(latitude))
+				* cos(radians(longitude) - radians(#{userLng}))
+				+ sin(radians(#{userLat})) * sin(radians(latitude))))
+			</when>
+			<otherwise>
+				0
+			</otherwise>
+		</choose>
+		AS distance,
+
+		(SELECT save_path
+		FROM product_images
+		WHERE product_id = products.product_id
+		LIMIT 1) AS thumbnail_path
+		FROM products
+
+		<where>
+			<if test="keyword != null and keyword != ''">
+				AND (
+				name LIKE CONCAT('%', #{keyword}, '%')
+				OR jibun LIKE CONCAT('%', #{keyword}, '%')
+				OR sgg_nm LIKE CONCAT('%', #{sggNm}, '%')
+				OR umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+				)
+			</if>
+
+			<if test="houseType != null and houseType != '' and houseType != '전체'">
+				AND house_type = #{houseType}
+			</if>
+
+			<if test="tradeType != null and tradeType != '' and tradeType != '전체'">
+				AND trade_type = #{tradeType}
+			</if>
+
+			<if
+				test="excluUseAr != null and excluUseAr != '' and excluUseAr != '전체 면적'">
+				<choose>
+					<when test="excluUseAr == '33㎡ 이하 (약 10평)'"> AND exclu_use_ar &lt;= 33 </when>
+					<when test="excluUseAr == '33㎡ ~ 66㎡ (10~20평)'"> AND exclu_use_ar &gt; 33 AND exclu_use_ar &lt;= 66
+					</when>
+					<when test="excluUseAr == '66㎡ ~ 99㎡ (20~30평)'"> AND exclu_use_ar &gt; 66 AND exclu_use_ar &lt;= 99
+					</when>
+					<when test="excluUseAr == '99㎡ 이상 (30평대~)'"> AND exclu_use_ar &gt; 99 </when>
+				</choose>
+			</if>
+
+			<if test="floor != null and floor != '' and floor != '전체'">
+				<choose>
+					<when test="floor == '1층'"> AND (floor = '1층' OR floor = '1') </when>
+					<when test="floor == '2층'"> AND (floor = '2층' OR floor = '2') </when>
+					<when test="floor == '지하'"> AND floor LIKE '-%' </when>
+					<when test="floor == '옥탑'"> AND floor LIKE '%옥탑%' </when>
+					<when test="floor == '3층 이상'">
+						AND floor NOT IN ('1층', '1', '2층', '2')
+						AND floor NOT LIKE '-%'
+						AND floor NOT LIKE '%옥탑%'
+					</when>
+				</choose>
+			</if>
+
+			<if test="userLat == null and minLat != null and maxLat != null and minLng != null and maxLng != null">
+				AND latitude BETWEEN #{minLat} AND #{maxLat}
+				AND longitude BETWEEN #{minLng} AND #{maxLng}
+			</if>
+		</where>
+
+		<if test="userLat != null and userLng != null and radius != null">
+			HAVING distance &lt;= #{radius}
+		</if>
+
+		<choose>
+			<when test="userLat != null and userLng != null">
+				ORDER BY distance ASC
+			</when>
+			<otherwise>
+				ORDER BY product_id DESC
+			</otherwise>
+		</choose>
+
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
+  	
+  	<select id="findAllMarkers">
+  		select product_id, house_type, trade_type, deal_amount, deposit, monthly_rent, latitude, longitude
+  		from products
+  		where latitude is not null and longitude is not null
+  	</select>
+  	
+  	<select id="findMyProductList">
+  		SELECT
+  			CONCAT(p.sgg_nm, ' ', p.umd_nm) AS address,
+  			p.name,
+  			p.house_type,
+  			p.trade_type,
+  			p.status,
+  			r.visit_date,
+  			p.exclu_use_ar,
+  			p.build_year,
+  			p.floor,
+  			p.apt_dong,
+  			p.deal_amount,
+  			p.deposit,
+  			p.monthly_rent,
+  			p.product_id
+  		FROM products p LEFT JOIN reservations r ON p.product_id = r.product_id  
+  		WHERE p.agent_id = #{agentId} AND (r.status is null OR (r.status NOT IN ('QUIT', 'NO_SHOW')))
+  	</select>
+  	
+  	<select id="aiSearchProduct" parameterType="com.ssafy.bbb.model.dto.AiSearchDto">
+  		SELECT *
+  		FROM products
+  		<where>
+  			AND trade_type = #{tradeType}
+  			AND status = 'AVAILABLE'
+  			AND (
+  				sgg_nm LIKE CONCAT('%', #{location}, '%')
+  				OR
+  				umd_nm LIKE CONCAT('%', #{location}, '%')
+  			)
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'RENT'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  				
+  				<if test="monthlyRent != null and monthlyRent.max > 0">
+  					AND monthly_rent BETWEEN #{monthlyRent.min} AND #{monthlyRent.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'LEASE'">
+  				<if test="deposit != null and deposit.max > 0">
+  					AND deposit BETWEEN #{deposit.min} AND #{deposit.max}
+  				</if>
+  			</if>
+  			
+  			<if test="tradeType.name() != null and tradeType.name() == 'SALE'">
+  				<if test="dealAmount != null and dealAmount.max > 0">
+  					AND deal_amount BETWEEN #{dealAmount.min} AND #{dealAmount.max}
+  				</if>
+  			</if>
+  		</where>
+  		
+  		LIMIT 10
+  	</select>
+  	
+  	<resultMap id="ProductSearchMap" type="com.ssafy.bbb.model.dto.ProductDto" autoMapping="true">
+        <id column="product_id" property="productId"/>
+        
+        <association property="thumbnail" javaType="com.ssafy.bbb.model.dto.ProductImageDto">
+            <result column="thumbnail_path" property="savePath"/>
+        </association>
+    </resultMap>
+  	
+  </mapper>

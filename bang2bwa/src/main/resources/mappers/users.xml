@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.ssafy.bbb.model.dao.UserDao">
+  	<select id="findEmailById">
+  		SELECT email FROM users WHERE user_id=#{userId}
+  	</select>
+  	
+  	<insert id="save" useGeneratedKeys="true" keyProperty="userId">
+  		INSERT INTO users(email, password, phone, name, birth, role)
+  		VALUES (#{email}, #{password}, #{phone}, #{name}, #{birth}, #{role})
+  	</insert>
+  	
+  	<insert id="saveAgent">
+  		INSERT INTO agents(agent_id, ceo_name, realtor_agency, business_number)
+  		VALUES (#{agentId}, #{ceoName}, #{realtorAgency}, #{businessNumber})
+  	</insert>
+  	
+  	<select id="findByEmail">
+  		SELECT * FROM users WHERE email = #{email}
+  	</select>
+  	
+  	<select id="existsByEmail">
+  		SELECT COUNT(*) FROM users WHERE email = #{email}
+  	</select>
+  	
+  	<select id="findUserInfoById">
+  		SELECT u.user_id, u.email, u.name, u.phone, u.birth, u.role, a.ceo_name, a.realtor_agency, a.business_number
+  		FROM users u LEFT JOIN agents a ON u.user_id = a.agent_id
+  		WHERE u.user_id = #{userId}
+  	</select>
+  	
+  	<select id="findRoleById">
+  		SELECT role FROM users WHERE user_id=#{userId}
+  	</select>
+  	
+  	<update id="updateUser">
+  		UPDATE users
+  		<set>
+  			<if test="updateDto.name != null and updateDto.name != ''">name=#{updateDto.name},</if>
+  			<if test="updateDto.phone != null and updateDto.phone != ''">phone=#{updateDto.phone},</if>
+  			<if test="updateDto.birth != null">birth=#{updateDto.birth},</if>
+  		</set>
+  		WHERE user_id = #{userId}
+  	</update>
+  	
+  	<update id="updateAgent">
+  		UPDATE agents
+  		<set>
+  			<if test="updateDto.ceoName != null and updateDto.ceoName != ''">ceo_name=#{updateDto.ceoName},</if>
+  			<if test="updateDto.realtorAgency != null and updateDto.realtorAgency != ''">realtor_agency=#{updateDto.realtorAgency},</if>
+  			<if test="updateDto.businessNumber != null and updateDto.businessNumber != ''">business_number=#{updateDto.businessNumber},</if>
+  		</set>
+  		WHERE agent_id = #{agentId}
+  	</update>
+  	
+  	<select id="findPasswordById">
+  		SELECT password FROM users WHERE user_id = #{userId}
+  	</select>
+  	
+  	<update id="updatePassword">
+  		UPDATE users
+  		SET password=#{encodedPassword}
+  		WHERE user_id = #{userId}
+  	</update>
+  	
+  	<delete id="deleteUser">
+  		DELETE FROM users WHERE user_id = #{userId}
+  	</delete>
+  	
+  	<update id="updatePasswordByEmail">
+  		UPDATE users
+  		SET password=#{encodedPassword}
+  		WHERE email = #{email}
+  	</update>
+  	
+  </mapper>

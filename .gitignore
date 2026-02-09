@@ -36,3 +36,6 @@ src/main/resources/application-prod.properties
 
 # --- Test ---
 test-output/
+
+# --- Image Dir ---
+product-images/
